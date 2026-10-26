@@ -1,0 +1,8 @@
+{
+  "name": "NELBD Trail Lucky Dip",
+  "description": "New Everyday Life, By Design",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

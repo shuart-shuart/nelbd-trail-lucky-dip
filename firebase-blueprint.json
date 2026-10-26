@@ -1,0 +1,430 @@
+{
+  "entities": {
+    "Prize": {
+      "title": "Prize",
+      "description": "Definition of a lucky dip prize item with its tier.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the festival prize.",
+          "maxLength": 128
+        },
+        "description": {
+          "type": "string",
+          "description": "Prize description and details.",
+          "maxLength": 500
+        },
+        "tier": {
+          "type": "string",
+          "description": "Prize tier ranking.",
+          "enum": ["STANDARD", "TOP"],
+          "maxLength": 16
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether the prize is active in the draw pool."
+        },
+        "icon": {
+          "type": "string",
+          "description": "Identifier for displaying the prize icon.",
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when prize was registered.",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp when prize was last updated.",
+          "maxLength": 64
+        }
+      },
+      "required": ["name", "tier", "isActive"]
+    },
+    "Inventory": {
+      "title": "Inventory",
+      "description": "Site-specific stock record for a prize (separate for PDD and PS sites).",
+      "type": "object",
+      "properties": {
+        "prizeId": {
+          "type": "string",
+          "description": "Referenced prize identifier.",
+          "maxLength": 128
+        },
+        "site": {
+          "type": "string",
+          "description": "Festival site location.",
+          "enum": ["PDD", "PS"],
+          "maxLength": 8
+        },
+        "allocatedQuantity": {
+          "type": "number",
+          "description": "Total stock allocated to this site."
+        },
+        "remainingQuantity": {
+          "type": "number",
+          "description": "Current remaining stock available at this site."
+        },
+        "claimedQuantity": {
+          "type": "number",
+          "description": "Quantity redeemed and handed out at this site."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp when inventory was last updated.",
+          "maxLength": 64
+        }
+      },
+      "required": ["prizeId", "site", "allocatedQuantity", "remainingQuantity"]
+    },
+    "Participant": {
+      "title": "Participant",
+      "description": "Festival attendee entering the lucky dip with nickname and Singapore mobile number.",
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "description": "Visitor nickname or preferred name.",
+          "maxLength": 64
+        },
+        "mobileNumber": {
+          "type": "string",
+          "description": "Singapore mobile phone number (8 digits, starting with 8 or 9, optional +65 prefix).",
+          "maxLength": 20,
+          "pattern": "^(\\+65)?[89][0-9]{7}$"
+        },
+        "site": {
+          "type": "string",
+          "description": "Festival site where participant registered.",
+          "enum": ["PDD", "PS"],
+          "maxLength": 8
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of participant registration.",
+          "maxLength": 64
+        }
+      },
+      "required": ["nickname", "mobileNumber", "site", "createdAt"]
+    },
+    "Draw": {
+      "title": "Draw",
+      "description": "Official record of a lucky dip draw executed for a participant.",
+      "type": "object",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "description": "Unique lucky dip ticket reference code.",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "participantId": {
+          "type": "string",
+          "description": "Identifier of the participant record.",
+          "maxLength": 128
+        },
+        "participantNickname": {
+          "type": "string",
+          "description": "Public nickname of the participant (without exposing phone number).",
+          "maxLength": 64
+        },
+        "prizeId": {
+          "type": "string",
+          "description": "Prize won identifier.",
+          "maxLength": 128
+        },
+        "prizeName": {
+          "type": "string",
+          "description": "Prize name awarded.",
+          "maxLength": 128
+        },
+        "prizeTier": {
+          "type": "string",
+          "description": "Tier of prize won.",
+          "enum": ["STANDARD", "TOP"],
+          "maxLength": 16
+        },
+        "site": {
+          "type": "string",
+          "description": "Site where lucky dip took place.",
+          "enum": ["PDD", "PS"],
+          "maxLength": 8
+        },
+        "status": {
+          "type": "string",
+          "description": "Redemption status of the prize.",
+          "enum": ["pending", "claimed", "forfeited"],
+          "maxLength": 32
+        },
+        "kioskId": {
+          "type": "string",
+          "description": "Terminal kiosk identifier.",
+          "maxLength": 64
+        },
+        "drawnAt": {
+          "type": "string",
+          "description": "ISO timestamp when draw took place.",
+          "maxLength": 64
+        },
+        "claimedAt": {
+          "type": "string",
+          "description": "ISO timestamp when prize was handed over.",
+          "maxLength": 64
+        }
+      },
+      "required": ["ticketNumber", "participantNickname", "prizeId", "prizeName", "prizeTier", "site", "status", "drawnAt"]
+    },
+    "InventoryAdjustment": {
+      "title": "InventoryAdjustment",
+      "description": "Audit trail log of changes to prize inventory stock at PDD or PS.",
+      "type": "object",
+      "properties": {
+        "prizeId": {
+          "type": "string",
+          "description": "Referenced prize identifier.",
+          "maxLength": 128
+        },
+        "prizeName": {
+          "type": "string",
+          "description": "Name of the prize adjusted.",
+          "maxLength": 128
+        },
+        "site": {
+          "type": "string",
+          "description": "Site where inventory was adjusted.",
+          "enum": ["PDD", "PS"],
+          "maxLength": 8
+        },
+        "previousQuantity": {
+          "type": "number",
+          "description": "Stock quantity before adjustment."
+        },
+        "newQuantity": {
+          "type": "number",
+          "description": "Stock quantity after adjustment."
+        },
+        "delta": {
+          "type": "number",
+          "description": "Change in stock count."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Reason for the adjustment.",
+          "enum": ["initial_stock", "restock", "draw", "manual_adjustment", "transfer"],
+          "maxLength": 32
+        },
+        "adjustedByAdminId": {
+          "type": "string",
+          "description": "UID of administrator who performed adjustment.",
+          "maxLength": 128
+        },
+        "adjustedByEmail": {
+          "type": "string",
+          "description": "Email of administrator.",
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when adjustment was recorded.",
+          "maxLength": 64
+        }
+      },
+      "required": ["prizeId", "site", "previousQuantity", "newQuantity", "delta", "reason", "createdAt"]
+    },
+    "ParticipantPhone": {
+      "title": "ParticipantPhone",
+      "description": "Atomic unique lock ensuring normalized Singapore mobile receives only one prize across festival.",
+      "type": "object",
+      "properties": {
+        "mobileNumber": {
+          "type": "string",
+          "description": "Normalized phone number (+65XXXXXXXX).",
+          "maxLength": 20
+        },
+        "participantId": {
+          "type": "string",
+          "description": "Referenced participant identifier.",
+          "maxLength": 128
+        },
+        "drawId": {
+          "type": "string",
+          "description": "Referenced draw identifier.",
+          "maxLength": 128
+        },
+        "site": {
+          "type": "string",
+          "description": "Site where draw took place.",
+          "enum": ["PDD", "PS"],
+          "maxLength": 8
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of prize award.",
+          "maxLength": 64
+        }
+      },
+      "required": ["mobileNumber", "drawId", "createdAt"]
+    },
+    "DailyTopPrize": {
+      "title": "DailyTopPrize",
+      "description": "Atomic daily calendar lock ensuring max one TOP prize awarded per calendar day across both sites in Asia/Singapore timezone.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Calendar date in Asia/Singapore (YYYY-MM-DD).",
+          "maxLength": 16
+        },
+        "awarded": {
+          "type": "boolean",
+          "description": "Whether a TOP prize has been awarded on this date."
+        },
+        "prizeId": {
+          "type": "string",
+          "description": "Prize identifier awarded.",
+          "maxLength": 128
+        },
+        "prizeName": {
+          "type": "string",
+          "description": "Name of top prize awarded.",
+          "maxLength": 128
+        },
+        "site": {
+          "type": "string",
+          "description": "Site where top prize was won.",
+          "enum": ["PDD", "PS"],
+          "maxLength": 8
+        },
+        "drawId": {
+          "type": "string",
+          "description": "Associated draw identifier.",
+          "maxLength": 128
+        },
+        "awardedAt": {
+          "type": "string",
+          "description": "Timestamp when awarded.",
+          "maxLength": 64
+        }
+      },
+      "required": ["date", "awarded"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized festival administrator account.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Administrator email address.",
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "description": "Role level.",
+          "enum": ["super_admin", "staff"],
+          "maxLength": 32
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name.",
+          "maxLength": 128
+        },
+        "siteAccess": {
+          "type": "string",
+          "description": "Assigned site access.",
+          "enum": ["ALL", "PDD", "PS"],
+          "maxLength": 16
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when admin was added.",
+          "maxLength": 64
+        }
+      },
+      "required": ["email", "role"]
+    },
+    "Setting": {
+      "title": "Setting",
+      "description": "Festival and kiosk operational parameters.",
+      "type": "object",
+      "properties": {
+        "festivalName": {
+          "type": "string",
+          "description": "Festival display name.",
+          "maxLength": 128
+        },
+        "kioskActive": {
+          "type": "boolean",
+          "description": "Whether kiosks are accepting entries."
+        },
+        "activeSite": {
+          "type": "string",
+          "description": "Default active site for kiosk station.",
+          "enum": ["PDD", "PS"],
+          "maxLength": 8
+        },
+        "welcomeMessage": {
+          "type": "string",
+          "description": "Welcome message for kiosk display.",
+          "maxLength": 500
+        },
+        "termsSummary": {
+          "type": "string",
+          "description": "Summary of lucky dip rules.",
+          "maxLength": 1000
+        },
+        "maxDrawsPerParticipant": {
+          "type": "number",
+          "description": "Allowed draws per participant."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp.",
+          "maxLength": 64
+        }
+      },
+      "required": ["festivalName", "kioskActive", "activeSite"]
+    }
+  },
+  "firestore": {
+    "/prizes/{prizeId}": {
+      "schema": "Prize",
+      "description": "Catalog of prizes with STANDARD and TOP tier designations."
+    },
+    "/inventory/{inventoryId}": {
+      "schema": "Inventory",
+      "description": "Stock tracking separated by site (PDD and PS) for each prize."
+    },
+    "/participants/{participantId}": {
+      "schema": "Participant",
+      "description": "Registered lucky dip participants with nickname and Singapore mobile number (PII protected)."
+    },
+    "/draws/{drawId}": {
+      "schema": "Draw",
+      "description": "Lucky dip draw records for auditing and prize redemption."
+    },
+    "/inventoryAdjustments/{adjustmentId}": {
+      "schema": "InventoryAdjustment",
+      "description": "Immutable log of stock adjustments and transfers across PDD and PS."
+    },
+    "/participantPhones/{phoneId}": {
+      "schema": "ParticipantPhone",
+      "description": "Uniqueness lock collection enforcing one prize per Singapore mobile number across festival."
+    },
+    "/dailyTopPrizes/{date}": {
+      "schema": "DailyTopPrize",
+      "description": "Daily calendar lock enforcing max one TOP prize awarded per day across both sites in Asia/Singapore timezone."
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Authorized staff and administrator accounts."
+    },
+    "/settings/{settingId}": {
+      "schema": "Setting",
+      "description": "System-wide and site-specific kiosk settings."
+    }
+  }
+}
