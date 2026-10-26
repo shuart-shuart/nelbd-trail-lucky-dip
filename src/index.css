@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/* --------------------------------------------------
+   NEL, BY DESIGN — FONT DECLARATIONS
+   -------------------------------------------------- */
+@font-face {
+  font-family: "NEL Rounded";
+  src: url("./assets/fonts/NELROUNDED-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NEL Rounded";
+  src: url("./assets/fonts/NELROUNDED-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("./assets/fonts/DMSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("./assets/fonts/DMSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --------------------------------------------------
+   NEL, BY DESIGN — DESIGN TOKENS
+   -------------------------------------------------- */
+:root {
+  /* Official Primary Digital Palette */
+  --nel-purple: #7716B5;
+  --nel-pink: #FF8DC6;
+  --nel-violet: #270342;
+  --nel-white: #ffffff;
+  --nel-surface: #1d0233;
+  --nel-input: #130121;
+
+  /* Typography Tokens */
+  --font-display: "NEL Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+@theme {
+  --color-nel-purple: #7716B5;
+  --color-nel-pink: #FF8DC6;
+  --color-nel-violet: #270342;
+  --color-nel-surface: #1d0233;
+  --color-nel-input: #130121;
+
+  --font-nel: "NEL Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-dm: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* --------------------------------------------------
+   BASE GLOBAL RESETS
+   -------------------------------------------------- */
+html, body {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  background-color: var(--nel-violet);
+  color: var(--nel-white);
+  font-family: var(--font-body);
+  min-height: 100vh;
+}
+
+input, textarea {
+  user-select: auto;
+}
+
+/* Scoped Typography Helpers for Public Kiosk */
+.nel-kiosk-root {
+  font-family: var(--font-body);
+}
+
+.nel-kiosk-root .font-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.nel-kiosk-root .font-heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+/* Scoped Typography Helpers for Staff Portal */
+.nel-staff-root {
+  font-family: var(--font-body);
+}
+
+.nel-staff-root h1,
+.nel-staff-root h2,
+.nel-staff-root h3,
+.nel-staff-root .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
