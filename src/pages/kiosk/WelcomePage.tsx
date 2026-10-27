@@ -31,10 +31,10 @@ export const WelcomePage: React.FC = () => {
       {/* Module 1: logo/date split with the original Abbey illustration fully visible. */}
       <section className="kiosk-welcome-hero kiosk-signage-outline w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
         <div className="kiosk-welcome-header grid grid-cols-2 gap-3 sm:gap-5 items-start">
-          <div className="min-w-0">
+          <div className="kiosk-brand-image min-w-0">
             <h1 className="m-0"><img src={nelLogo} alt="New Everyday Life, By Design" className="block w-full h-auto object-contain object-left" /></h1>
           </div>
-          <div className="min-w-0 flex items-start justify-end">
+          <div className="kiosk-date-image min-w-0 flex items-start justify-end">
             <img src={dateImage} alt="14 November to 6 December 2026" className="block w-full h-auto object-contain object-right" />
           </div>
         </div>
