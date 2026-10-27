@@ -93,7 +93,7 @@ export const DrawPage: React.FC = () => {
 
   if (authLoading || !isAdmin) return (
     <div className="w-full max-w-md mx-auto rounded-3xl bg-nel-pink text-nel-violet p-8 text-center font-dm">
-      <h1 className="font-nel text-3xl mb-3">Staff activation required</h1>
+      <h1 className="font-dm text-3xl mb-3">Staff activation required</h1>
       <p className="mb-5">An authorized staff member must sign in before this kiosk can award prizes.</p>
       <button type="button" disabled={authLoading} onClick={() => void signInWithGoogle()} className="bg-nel-violet text-nel-pink rounded-xl px-6 py-4 font-bold">{authLoading ? 'Checking…' : 'Sign in with Google'}</button>
       {authError && <p role="alert" className="mt-3 text-sm">{authError}</p>}
@@ -124,12 +124,12 @@ export const DrawPage: React.FC = () => {
         </div>
 
         {/* Large Personalised Heading */}
-        <h1 className="font-nel font-semibold text-3xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.1]">
+        <h1 className="font-dm font-semibold text-3xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.1]">
           Ready, {nickname}?
         </h1>
 
         {/* Short Supporting Instruction */}
-        <p className="font-nel font-semibold text-xl sm:text-2xl text-nel-pink mt-1 sm:mt-1.5 leading-[1.1]">
+        <p className="font-dm font-semibold text-xl sm:text-2xl text-nel-pink mt-1 sm:mt-1.5 leading-[1.1]">
           One tap. One surprise.
         </p>
       </header>
@@ -193,10 +193,10 @@ export const DrawPage: React.FC = () => {
                 <DrawPictogram />
 
                 {/* Centred Bold "TAP TO DRAW" Typography */}
-                <span className="font-nel font-semibold text-2xl sm:text-3xl text-nel-violet leading-none tracking-tight">
+                <span className="font-dm font-semibold text-2xl sm:text-3xl text-nel-violet leading-none tracking-tight">
                   TAP HERE
                 </span>
-                <span className="font-nel font-semibold text-3xl sm:text-5xl text-nel-violet leading-none tracking-tight mt-1 sm:mt-1.5">
+                <span className="font-dm font-semibold text-3xl sm:text-5xl text-nel-violet leading-none tracking-tight mt-1 sm:mt-1.5">
                   TO DRAW
                 </span>
               </>
@@ -207,7 +207,7 @@ export const DrawPage: React.FC = () => {
                   className="w-12 h-12 rounded-full border-4 border-nel-violet border-t-transparent animate-spin mb-2"
                   aria-hidden="true"
                 />
-                <span className="font-nel font-semibold text-lg sm:text-xl text-nel-violet tracking-wide">
+                <span className="font-dm font-semibold text-lg sm:text-xl text-nel-violet tracking-wide">
                   DRAWING...
                 </span>
               </div>
