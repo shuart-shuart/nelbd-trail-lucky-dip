@@ -808,9 +808,9 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           {/* CSV Import */}
           <button
             onClick={() => setIsCsvModalOpen(true)}
-            className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 active:scale-98 text-white text-xs font-bold flex items-center justify-center gap-1.5 border border-nel-purple/50 transition shadow cursor-pointer"
+            className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 active:scale-98 text-[#33224B] text-xs font-bold flex items-center justify-center gap-1.5 border border-[#E8DEF1] transition shadow cursor-pointer"
           >
-            <Upload className="w-3.5 h-3.5 text-nel-pink" />
+            <Upload className="w-3.5 h-3.5 text-[#8649AC]" />
             <span>CSV Import</span>
           </button>
 
@@ -828,16 +828,16 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* Toast Notification Banner */}
       {feedbackMessage && (
         <div
-          className={`mb-6 p-4 rounded-2xl border text-xs font-semibold flex items-center gap-2 shadow-lg transition ${
+          className={`mb-6 p-4 rounded-2xl border text-xs font-semibold flex items-center gap-2 shadow-sm transition ${
             feedbackMessage.type === 'error'
               ? 'bg-red-950/80 border-red-500 text-red-200'
-              : 'bg-nel-purple/40/80 border-nel-pink text-emerald-200'
+              : 'bg-[#F0E8F9]/80 border-nel-pink text-emerald-200'
           }`}
         >
           {feedbackMessage.type === 'error' ? (
             <ShieldAlert className="w-5 h-5 text-red-400 shrink-0" />
           ) : (
-            <CheckCircle2 className="w-5 h-5 text-nel-pink shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-[#8649AC] shrink-0" />
           )}
           <span>{feedbackMessage.text}</span>
         </div>
@@ -848,23 +848,23 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {/* TOTAL INVENTORY */}
-        <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-white/60 mb-1.5 sm:mb-2 truncate">
+        <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-[#8A7C96] mb-1.5 sm:mb-2 truncate">
             <span className="flex items-center gap-1 sm:gap-1.5 truncate">
-              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-nel-pink shrink-0" />
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8649AC] shrink-0" />
               <span className="truncate">TOTAL INVENTORY</span>
             </span>
           </div>
           <div className="space-y-0.5 sm:space-y-1 mt-1 sm:mt-2">
             <div className="flex justify-between items-baseline">
-              <span className="text-[11px] sm:text-xs text-white/60">Starting:</span>
-              <span className="text-base sm:text-xl font-mono font-bold text-white">
+              <span className="text-[11px] sm:text-xs text-[#8A7C96]">Starting:</span>
+              <span className="text-base sm:text-xl font-mono font-bold text-[#33224B]">
                 {totalStartingQuantity}
               </span>
             </div>
             <div className="flex justify-between items-baseline">
-              <span className="text-[11px] sm:text-xs text-white/60">Remaining:</span>
-              <span className="text-xl sm:text-2xl font-mono font-black text-nel-pink">
+              <span className="text-[11px] sm:text-xs text-[#8A7C96]">Remaining:</span>
+              <span className="text-xl sm:text-2xl font-mono font-black text-[#8649AC]">
                 {totalRemainingQuantity}
               </span>
             </div>
@@ -872,24 +872,24 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
 
         {/* PDD */}
-        <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-white/60 mb-1.5 sm:mb-2">
+        <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-[#8A7C96] mb-1.5 sm:mb-2">
             <span className="flex items-center gap-1 sm:gap-1.5 truncate">
-              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-nel-pink shrink-0" />
+              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8649AC] shrink-0" />
               <span>PDD</span>
             </span>
-            <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-nel-purple/30 text-nel-pink font-mono">
+            <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-[#F1EAF9] text-[#8649AC] font-mono">
               Site PDD
             </span>
           </div>
           <div className="space-y-0.5 sm:space-y-1 mt-1 sm:mt-2">
             <div className="flex justify-between items-baseline">
-              <span className="text-[11px] sm:text-xs text-white/60">Starting:</span>
-              <span className="text-base sm:text-xl font-mono font-bold text-white">{pddStartingQuantity}</span>
+              <span className="text-[11px] sm:text-xs text-[#8A7C96]">Starting:</span>
+              <span className="text-base sm:text-xl font-mono font-bold text-[#33224B]">{pddStartingQuantity}</span>
             </div>
             <div className="flex justify-between items-baseline">
-              <span className="text-[11px] sm:text-xs text-white/60">Remaining:</span>
-              <span className="text-xl sm:text-2xl font-mono font-black text-nel-pink">
+              <span className="text-[11px] sm:text-xs text-[#8A7C96]">Remaining:</span>
+              <span className="text-xl sm:text-2xl font-mono font-black text-[#8649AC]">
                 {pddRemainingQuantity}
               </span>
             </div>
@@ -897,23 +897,23 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
 
         {/* PS */}
-        <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-white/60 mb-1.5 sm:mb-2">
+        <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-[#8A7C96] mb-1.5 sm:mb-2">
             <span className="flex items-center gap-1 sm:gap-1.5 truncate">
               <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 shrink-0" />
               <span>PS</span>
             </span>
-            <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-nel-purple/30 text-sky-300 font-mono">
+            <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-[#F1EAF9] text-sky-300 font-mono">
               Site PS
             </span>
           </div>
           <div className="space-y-0.5 sm:space-y-1 mt-1 sm:mt-2">
             <div className="flex justify-between items-baseline">
-              <span className="text-[11px] sm:text-xs text-white/60">Starting:</span>
-              <span className="text-base sm:text-xl font-mono font-bold text-white">{psStartingQuantity}</span>
+              <span className="text-[11px] sm:text-xs text-[#8A7C96]">Starting:</span>
+              <span className="text-base sm:text-xl font-mono font-bold text-[#33224B]">{psStartingQuantity}</span>
             </div>
             <div className="flex justify-between items-baseline">
-              <span className="text-[11px] sm:text-xs text-white/60">Remaining:</span>
+              <span className="text-[11px] sm:text-xs text-[#8A7C96]">Remaining:</span>
               <span className="text-xl sm:text-2xl font-mono font-black text-sky-300">
                 {psRemainingQuantity}
               </span>
@@ -922,8 +922,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
 
         {/* TOP PRIZE */}
-        <div className="bg-nel-surface border border-amber-900/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-white/60 mb-1.5 sm:mb-2">
+        <div className="bg-white border border-amber-900/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-[#8A7C96] mb-1.5 sm:mb-2">
             <span className="flex items-center gap-1 sm:gap-1.5 truncate">
               <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
               <span>TOP PRIZE</span>
@@ -934,11 +934,11 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           </div>
           <div className="space-y-0.5 sm:space-y-1 mt-1 sm:mt-2">
             <div className="flex justify-between items-baseline">
-              <span className="text-[11px] sm:text-xs text-white/60">Starting:</span>
-              <span className="text-base sm:text-xl font-mono font-bold text-white">{topStartingQuantity}</span>
+              <span className="text-[11px] sm:text-xs text-[#8A7C96]">Starting:</span>
+              <span className="text-base sm:text-xl font-mono font-bold text-[#33224B]">{topStartingQuantity}</span>
             </div>
             <div className="flex justify-between items-baseline">
-              <span className="text-[11px] sm:text-xs text-white/60">Remaining:</span>
+              <span className="text-[11px] sm:text-xs text-[#8A7C96]">Remaining:</span>
               <span className="text-xl sm:text-2xl font-mono font-black text-amber-400">
                 {topRemainingQuantity}
               </span>
@@ -953,8 +953,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           onClick={() => setActiveTab('inventory')}
           className={`px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
             activeTab === 'inventory'
-              ? 'bg-emerald-500/20 text-nel-pink border border-nel-pink/40 shadow'
-              : 'text-white/60 hover:text-white'
+              ? 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/40 shadow'
+              : 'text-[#8A7C96] hover:text-[#33224B]'
           }`}
         >
           <Gift className="w-4 h-4 shrink-0" />
@@ -964,8 +964,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           onClick={() => setActiveTab('adjustments')}
           className={`px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
             activeTab === 'adjustments'
-              ? 'bg-emerald-500/20 text-nel-pink border border-nel-pink/40 shadow'
-              : 'text-white/60 hover:text-white'
+              ? 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/40 shadow'
+              : 'text-[#8A7C96] hover:text-[#33224B]'
           }`}
         >
           <HistoryIcon className="w-4 h-4 shrink-0" />
@@ -976,21 +976,21 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {activeTab === 'inventory' ? (
         <>
           {/* Search & Filter Toolbar */}
-          <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 mb-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-lg">
+          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 mb-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-sm">
             <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#8A7C96] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search prize name or description..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-nel-input border border-nel-purple/50 text-white text-base sm:text-xs focus:border-nel-pink focus:outline-none placeholder-slate-500 font-medium min-h-[44px]"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-xs focus:border-nel-pink focus:outline-none placeholder-slate-500 font-medium min-h-[44px]"
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial justify-between sm:justify-start">
-                <span className="text-[11px] font-bold text-white/60 px-2 uppercase">Tier:</span>
+                <span className="text-[11px] font-bold text-[#8A7C96] px-2 uppercase">Tier:</span>
                 {(['ALL', 'TOP', 'STANDARD'] as const).map((tier) => (
                   <button
                     key={tier}
@@ -999,8 +999,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       tierFilter === tier
                         ? tier === 'TOP'
                           ? 'bg-amber-500/30 text-amber-300 border border-amber-500/50'
-                          : 'bg-emerald-500/20 text-nel-pink border border-nel-pink/50'
-                        : 'text-white/60 hover:text-white'
+                          : 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/50'
+                        : 'text-[#8A7C96] hover:text-[#33224B]'
                     }`}
                   >
                     {tier}
@@ -1009,15 +1009,15 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               </div>
 
               <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial justify-between sm:justify-start">
-                <span className="text-[11px] font-bold text-white/60 px-2 uppercase">Status:</span>
+                <span className="text-[11px] font-bold text-[#8A7C96] px-2 uppercase">Status:</span>
                 {(['ALL', 'ACTIVE', 'INACTIVE'] as const).map((status) => (
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
                     className={`px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold transition cursor-pointer flex-1 sm:flex-initial text-center ${
                       statusFilter === status
-                        ? 'bg-nel-purple/30 text-white border border-slate-600'
-                        : 'text-white/60 hover:text-white'
+                        ? 'bg-[#F1EAF9] text-[#33224B] border border-slate-600'
+                        : 'text-[#8A7C96] hover:text-[#33224B]'
                     }`}
                   >
                     {status}
@@ -1030,15 +1030,15 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           {/* ------------------------------------------------------------- */}
           {/* INVENTORY PRESENTATION: DESKTOP TABLE & MOBILE CARD LIST */}
           {/* ------------------------------------------------------------- */}
-          <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl">
+          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
             <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-nel-purple/40 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-nel-pink" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                <SlidersHorizontal className="w-4 h-4 text-[#8649AC]" />
+                <span className="text-xs font-bold text-[#33224B] uppercase tracking-wider">
                   Prize Inventory ({filteredPrizes.length} items)
                 </span>
               </div>
-              <span className="text-[11px] text-white/60">
+              <span className="text-[11px] text-[#8A7C96]">
                 Totals auto-calculated: PDD + PS
               </span>
             </div>
@@ -1046,8 +1046,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
             {filteredPrizes.length === 0 ? (
               <div className="p-8 sm:p-12 text-center">
                 <Gift className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-white/80">No prizes match criteria</h3>
-                <p className="text-xs text-white/60 mt-1 mb-4">
+                <h3 className="text-base font-bold text-[#645574]">No prizes match criteria</h3>
+                <p className="text-xs text-[#8A7C96] mt-1 mb-4">
                   Adjust filters or click "+ Add Prize" to create a new prize.
                 </p>
                 <button
@@ -1091,7 +1091,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             />
                             <label
                               htmlFor={`mobile-prize-img-${prize.id}`}
-                              className="w-14 h-14 rounded-2xl bg-nel-input border border-nel-purple/50 hover:border-nel-pink/60 flex flex-col items-center justify-center cursor-pointer overflow-hidden shadow-inner p-1 transition"
+                              className="w-14 h-14 rounded-2xl bg-nel-input border border-[#E8DEF1] hover:border-nel-pink/60 flex flex-col items-center justify-center cursor-pointer overflow-hidden shadow-inner p-1 transition"
                               title="Click to upload or replace PNG image"
                             >
                               {prize.imageUrl ? (
@@ -1101,11 +1101,11 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                   className="w-full h-full object-contain"
                                 />
                               ) : isUploadingImageFor === prize.id ? (
-                                <span className="text-[10px] text-nel-pink animate-pulse">Saving...</span>
+                                <span className="text-[10px] text-[#8649AC] animate-pulse">Saving...</span>
                               ) : (
                                 <>
-                                  <ImageIcon className="w-5 h-5 text-white/40 mb-0.5" />
-                                  <span className="text-[9px] font-bold text-nel-pink">+ PNG</span>
+                                  <ImageIcon className="w-5 h-5 text-[#33224B]/40 mb-0.5" />
+                                  <span className="text-[9px] font-bold text-[#8649AC]">+ PNG</span>
                                 </>
                               )}
                             </label>
@@ -1117,7 +1117,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
                                   prize.tier === 'TOP'
                                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                    : 'bg-emerald-500/20 text-nel-pink border-nel-pink/40'
+                                    : 'bg-emerald-500/20 text-[#8649AC] border-nel-pink/40'
                                 }`}
                               >
                                 {prize.tier === 'TOP' && <Trophy className="w-3 h-3 text-amber-400" />}
@@ -1127,17 +1127,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${
                                   prize.isActive
                                     ? 'bg-emerald-950/60 border-emerald-600/50 text-emerald-300'
-                                    : 'bg-nel-purple/40 border-nel-purple/60 text-white/50'
+                                    : 'bg-[#F0E8F9] border-nel-purple/60 text-[#33224B]/50'
                                 }`}
                               >
                                 {prize.isActive ? 'Active' : 'Inactive'}
                               </span>
                             </div>
-                            <h4 className="font-bold text-white text-base leading-snug break-words font-sans">
+                            <h4 className="font-bold text-[#33224B] text-base leading-snug break-words font-sans">
                               {prize.name}
                             </h4>
                             {prize.description && (
-                              <p className="text-xs text-white/60 line-clamp-2 mt-0.5 font-normal">
+                              <p className="text-xs text-[#8A7C96] line-clamp-2 mt-0.5 font-normal">
                                 {prize.description}
                               </p>
                             )}
@@ -1150,7 +1150,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             className={`p-2 rounded-xl border transition min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer shrink-0 ${
                               prize.isActive
                                 ? 'bg-emerald-950/40 border-emerald-600/60 text-emerald-300'
-                                : 'bg-nel-purple/30 border-nel-purple/50 text-white/40'
+                                : 'bg-[#F1EAF9] border-[#E8DEF1] text-[#33224B]/40'
                             }`}
                             title={prize.isActive ? 'Active in pool (Tap to toggle)' : 'Inactive in pool (Tap to toggle)'}
                             aria-label={`Toggle active status for ${prize.name}`}
@@ -1160,13 +1160,13 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         </div>
 
                         {/* Total Remaining Banner */}
-                        <div className="p-2.5 rounded-xl bg-nel-input/80 border border-nel-purple/50 flex items-center justify-between">
-                          <span className="text-xs font-semibold text-white/70">Total Remaining:</span>
+                        <div className="p-2.5 rounded-xl bg-nel-input/80 border border-[#E8DEF1] flex items-center justify-between">
+                          <span className="text-xs font-semibold text-[#756782]">Total Remaining:</span>
                           <div className="text-right">
-                            <span className="text-xl font-mono font-black text-nel-pink">
+                            <span className="text-xl font-mono font-black text-[#8649AC]">
                               {totalRem}
                             </span>
-                            <span className="text-xs text-white/50 font-mono ml-1.5">
+                            <span className="text-xs text-[#33224B]/50 font-mono ml-1.5">
                               / {totalStart} starting
                             </span>
                           </div>
@@ -1175,24 +1175,24 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         {/* Site Breakdown micro-grid (PDD vs PS) */}
                         <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                           {/* PDD Station */}
-                          <div className="p-2.5 rounded-xl bg-nel-surface border border-teal-500/30 flex flex-col justify-between">
+                          <div className="p-2.5 rounded-xl bg-white border border-teal-500/30 flex flex-col justify-between">
                             <div className="flex items-center justify-between text-[11px] mb-1">
-                              <span className="font-bold text-nel-pink flex items-center gap-1 font-sans">
-                                <MapPin className="w-3 h-3 text-nel-pink" />
+                              <span className="font-bold text-[#8649AC] flex items-center gap-1 font-sans">
+                                <MapPin className="w-3 h-3 text-[#8649AC]" />
                                 <span>PDD Station</span>
                               </span>
                             </div>
                             <div className="flex items-baseline justify-between mt-1">
-                              <span className="text-[11px] text-white/50 font-sans">Rem / Start:</span>
+                              <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
                               <div>
-                                <span className="font-black text-nel-pink text-base">{pddRem}</span>
-                                <span className="text-white/50 text-xs"> / {pddStart}</span>
+                                <span className="font-black text-[#8649AC] text-base">{pddRem}</span>
+                                <span className="text-[#33224B]/50 text-xs"> / {pddStart}</span>
                               </div>
                             </div>
                           </div>
 
                           {/* PS Station */}
-                          <div className="p-2.5 rounded-xl bg-nel-surface border border-sky-500/30 flex flex-col justify-between">
+                          <div className="p-2.5 rounded-xl bg-white border border-sky-500/30 flex flex-col justify-between">
                             <div className="flex items-center justify-between text-[11px] mb-1">
                               <span className="font-bold text-sky-300 flex items-center gap-1 font-sans">
                                 <MapPin className="w-3 h-3 text-sky-400" />
@@ -1200,10 +1200,10 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                               </span>
                             </div>
                             <div className="flex items-baseline justify-between mt-1">
-                              <span className="text-[11px] text-white/50 font-sans">Rem / Start:</span>
+                              <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
                               <div>
                                 <span className="font-black text-sky-300 text-base">{psRem}</span>
-                                <span className="text-white/50 text-xs"> / {psStart}</span>
+                                <span className="text-[#33224B]/50 text-xs"> / {psStart}</span>
                               </div>
                             </div>
                           </div>
@@ -1214,7 +1214,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                           <button
                             type="button"
                             onClick={() => handleOpenAdjust(prize, 'PDD')}
-                            className="flex-1 py-2.5 px-3 min-h-[44px] rounded-xl bg-nel-purple/50 hover:bg-slate-700 active:scale-98 text-nel-pink text-xs font-bold flex items-center justify-center gap-1.5 border border-nel-pink/30 transition cursor-pointer"
+                            className="flex-1 py-2.5 px-3 min-h-[44px] rounded-xl bg-nel-purple/50 hover:bg-slate-700 active:scale-98 text-[#8649AC] text-xs font-bold flex items-center justify-center gap-1.5 border border-[#E2CBF0] transition cursor-pointer"
                           >
                             <span>Adjust Stock</span>
                           </button>
@@ -1222,9 +1222,9 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(prize)}
-                            className="py-2.5 px-3.5 min-h-[44px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 active:scale-98 text-white text-xs font-semibold flex items-center justify-center gap-1.5 border border-nel-purple/50 transition cursor-pointer"
+                            className="py-2.5 px-3.5 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 active:scale-98 text-[#33224B] text-xs font-semibold flex items-center justify-center gap-1.5 border border-[#E8DEF1] transition cursor-pointer"
                           >
-                            <Edit2 className="w-3.5 h-3.5 text-nel-pink" />
+                            <Edit2 className="w-3.5 h-3.5 text-[#8649AC]" />
                             <span>Edit</span>
                           </button>
 
@@ -1250,7 +1250,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             <button
                               type="button"
                               onClick={() => handleDeletePrize(prize)}
-                              className="p-2.5 min-h-[44px] min-w-[44px] rounded-xl bg-nel-purple/30 hover:bg-red-950/60 hover:text-red-400 text-white/60 border border-nel-purple/50 transition cursor-pointer flex items-center justify-center shrink-0"
+                              className="p-2.5 min-h-[44px] min-w-[44px] rounded-xl bg-[#F1EAF9] hover:bg-red-950/60 hover:text-red-400 text-[#8A7C96] border border-[#E8DEF1] transition cursor-pointer flex items-center justify-center shrink-0"
                               title="Permanently Delete (No history)"
                               aria-label="Delete prize"
                             >
@@ -1265,8 +1265,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
                 {/* 2. DESKTOP FULL TABLE VIEW (Visible on lg screens and up) */}
                 <div className="hidden lg:block overflow-x-auto">
-                  <table className="w-full text-left text-sm text-white/80">
-                    <thead className="bg-nel-input/80 text-[11px] uppercase font-bold text-white/60 border-b border-nel-purple/40">
+                  <table className="w-full text-left text-sm text-[#645574]">
+                    <thead className="bg-nel-input/80 text-[11px] uppercase font-bold text-[#8A7C96] border-b border-nel-purple/40">
                       <tr>
                         <th className="px-5 py-3.5">Prize Name</th>
                         <th className="px-4 py-3.5">Tier</th>
@@ -1294,7 +1294,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         const hasHistory = drawCount > 0 || adjCount > 0;
 
                         return (
-                          <tr key={prize.id} className="hover:bg-nel-purple/30/40 transition">
+                          <tr key={prize.id} className="hover:bg-[#F1EAF9]/40 transition">
                             {/* Prize Image & Name */}
                             <td className="px-5 py-4 font-sans">
                               <div className="flex items-center gap-3">
@@ -1312,7 +1312,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                   />
                                   <label
                                     htmlFor={`desktop-prize-img-${prize.id}`}
-                                    className="w-12 h-12 rounded-xl bg-nel-input border border-nel-purple/50 hover:border-nel-pink/60 flex flex-col items-center justify-center cursor-pointer overflow-hidden p-1 shadow-inner transition group"
+                                    className="w-12 h-12 rounded-xl bg-nel-input border border-[#E8DEF1] hover:border-nel-pink/60 flex flex-col items-center justify-center cursor-pointer overflow-hidden p-1 shadow-inner transition group"
                                     title="Click to upload or replace PNG image"
                                   >
                                     {prize.imageUrl ? (
@@ -1322,22 +1322,22 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                         className="w-full h-full object-contain group-hover:scale-105 transition"
                                       />
                                     ) : isUploadingImageFor === prize.id ? (
-                                      <span className="text-[9px] text-nel-pink animate-pulse">Saving...</span>
+                                      <span className="text-[9px] text-[#8649AC] animate-pulse">Saving...</span>
                                     ) : (
                                       <>
-                                        <ImageIcon className="w-4 h-4 text-white/30 group-hover:text-nel-pink transition" />
-                                        <span className="text-[8px] text-nel-pink font-bold mt-0.5">+ PNG</span>
+                                        <ImageIcon className="w-4 h-4 text-[#33224B]/30 group-hover:text-[#8649AC] transition" />
+                                        <span className="text-[8px] text-[#8649AC] font-bold mt-0.5">+ PNG</span>
                                       </>
                                     )}
                                   </label>
                                 </div>
 
                                 <div className="min-w-0">
-                                  <div className="font-bold text-white text-sm leading-snug">
+                                  <div className="font-bold text-[#33224B] text-sm leading-snug">
                                     {prize.name}
                                   </div>
                                   {prize.description && (
-                                    <div className="text-[11px] text-white/60 line-clamp-1 max-w-xs mt-0.5 font-normal">
+                                    <div className="text-[11px] text-[#8A7C96] line-clamp-1 max-w-xs mt-0.5 font-normal">
                                       {prize.description}
                                     </div>
                                   )}
@@ -1351,7 +1351,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
                                   prize.tier === 'TOP'
                                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                    : 'bg-emerald-500/20 text-nel-pink border-nel-pink/40'
+                                    : 'bg-emerald-500/20 text-[#8649AC] border-nel-pink/40'
                                 }`}
                               >
                                 {prize.tier === 'TOP' && <Trophy className="w-3 h-3 text-amber-400" />}
@@ -1360,17 +1360,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </td>
 
                             {/* PDD Starting Quantity */}
-                            <td className="px-4 py-4 text-center font-bold text-white/80">
+                            <td className="px-4 py-4 text-center font-bold text-[#645574]">
                               {pddStart}
                             </td>
 
                             {/* PDD Remaining Quantity */}
-                            <td className="px-4 py-4 text-center font-black text-nel-pink">
+                            <td className="px-4 py-4 text-center font-black text-[#8649AC]">
                               {pddRem}
                             </td>
 
                             {/* PS Starting Quantity */}
-                            <td className="px-4 py-4 text-center font-bold text-white/80">
+                            <td className="px-4 py-4 text-center font-bold text-[#645574]">
                               {psStart}
                             </td>
 
@@ -1380,12 +1380,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </td>
 
                             {/* Total Starting Quantity */}
-                            <td className="px-4 py-4 text-center font-bold text-white bg-nel-input/30">
+                            <td className="px-4 py-4 text-center font-bold text-[#33224B] bg-nel-input/30">
                               {totalStart}
                             </td>
 
                             {/* Total Remaining Quantity */}
-                            <td className="px-4 py-4 text-center font-black text-nel-pink bg-nel-input/30">
+                            <td className="px-4 py-4 text-center font-black text-[#8649AC] bg-nel-input/30">
                               {totalRem}
                             </td>
 
@@ -1395,19 +1395,19 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 onClick={() => handleToggleActive(prize)}
                                 className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold border inline-flex items-center gap-1 transition cursor-pointer ${
                                   prize.isActive
-                                    ? 'bg-nel-purple/40/60 border-nel-pink/40/60 text-nel-pink hover:bg-emerald-900/60'
-                                    : 'bg-nel-purple/30 border-nel-purple/50 text-white/60 hover:bg-slate-750'
+                                    ? 'bg-[#F0E8F9]/60 border-nel-pink/40/60 text-[#8649AC] hover:bg-emerald-900/60'
+                                    : 'bg-[#F1EAF9] border-[#E8DEF1] text-[#8A7C96] hover:bg-slate-750'
                                 }`}
                                 title={prize.isActive ? 'Active in draw pool' : 'Inactive'}
                               >
                                 {prize.isActive ? (
                                   <>
-                                    <Check className="w-3 h-3 text-nel-pink" />
+                                    <Check className="w-3 h-3 text-[#8649AC]" />
                                     <span>Active</span>
                                   </>
                                 ) : (
                                   <>
-                                    <X className="w-3 h-3 text-white/60" />
+                                    <X className="w-3 h-3 text-[#8A7C96]" />
                                     <span>Inactive</span>
                                   </>
                                 )}
@@ -1420,17 +1420,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 {/* Edit Button */}
                                 <button
                                   onClick={() => handleOpenEdit(prize)}
-                                  className="px-2.5 py-1 rounded-lg bg-nel-purple/30 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-1 border border-nel-purple/50 transition cursor-pointer"
+                                  className="px-2.5 py-1 rounded-lg bg-[#F1EAF9] hover:bg-slate-700 text-[#33224B] text-xs font-semibold flex items-center gap-1 border border-[#E8DEF1] transition cursor-pointer"
                                   title="Edit Prize"
                                 >
-                                  <Edit2 className="w-3 h-3 text-nel-pink" />
+                                  <Edit2 className="w-3 h-3 text-[#8649AC]" />
                                   <span>Edit</span>
                                 </button>
 
                                 {/* Adjust Stock Button */}
                                 <button
                                   onClick={() => handleOpenAdjust(prize, 'PDD')}
-                                  className="px-2.5 py-1 rounded-lg bg-nel-purple/30 hover:bg-slate-700 text-nel-pink text-xs font-semibold flex items-center gap-1 border border-teal-500/20 transition cursor-pointer"
+                                  className="px-2.5 py-1 rounded-lg bg-[#F1EAF9] hover:bg-slate-700 text-[#8649AC] text-xs font-semibold flex items-center gap-1 border border-teal-500/20 transition cursor-pointer"
                                   title="Adjust Stock"
                                 >
                                   <span>Adjust Stock</span>
@@ -1443,7 +1443,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                     className={`p-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
                                       prize.isActive
                                         ? 'bg-amber-950/40 border-amber-800/40 text-amber-300 hover:bg-amber-900/60'
-                                        : 'bg-nel-purple/40/40 border-nel-pink/40/40 text-nel-pink hover:bg-emerald-900/60'
+                                        : 'bg-[#F0E8F9]/40 border-nel-pink/40/40 text-[#8649AC] hover:bg-emerald-900/60'
                                     }`}
                                     title={
                                       prize.isActive
@@ -1460,7 +1460,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 ) : (
                                   <button
                                     onClick={() => handleDeletePrize(prize)}
-                                    className="p-1.5 rounded-lg bg-nel-purple/30 hover:bg-red-950/60 hover:text-red-400 text-white/60 border border-nel-purple/50 transition cursor-pointer"
+                                    className="p-1.5 rounded-lg bg-[#F1EAF9] hover:bg-red-950/60 hover:text-red-400 text-[#8A7C96] border border-[#E8DEF1] transition cursor-pointer"
                                     title="Permanently Delete (No history)"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -1481,29 +1481,29 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       ) : (
         /* Audit Trail Tab */
         <div className="space-y-4">
-          <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-lg">
+          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-sm">
             <div className="relative w-full md:w-72">
-              <Search className="w-4 h-4 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#8A7C96] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={auditSearch}
                 onChange={(e) => setAuditSearch(e.target.value)}
                 placeholder="Search prize or admin email..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-nel-input border border-nel-purple/50 text-white text-base sm:text-xs focus:border-nel-pink focus:outline-none min-h-[44px]"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-xs focus:border-nel-pink focus:outline-none min-h-[44px]"
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial">
-                <span className="text-[11px] font-bold text-white/60 px-2 uppercase">Site:</span>
+                <span className="text-[11px] font-bold text-[#8A7C96] px-2 uppercase">Site:</span>
                 {(['ALL', 'PDD', 'PS'] as const).map((site) => (
                   <button
                     key={site}
                     onClick={() => setAuditSiteFilter(site)}
                     className={`px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-bold transition cursor-pointer flex-1 sm:flex-initial text-center ${
                       auditSiteFilter === site
-                        ? 'bg-emerald-500/20 text-nel-pink border border-nel-pink/50'
-                        : 'text-white/60 hover:text-white'
+                        ? 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/50'
+                        : 'text-[#8A7C96] hover:text-[#33224B]'
                     }`}
                   >
                     {site}
@@ -1512,7 +1512,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               </div>
 
               <div className="flex flex-wrap items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 w-full sm:w-auto">
-                <span className="text-[11px] font-bold text-white/60 px-2 uppercase">Reason:</span>
+                <span className="text-[11px] font-bold text-[#8A7C96] px-2 uppercase">Reason:</span>
                 {(['ALL', 'manual_adjustment', 'restock', 'draw', 'initial_stock'] as const).map(
                   (reason) => (
                     <button
@@ -1520,8 +1520,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       onClick={() => setAuditReasonFilter(reason)}
                       className={`px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold capitalize transition cursor-pointer ${
                         auditReasonFilter === reason
-                          ? 'bg-nel-purple/30 text-white border border-slate-600'
-                          : 'text-white/60 hover:text-white'
+                          ? 'bg-[#F1EAF9] text-[#33224B] border border-slate-600'
+                          : 'text-[#8A7C96] hover:text-[#33224B]'
                       }`}
                     >
                       {reason.replace('_', ' ')}
@@ -1532,21 +1532,21 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
             </div>
           </div>
 
-          <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl">
+          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
             <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-nel-purple/40 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <HistoryIcon className="w-4 h-4 text-nel-pink" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                <HistoryIcon className="w-4 h-4 text-[#8649AC]" />
+                <span className="text-xs font-bold text-[#33224B] uppercase tracking-wider">
                   Audit Records ({filteredAdjustments.length})
                 </span>
               </div>
-              <span className="text-[11px] text-white/60">
+              <span className="text-[11px] text-[#8A7C96]">
                 Immutable adjustments
               </span>
             </div>
 
             {filteredAdjustments.length === 0 ? (
-              <div className="p-8 sm:p-12 text-center text-white/60 text-xs">
+              <div className="p-8 sm:p-12 text-center text-[#8A7C96] text-xs">
                 No audit adjustments found for the selected criteria.
               </div>
             ) : (
@@ -1559,17 +1559,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       <div key={adj.id} className="p-4 space-y-2">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <span className="font-bold text-white text-sm block">
+                            <span className="font-bold text-[#33224B] text-sm block">
                               {adj.prizeName}
                             </span>
-                            <span className="text-[11px] text-white/50 font-mono">
+                            <span className="text-[11px] text-[#33224B]/50 font-mono">
                               {adj.createdAt ? new Date(adj.createdAt).toLocaleString() : 'Recent'}
                             </span>
                           </div>
                           <span
                             className={`px-2 py-0.5 rounded text-xs font-mono font-bold shrink-0 ${
                               adj.site === 'PDD'
-                                ? 'bg-teal-950 text-nel-pink border border-teal-800/40'
+                                ? 'bg-teal-950 text-[#8649AC] border border-teal-800/40'
                                 : 'bg-sky-950 text-sky-300 border border-sky-800/40'
                             }`}
                           >
@@ -1578,17 +1578,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         </div>
 
                         <div className="flex items-center justify-between text-xs font-mono bg-nel-input/60 p-2 rounded-xl">
-                          <span className="text-white/60">Stock Change:</span>
+                          <span className="text-[#8A7C96]">Stock Change:</span>
                           <div>
                             <span>{adj.previousQuantity}</span> →{' '}
-                            <span className="text-white font-bold">{adj.newQuantity}</span>{' '}
+                            <span className="text-[#33224B] font-bold">{adj.newQuantity}</span>{' '}
                             <span
                               className={`font-bold ${
                                 deltaVal > 0
-                                  ? 'text-nel-pink'
+                                  ? 'text-[#8649AC]'
                                   : deltaVal < 0
                                   ? 'text-red-400'
-                                  : 'text-white/60'
+                                  : 'text-[#8A7C96]'
                               }`}
                             >
                               ({deltaVal > 0 ? `+${deltaVal}` : deltaVal})
@@ -1597,10 +1597,10 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         </div>
 
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="px-2 py-0.5 rounded-full bg-nel-purple/30 text-white/80 border border-nel-purple/50 capitalize">
+                          <span className="px-2 py-0.5 rounded-full bg-[#F1EAF9] text-[#645574] border border-[#E8DEF1] capitalize">
                             {adj.reason.replace('_', ' ')}
                           </span>
-                          <span className="text-white/50 truncate max-w-[140px]">
+                          <span className="text-[#33224B]/50 truncate max-w-[140px]">
                             {adj.adminId || adj.adjustedByAdminId || adj.adjustedByEmail || 'Admin'}
                           </span>
                         </div>
@@ -1611,8 +1611,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
                 {/* Desktop Audit Table View (hidden md:block) */}
                 <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full text-left text-sm text-white/80">
-                    <thead className="bg-nel-input/80 text-[11px] uppercase font-bold text-white/60 border-b border-nel-purple/40">
+                  <table className="w-full text-left text-sm text-[#645574]">
+                    <thead className="bg-nel-input/80 text-[11px] uppercase font-bold text-[#8A7C96] border-b border-nel-purple/40">
                       <tr>
                         <th className="px-6 py-3.5">Timestamp</th>
                         <th className="px-6 py-3.5">Prize Name</th>
@@ -1626,16 +1626,16 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       {filteredAdjustments.map((adj) => {
                         const deltaVal = adj.quantityChange ?? adj.delta ?? 0;
                         return (
-                          <tr key={adj.id} className="hover:bg-nel-purple/30/40 transition">
-                            <td className="px-6 py-3.5 text-xs text-white/60 font-mono">
+                          <tr key={adj.id} className="hover:bg-[#F1EAF9]/40 transition">
+                            <td className="px-6 py-3.5 text-xs text-[#8A7C96] font-mono">
                               {adj.createdAt ? new Date(adj.createdAt).toLocaleString() : 'Recent'}
                             </td>
-                            <td className="px-6 py-3.5 font-bold text-white">{adj.prizeName}</td>
+                            <td className="px-6 py-3.5 font-bold text-[#33224B]">{adj.prizeName}</td>
                             <td className="px-6 py-3.5">
                               <span
                                 className={`px-2 py-0.5 rounded text-xs font-mono font-bold ${
                                   adj.site === 'PDD'
-                                    ? 'bg-teal-950 text-nel-pink'
+                                    ? 'bg-teal-950 text-[#8649AC]'
                                     : 'bg-sky-950 text-sky-300'
                                 }`}
                               >
@@ -1643,26 +1643,26 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                               </span>
                             </td>
                             <td className="px-6 py-3.5 font-mono">
-                              <span className="text-white/60">{adj.previousQuantity}</span> →{' '}
-                              <span className="text-white font-bold">{adj.newQuantity}</span>{' '}
+                              <span className="text-[#8A7C96]">{adj.previousQuantity}</span> →{' '}
+                              <span className="text-[#33224B] font-bold">{adj.newQuantity}</span>{' '}
                               <span
                                 className={`text-xs font-bold ${
                                   deltaVal > 0
-                                    ? 'text-nel-pink'
+                                    ? 'text-[#8649AC]'
                                     : deltaVal < 0
                                     ? 'text-red-400'
-                                    : 'text-white/60'
+                                    : 'text-[#8A7C96]'
                                 }`}
                               >
                                 ({deltaVal > 0 ? `+${deltaVal}` : deltaVal})
                               </span>
                             </td>
                             <td className="px-6 py-3.5">
-                              <span className="text-xs px-2.5 py-0.5 rounded-full bg-nel-purple/30 text-white/80 border border-nel-purple/50 capitalize">
+                              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#F1EAF9] text-[#645574] border border-[#E8DEF1] capitalize">
                                 {adj.reason.replace('_', ' ')}
                               </span>
                             </td>
-                            <td className="px-6 py-3.5 text-xs text-white/60">
+                            <td className="px-6 py-3.5 text-xs text-[#8A7C96]">
                               {adj.adminId || adj.adjustedByAdminId || adj.adjustedByEmail || 'Admin'}
                             </td>
                           </tr>
@@ -1682,17 +1682,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
+          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
             <button
               onClick={() => setIsAddModalOpen(false)}
-              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-white/60 hover:text-white p-2 rounded-xl hover:bg-nel-purple/30 transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-[#8A7C96] hover:text-[#33224B] p-2 rounded-xl hover:bg-[#F1EAF9] transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Close Add Modal"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-1">+ Add New Prize</h3>
-            <p className="text-xs text-white/60 mb-4 sm:mb-5">
+            <h3 className="text-lg sm:text-xl font-bold text-[#33224B] mb-1">+ Add New Prize</h3>
+            <p className="text-xs text-[#8A7C96] mb-4 sm:mb-5">
               Create a prize item with initial PDD & PS starting allocations.
             </p>
 
@@ -1705,7 +1705,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
             <form onSubmit={handleSaveAddPrize} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                   Prize Name *
                 </label>
                 <input
@@ -1714,19 +1714,19 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                   value={addName}
                   onChange={(e) => setAddName(e.target.value)}
                   placeholder="e.g. Trail Hydration Flask"
-                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/50 text-white text-base sm:text-sm focus:border-nel-pink focus:outline-none"
+                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm focus:border-nel-pink focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                  <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                     Tier *
                   </label>
                   <select
                     value={addTier}
                     onChange={(e) => setAddTier(e.target.value as PrizeTier)}
-                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/50 text-white text-base sm:text-sm focus:border-nel-pink focus:outline-none font-bold"
+                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm focus:border-nel-pink focus:outline-none font-bold"
                   >
                     <option value="STANDARD">STANDARD</option>
                     <option value="TOP">TOP</option>
@@ -1734,17 +1734,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                  <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                     Active Status
                   </label>
-                  <label className="flex items-center space-x-2.5 min-h-[44px] px-3.5 rounded-xl bg-nel-input border border-nel-purple/50 cursor-pointer">
+                  <label className="flex items-center space-x-2.5 min-h-[44px] px-3.5 rounded-xl bg-nel-input border border-[#E8DEF1] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={addIsActive}
                       onChange={(e) => setAddIsActive(e.target.checked)}
                       className="w-4 h-4 rounded border-slate-600 text-emerald-500 focus:ring-nel-pink"
                     />
-                    <span className="text-xs font-semibold text-white">Active in Draw Pool</span>
+                    <span className="text-xs font-semibold text-[#33224B]">Active in Draw Pool</span>
                   </label>
                 </div>
               </div>
@@ -1752,8 +1752,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               {/* Prize Image (PNG) Upload */}
               <div className="p-3.5 rounded-2xl bg-nel-input border border-nel-purple/40 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase text-white/80 flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-nel-pink" />
+                  <label className="text-xs font-bold uppercase text-[#645574] flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-[#8649AC]" />
                     <span>Prize Image (PNG)</span>
                   </label>
                   {addImageUrl && (
@@ -1769,7 +1769,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
                 <div className="flex items-center gap-3">
                   {/* Thumbnail Preview Box */}
-                  <div className="w-16 h-16 rounded-xl bg-nel-surface border border-nel-purple/50 flex items-center justify-center overflow-hidden shrink-0 relative shadow-inner">
+                  <div className="w-16 h-16 rounded-xl bg-white border border-[#E8DEF1] flex items-center justify-center overflow-hidden shrink-0 relative shadow-inner">
                     {addImageUrl ? (
                       <img
                         src={addImageUrl}
@@ -1777,7 +1777,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         className="w-full h-full object-contain p-1"
                       />
                     ) : (
-                      <ImageIcon className="w-6 h-6 text-white/30" />
+                      <ImageIcon className="w-6 h-6 text-[#33224B]/30" />
                     )}
                   </div>
 
@@ -1800,12 +1800,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                     />
                     <label
                       htmlFor="add-prize-image-input"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-nel-purple/40 hover:bg-nel-purple/60 border border-nel-pink/40 text-xs font-semibold text-nel-pink cursor-pointer transition min-h-[40px]"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F0E8F9] hover:bg-nel-purple/60 border border-nel-pink/40 text-xs font-semibold text-[#8649AC] cursor-pointer transition min-h-[40px]"
                     >
-                      <Upload className="w-3.5 h-3.5 text-nel-pink" />
+                      <Upload className="w-3.5 h-3.5 text-[#8649AC]" />
                       <span>{addImageUrl ? 'Change PNG' : 'Upload PNG'}</span>
                     </label>
-                    <p className="text-[11px] text-white/50 mt-1 leading-tight">
+                    <p className="text-[11px] text-[#33224B]/50 mt-1 leading-tight">
                       Transparent PNG recommended. Appears above prize text on the lucky dip screen.
                     </p>
                   </div>
@@ -1813,12 +1813,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               </div>
 
               <div className="p-3.5 sm:p-4 rounded-2xl bg-nel-input border border-nel-purple/40 space-y-3">
-                <div className="text-xs font-bold uppercase text-nel-pink">
+                <div className="text-xs font-bold uppercase text-[#8649AC]">
                   Starting Quantities
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-white/80 mb-1">
+                    <label className="block text-[11px] font-bold text-[#645574] mb-1">
                       PDD Starting Quantity
                     </label>
                     <input
@@ -1827,11 +1827,11 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       required
                       value={addPddStarting}
                       onChange={(e) => setAddPddStarting(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-nel-surface border border-nel-purple/50 text-white text-base sm:text-sm font-mono"
+                      className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-white border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-white/80 mb-1">
+                    <label className="block text-[11px] font-bold text-[#645574] mb-1">
                       PS Starting Quantity
                     </label>
                     <input
@@ -1840,20 +1840,20 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       required
                       value={addPsStarting}
                       onChange={(e) => setAddPsStarting(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-nel-surface border border-nel-purple/50 text-white text-base sm:text-sm font-mono"
+                      className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-white border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm font-mono"
                     />
                   </div>
                 </div>
 
-                <div className="text-xs text-white/60 flex items-center justify-between pt-1 border-t border-nel-purple/40">
+                <div className="text-xs text-[#8A7C96] flex items-center justify-between pt-1 border-t border-nel-purple/40">
                   <span>Total Starting Quantity:</span>
-                  <strong className="text-nel-pink font-mono text-sm">
+                  <strong className="text-[#8649AC] font-mono text-sm">
                     {(Number(addPddStarting) || 0) + (Number(addPsStarting) || 0)} units
                   </strong>
                 </div>
-                <div className="text-xs text-white/60 flex items-center justify-between">
+                <div className="text-xs text-[#8A7C96] flex items-center justify-between">
                   <span>Total Remaining Quantity:</span>
-                  <strong className="text-nel-pink font-mono text-sm">
+                  <strong className="text-[#8649AC] font-mono text-sm">
                     {(Number(addPddStarting) || 0) + (Number(addPsStarting) || 0)} units
                   </strong>
                 </div>
@@ -1863,7 +1863,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 text-white/80 text-xs font-semibold cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 text-[#645574] text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1885,17 +1885,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isEditModalOpen && editingPrize && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
+          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
             <button
               onClick={() => setIsEditModalOpen(false)}
-              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-white/60 hover:text-white p-2 rounded-xl hover:bg-nel-purple/30 transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-[#8A7C96] hover:text-[#33224B] p-2 rounded-xl hover:bg-[#F1EAF9] transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Close Edit Modal"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Edit Prize</h3>
-            <p className="text-xs text-white/60 mb-4 sm:mb-5">
+            <h3 className="text-lg sm:text-xl font-bold text-[#33224B] mb-1">Edit Prize</h3>
+            <p className="text-xs text-[#8A7C96] mb-4 sm:mb-5">
               Update prize details and starting quantities.
             </p>
 
@@ -1908,7 +1908,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
             <form onSubmit={handleSaveEditPrize} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                   Prize Name *
                 </label>
                 <input
@@ -1916,19 +1916,19 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/50 text-white text-base sm:text-sm focus:border-nel-pink focus:outline-none"
+                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm focus:border-nel-pink focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                  <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                     Tier *
                   </label>
                   <select
                     value={editTier}
                     onChange={(e) => setEditTier(e.target.value as PrizeTier)}
-                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/50 text-white text-base sm:text-sm focus:border-nel-pink focus:outline-none font-bold"
+                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm focus:border-nel-pink focus:outline-none font-bold"
                   >
                     <option value="STANDARD">STANDARD</option>
                     <option value="TOP">TOP</option>
@@ -1936,17 +1936,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                  <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                     Active / Inactive
                   </label>
-                  <label className="flex items-center space-x-2.5 min-h-[44px] px-3.5 rounded-xl bg-nel-input border border-nel-purple/50 cursor-pointer">
+                  <label className="flex items-center space-x-2.5 min-h-[44px] px-3.5 rounded-xl bg-nel-input border border-[#E8DEF1] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={editIsActive}
                       onChange={(e) => setEditIsActive(e.target.checked)}
                       className="w-4 h-4 rounded border-slate-600 text-emerald-500 focus:ring-nel-pink"
                     />
-                    <span className="text-xs font-semibold text-white">Active in Draw Pool</span>
+                    <span className="text-xs font-semibold text-[#33224B]">Active in Draw Pool</span>
                   </label>
                 </div>
               </div>
@@ -1954,8 +1954,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               {/* Prize Image (PNG) Upload */}
               <div className="p-3.5 rounded-2xl bg-nel-input border border-nel-purple/40 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase text-white/80 flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-nel-pink" />
+                  <label className="text-xs font-bold uppercase text-[#645574] flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-[#8649AC]" />
                     <span>Prize Image (PNG)</span>
                   </label>
                   {editImageUrl && (
@@ -1971,7 +1971,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
                 <div className="flex items-center gap-3">
                   {/* Thumbnail Preview Box */}
-                  <div className="w-16 h-16 rounded-xl bg-nel-surface border border-nel-purple/50 flex items-center justify-center overflow-hidden shrink-0 relative shadow-inner">
+                  <div className="w-16 h-16 rounded-xl bg-white border border-[#E8DEF1] flex items-center justify-center overflow-hidden shrink-0 relative shadow-inner">
                     {editImageUrl ? (
                       <img
                         src={editImageUrl}
@@ -1979,7 +1979,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         className="w-full h-full object-contain p-1"
                       />
                     ) : (
-                      <ImageIcon className="w-6 h-6 text-white/30" />
+                      <ImageIcon className="w-6 h-6 text-[#33224B]/30" />
                     )}
                   </div>
 
@@ -2002,12 +2002,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                     />
                     <label
                       htmlFor="edit-prize-image-input"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-nel-purple/40 hover:bg-nel-purple/60 border border-nel-pink/40 text-xs font-semibold text-nel-pink cursor-pointer transition min-h-[40px]"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F0E8F9] hover:bg-nel-purple/60 border border-nel-pink/40 text-xs font-semibold text-[#8649AC] cursor-pointer transition min-h-[40px]"
                     >
-                      <Upload className="w-3.5 h-3.5 text-nel-pink" />
+                      <Upload className="w-3.5 h-3.5 text-[#8649AC]" />
                       <span>{editImageUrl ? 'Change PNG' : 'Upload PNG'}</span>
                     </label>
-                    <p className="text-[11px] text-white/50 mt-1 leading-tight">
+                    <p className="text-[11px] text-[#33224B]/50 mt-1 leading-tight">
                       Transparent PNG recommended. Appears above prize text on the lucky dip screen.
                     </p>
                   </div>
@@ -2017,7 +2017,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               {/* Starting Quantities Handling */}
               <div className="p-3.5 sm:p-4 rounded-2xl bg-nel-input border border-nel-purple/40 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-1">
-                  <span className="text-xs font-bold uppercase text-nel-pink">
+                  <span className="text-xs font-bold uppercase text-[#8649AC]">
                     Starting Quantities
                   </span>
                   {(drawCountsByPrize[editingPrize.id] || 0) > 0 && (
@@ -2028,13 +2028,13 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 </div>
 
                 {(drawCountsByPrize[editingPrize.id] || 0) > 0 ? (
-                  <div className="p-3 rounded-xl bg-nel-surface border border-nel-purple/40 text-xs text-white/80 space-y-1">
+                  <div className="p-3 rounded-xl bg-white border border-nel-purple/40 text-xs text-[#645574] space-y-1">
                     <p className="font-semibold text-amber-300">
                       Draws have been recorded for this prize ({drawCountsByPrize[editingPrize.id]} draws).
                     </p>
-                    <p className="text-white/60 text-[11px] leading-relaxed">
+                    <p className="text-[#8A7C96] text-[11px] leading-relaxed">
                       Starting quantities cannot be directly overwritten once draws have occurred. Use{' '}
-                      <strong className="text-nel-pink">Adjust Stock</strong> to modify current physical inventory.
+                      <strong className="text-[#8649AC]">Adjust Stock</strong> to modify current physical inventory.
                     </p>
                     <div className="grid grid-cols-2 gap-2 pt-2 text-xs font-mono">
                       <div>PDD Starting: {editPddStarting}</div>
@@ -2043,12 +2043,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                   </div>
                 ) : (
                   <>
-                    <p className="text-[11px] text-white/60">
+                    <p className="text-[11px] text-[#8A7C96]">
                       Before any draws are recorded, starting quantities can be edited directly.
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[11px] font-bold text-white/80 mb-1">
+                        <label className="block text-[11px] font-bold text-[#645574] mb-1">
                           PDD Starting Quantity
                         </label>
                         <input
@@ -2058,11 +2058,11 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                           onChange={(e) =>
                             setEditPddStarting(Math.max(0, parseInt(e.target.value) || 0))
                           }
-                          className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-nel-surface border border-nel-purple/50 text-white text-base sm:text-sm font-mono"
+                          className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-white border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm font-mono"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-white/80 mb-1">
+                        <label className="block text-[11px] font-bold text-[#645574] mb-1">
                           PS Starting Quantity
                         </label>
                         <input
@@ -2072,13 +2072,13 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                           onChange={(e) =>
                             setEditPsStarting(Math.max(0, parseInt(e.target.value) || 0))
                           }
-                          className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-nel-surface border border-nel-purple/50 text-white text-base sm:text-sm font-mono"
+                          className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-white border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm font-mono"
                         />
                       </div>
                     </div>
-                    <div className="text-xs text-white/60 flex items-center justify-between pt-1">
+                    <div className="text-xs text-[#8A7C96] flex items-center justify-between pt-1">
                       <span>Total Starting Quantity:</span>
-                      <strong className="text-nel-pink font-mono text-sm">
+                      <strong className="text-[#8649AC] font-mono text-sm">
                         {(Number(editPddStarting) || 0) + (Number(editPsStarting) || 0)} units
                       </strong>
                     </div>
@@ -2090,7 +2090,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 text-white/80 text-xs font-semibold cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 text-[#645574] text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -2113,25 +2113,25 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Delete Inventory Item</span>
                     </div>
-                    <div className="text-[11px] text-white/60 mt-0.5">
+                    <div className="text-[11px] text-[#8A7C96] mt-0.5">
                       Permanently remove this prize and all associated site inventories.
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full sm:w-auto px-3.5 py-2 min-h-[44px] rounded-xl bg-red-950/80 hover:bg-red-900 text-red-300 hover:text-white text-xs font-bold border border-red-700/60 flex items-center justify-center gap-1.5 transition cursor-pointer shrink-0"
+                    className="w-full sm:w-auto px-3.5 py-2 min-h-[44px] rounded-xl bg-red-950/80 hover:bg-red-900 text-red-300 hover:text-[#33224B] text-xs font-bold border border-red-700/60 flex items-center justify-center gap-1.5 transition cursor-pointer shrink-0"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete Item</span>
                   </button>
                 </div>
               ) : (
-                <div className="p-4 rounded-2xl bg-red-950/80 border-2 border-red-600 text-left space-y-3 shadow-xl">
+                <div className="p-4 rounded-2xl bg-red-950/80 border-2 border-red-600 text-left space-y-3 shadow-sm">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold text-white text-xs block">
+                      <span className="font-bold text-[#33224B] text-xs block">
                         Confirm Complete Removal
                       </span>
                       <p className="text-[11px] text-red-200 mt-1 leading-relaxed">
@@ -2146,7 +2146,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       type="button"
                       disabled={isDeletingFromEdit}
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="w-full sm:w-auto px-3.5 py-2 min-h-[44px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 text-white/80 text-xs font-semibold cursor-pointer"
+                      className="w-full sm:w-auto px-3.5 py-2 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 text-[#645574] text-xs font-semibold cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -2154,7 +2154,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       type="button"
                       disabled={isDeletingFromEdit}
                       onClick={handleConfirmDeleteFromEdit}
-                      className="w-full sm:w-auto px-4 py-2 min-h-[44px] rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-black shadow-lg flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      className="w-full sm:w-auto px-4 py-2 min-h-[44px] rounded-xl bg-red-600 hover:bg-red-500 text-[#33224B] text-xs font-black shadow-sm flex items-center justify-center gap-1.5 transition cursor-pointer"
                     >
                       {isDeletingFromEdit ? (
                         <span>Deleting Item...</span>
@@ -2178,18 +2178,18 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isAdjustModalOpen && adjustingPrize && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
+          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
             <button
               onClick={() => setIsAdjustModalOpen(false)}
-              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-white/60 hover:text-white p-2 rounded-xl hover:bg-nel-purple/30 transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-[#8A7C96] hover:text-[#33224B] p-2 rounded-xl hover:bg-[#F1EAF9] transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Close Adjust Stock Modal"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Adjust Stock</h3>
-            <p className="text-xs text-white/60 mb-4">
-              Modify physical remaining inventory for <strong className="text-nel-pink">{adjustingPrize.name}</strong>.
+            <h3 className="text-lg sm:text-xl font-bold text-[#33224B] mb-1">Adjust Stock</h3>
+            <p className="text-xs text-[#8A7C96] mb-4">
+              Modify physical remaining inventory for <strong className="text-[#8649AC]">{adjustingPrize.name}</strong>.
             </p>
 
             {adjustError && (
@@ -2201,7 +2201,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
             <form onSubmit={handleSaveStockAdjustment} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                   Site *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -2210,8 +2210,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                     onClick={() => setAdjustSite('PDD')}
                     className={`py-2.5 px-3 min-h-[44px] rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center ${
                       adjustSite === 'PDD'
-                        ? 'bg-teal-500/20 text-nel-pink border-teal-500 shadow'
-                        : 'bg-nel-input text-white/60 border-nel-purple/50 hover:text-white'
+                        ? 'bg-teal-500/20 text-[#8649AC] border-teal-500 shadow'
+                        : 'bg-nel-input text-[#8A7C96] border-[#E8DEF1] hover:text-[#33224B]'
                     }`}
                   >
                     Station PDD
@@ -2222,7 +2222,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                     className={`py-2.5 px-3 min-h-[44px] rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center ${
                       adjustSite === 'PS'
                         ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow'
-                        : 'bg-nel-input text-white/60 border-nel-purple/50 hover:text-white'
+                        : 'bg-nel-input text-[#8A7C96] border-[#E8DEF1] hover:text-[#33224B]'
                     }`}
                   >
                     Station PS
@@ -2233,14 +2233,14 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               {/* Adjustment Calculation Box */}
               <div className="p-3.5 sm:p-4 rounded-2xl bg-nel-input border border-nel-purple/40 space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/60">Current Remaining:</span>
-                  <span className="font-mono font-bold text-white text-base">
+                  <span className="text-[#8A7C96]">Current Remaining:</span>
+                  <span className="font-mono font-bold text-[#33224B] text-base">
                     {currentRemainingForAdjust} units
                   </span>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-white/80 mb-1">
+                  <label className="block text-xs font-bold uppercase text-[#645574] mb-1">
                     Adjustment (+ / - integer) *
                   </label>
                   <input
@@ -2250,22 +2250,22 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                     value={adjustmentValue}
                     onChange={(e) => setAdjustmentValue(e.target.value)}
                     placeholder="e.g. 20 or -5"
-                    className="w-full px-3.5 py-2.5 min-h-[48px] rounded-xl bg-nel-surface border border-nel-purple/50 text-white font-mono text-lg sm:text-base focus:border-teal-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 min-h-[48px] rounded-xl bg-white border border-[#E8DEF1] text-[#33224B] font-mono text-lg sm:text-base focus:border-teal-500 focus:outline-none"
                   />
-                  <span className="text-[11px] text-white/40 mt-1 block">
+                  <span className="text-[11px] text-[#33224B]/40 mt-1 block">
                     Use positive number to add stock (+20), negative number to deduct (-5).
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center text-xs pt-2 border-t border-nel-purple/40">
-                  <span className="text-white/60 font-semibold">New Remaining:</span>
+                  <span className="text-[#8A7C96] font-semibold">New Remaining:</span>
                   <span
                     className={`font-mono font-black text-lg ${
                       calculatedNewRemaining < 0
                         ? 'text-red-400'
                         : calculatedNewRemaining !== currentRemainingForAdjust
-                        ? 'text-nel-pink'
-                        : 'text-white'
+                        ? 'text-[#8649AC]'
+                        : 'text-[#33224B]'
                     }`}
                   >
                     {calculatedNewRemaining} units
@@ -2280,7 +2280,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                   Reason *
                 </label>
                 <input
@@ -2289,19 +2289,19 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
                   placeholder="e.g. Additional stock delivered from central store"
-                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/50 text-white text-base sm:text-xs focus:border-teal-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-xs focus:border-teal-500 focus:outline-none"
                 />
               </div>
 
-              <div className="text-[11px] text-white/60 bg-nel-input p-2.5 rounded-xl border border-nel-purple/40 leading-relaxed">
-                This adjustment will be recorded in <code className="text-nel-pink">inventoryAdjustments</code> without modifying historical draw records.
+              <div className="text-[11px] text-[#8A7C96] bg-nel-input p-2.5 rounded-xl border border-nel-purple/40 leading-relaxed">
+                This adjustment will be recorded in <code className="text-[#8649AC]">inventoryAdjustments</code> without modifying historical draw records.
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsAdjustModalOpen(false)}
-                  className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 text-white/80 text-xs font-semibold cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 text-[#645574] text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -2323,36 +2323,36 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isCsvModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-nel-surface border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col p-4 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col p-4 sm:p-6 shadow-2xl relative overflow-hidden">
             <button
               onClick={() => {
                 setIsCsvModalOpen(false);
                 setParsedCsvItems([]);
                 setCsvRawText('');
               }}
-              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-white/60 hover:text-white p-2 rounded-xl hover:bg-nel-purple/30 transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-[#8A7C96] hover:text-[#33224B] p-2 rounded-xl hover:bg-[#F1EAF9] transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Close CSV Modal"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2 mb-1">
-              <Upload className="w-5 h-5 text-nel-pink shrink-0" />
+            <h3 className="text-lg sm:text-xl font-bold text-[#33224B] flex items-center gap-2 mb-1">
+              <Upload className="w-5 h-5 text-[#8649AC] shrink-0" />
               <span>CSV Inventory Import</span>
             </h3>
-            <p className="text-xs text-white/60 mb-3 sm:mb-4">
-              Columns: <code className="text-nel-pink font-mono text-[11px] sm:text-xs">prize_name,tier,pdd_quantity,ps_quantity,active</code>
+            <p className="text-xs text-[#8A7C96] mb-3 sm:mb-4">
+              Columns: <code className="text-[#8649AC] font-mono text-[11px] sm:text-xs">prize_name,tier,pdd_quantity,ps_quantity,active</code>
             </p>
 
             {/* Template Tools */}
             <div className="flex flex-wrap items-center gap-2 mb-3 p-3 rounded-2xl bg-nel-input border border-nel-purple/40 text-xs">
-              <span className="text-white/60 font-semibold">CSV Helpers:</span>
+              <span className="text-[#8A7C96] font-semibold">CSV Helpers:</span>
               <button
                 type="button"
                 onClick={handleDownloadCsvTemplate}
-                className="px-3 py-2 min-h-[40px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 text-white font-medium flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3 py-2 min-h-[40px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 text-[#33224B] font-medium flex items-center gap-1.5 transition cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5 text-nel-pink" />
+                <Download className="w-3.5 h-3.5 text-[#8649AC]" />
                 <span>Download Sample CSV</span>
               </button>
             </div>
@@ -2360,13 +2360,13 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
             {/* File Upload / Paste Box */}
             <div className="mb-3">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-bold uppercase text-white/80">
+                <label className="text-xs font-bold uppercase text-[#645574]">
                   Select CSV File or Paste Raw CSV
                 </label>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-xs text-nel-pink hover:text-nel-pink underline font-semibold cursor-pointer p-1 min-h-[36px] flex items-center"
+                  className="text-xs text-[#8649AC] hover:text-[#8649AC] underline font-semibold cursor-pointer p-1 min-h-[36px] flex items-center"
                 >
                   Browse File
                 </button>
@@ -2387,7 +2387,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 placeholder="prize_name,tier,pdd_quantity,ps_quantity,active
 Garmin Forerunner 55 Trail GPS Watch,TOP,12,11,true
 NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-nel-input border border-nel-purple/50 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-nel-input border border-[#E8DEF1] text-xs font-mono text-[#33224B] placeholder-slate-500 focus:outline-none focus:border-teal-500"
               />
             </div>
 
@@ -2395,24 +2395,24 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
             {parsedCsvItems.length > 0 && (
               <div className="flex-1 flex flex-col min-h-0 bg-nel-input rounded-2xl border border-nel-purple/40 p-3 sm:p-4 mb-3 overflow-hidden">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                  <span className="text-xs font-bold uppercase text-nel-pink flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-nel-pink shrink-0" />
+                  <span className="text-xs font-bold uppercase text-[#8649AC] flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-[#8649AC] shrink-0" />
                     <span>Import Preview</span>
                   </span>
 
                   {/* Metrics requested */}
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono text-white/80">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono text-[#645574]">
                     <span>
-                      Items: <strong className="text-white">{parsedCsvItems.length}</strong>
+                      Items: <strong className="text-[#33224B]">{parsedCsvItems.length}</strong>
                     </span>
                     <span>
-                      PDD: <strong className="text-nel-pink">{csvTotalPdd}</strong>
+                      PDD: <strong className="text-[#8649AC]">{csvTotalPdd}</strong>
                     </span>
                     <span>
                       PS: <strong className="text-sky-300">{csvTotalPs}</strong>
                     </span>
                     <span>
-                      Total: <strong className="text-white font-bold">{csvCombinedTotal}</strong>
+                      Total: <strong className="text-[#33224B] font-bold">{csvCombinedTotal}</strong>
                     </span>
                     <span>
                       TOP: <strong className="text-amber-400">{csvTopUnits}</strong>
@@ -2445,7 +2445,7 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                       <span>{csvMatchedPrizesCount} prizes match existing catalog:</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-3 mt-2">
-                      <span className="font-semibold text-white">Action:</span>
+                      <span className="font-semibold text-[#33224B]">Action:</span>
                       <label className="flex items-center space-x-1.5 cursor-pointer min-h-[36px]">
                         <input
                           type="radio"
@@ -2485,8 +2485,8 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
 
                 {/* Table of Parsed Rows - Contained scrolling */}
                 <div className="flex-1 overflow-x-auto overflow-y-auto max-h-48 border border-nel-purple/40 rounded-xl">
-                  <table className="w-full text-left text-xs text-white/80">
-                    <thead className="bg-nel-surface sticky top-0 text-[10px] uppercase font-bold text-white/60 border-b border-nel-purple/40">
+                  <table className="w-full text-left text-xs text-[#645574]">
+                    <thead className="bg-white sticky top-0 text-[10px] uppercase font-bold text-[#8A7C96] border-b border-nel-purple/40">
                       <tr>
                         <th className="px-3 py-2">Row</th>
                         <th className="px-3 py-2">Prize Name</th>
@@ -2502,10 +2502,10 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                       {parsedCsvItems.map((item) => (
                         <tr
                           key={item.rowNumber}
-                          className={item.isValid ? 'hover:bg-nel-surface/60' : 'bg-red-950/20'}
+                          className={item.isValid ? 'hover:bg-white/60' : 'bg-red-950/20'}
                         >
-                          <td className="px-3 py-2 text-white/40">#{item.rowNumber}</td>
-                          <td className="px-3 py-2 font-sans font-semibold text-white">
+                          <td className="px-3 py-2 text-[#33224B]/40">#{item.rowNumber}</td>
+                          <td className="px-3 py-2 font-sans font-semibold text-[#33224B]">
                             {item.prize_name}
                             {item.matchedPrizeId && (
                               <span className="ml-1.5 text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">
@@ -2518,25 +2518,25 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                               className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                                 item.tier === 'TOP'
                                   ? 'bg-amber-500/20 text-amber-300'
-                                  : 'bg-emerald-500/20 text-nel-pink'
+                                  : 'bg-emerald-500/20 text-[#8649AC]'
                               }`}
                             >
                               {item.tier}
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-nel-pink">{item.pdd_quantity}</td>
+                          <td className="px-3 py-2 text-[#8649AC]">{item.pdd_quantity}</td>
                           <td className="px-3 py-2 text-sky-300">{item.ps_quantity}</td>
-                          <td className="px-3 py-2 font-bold text-white">{item.total_quantity}</td>
+                          <td className="px-3 py-2 font-bold text-[#33224B]">{item.total_quantity}</td>
                           <td className="px-3 py-2 font-sans">
                             {item.active ? (
-                              <span className="text-nel-pink text-[11px]">Yes</span>
+                              <span className="text-[#8649AC] text-[11px]">Yes</span>
                             ) : (
-                              <span className="text-white/60 text-[11px]">No</span>
+                              <span className="text-[#8A7C96] text-[11px]">No</span>
                             )}
                           </td>
                           <td className="px-3 py-2 font-sans">
                             {item.isValid ? (
-                              <span className="text-nel-pink text-[11px] font-semibold">
+                              <span className="text-[#8649AC] text-[11px] font-semibold">
                                 Ready
                               </span>
                             ) : (
@@ -2562,7 +2562,7 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                   setParsedCsvItems([]);
                   setCsvRawText('');
                 }}
-                className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 text-white/80 text-xs font-semibold cursor-pointer text-center"
+                className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 text-[#645574] text-xs font-semibold cursor-pointer text-center"
               >
                 Cancel
               </button>
@@ -2575,7 +2575,7 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                   csvMatchAction === 'cancel'
                 }
                 onClick={handleExecuteCsvImport}
-                className="w-full sm:w-auto px-5 py-3 min-h-[48px] rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 disabled:opacity-50 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg transition cursor-pointer"
+                className="w-full sm:w-auto px-5 py-3 min-h-[48px] rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 disabled:opacity-50 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
               >
                 {isImporting ? (
                   <span>Importing Records...</span>

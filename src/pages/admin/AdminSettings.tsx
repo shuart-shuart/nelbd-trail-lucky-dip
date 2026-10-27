@@ -39,12 +39,12 @@ export const AdminSettings: React.FC = () => {
       <div className="max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Availability Toggle - Obvious LIVE / PAUSED indicator */}
-          <div className="bg-nel-surface border border-nel-purple/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl">
+          <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <Sliders className="w-5 h-5 text-nel-pink shrink-0" />
-                  <h3 className="text-base font-nel font-semibold text-white">
+                  <Sliders className="w-5 h-5 text-[#8649AC] shrink-0" />
+                  <h3 className="text-base font-nel font-semibold text-[#33224B]">
                     Public Kiosk Availability
                   </h3>
                   <span
@@ -67,13 +67,13 @@ export const AdminSettings: React.FC = () => {
                     )}
                   </span>
                 </div>
-                <p className="text-xs text-white/70 font-dm leading-relaxed">
+                <p className="text-xs text-[#756782] font-dm leading-relaxed">
                   When paused, both PDD and PS kiosks display a pause message and stop accepting new lucky dip attempts.
                 </p>
               </div>
 
-              <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-nel-purple/30">
-                <span className="text-xs font-bold text-white/80 sm:hidden">
+              <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E7DCEF]">
+                <span className="text-xs font-bold text-[#645574] sm:hidden">
                   Status: {settings.kioskActive ? 'LIVE' : 'PAUSED'}
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer min-h-[44px]">
@@ -91,16 +91,16 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           {/* Site and General Information */}
-          <div className="bg-nel-surface border border-nel-purple/50 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl space-y-4 sm:space-y-5">
-            <h3 className="text-base font-nel font-semibold text-white">Station Configuration</h3>
+          <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-sm space-y-4 sm:space-y-5">
+            <h3 className="text-base font-nel font-semibold text-[#33224B]">Station Configuration</h3>
 
             {/* Station Selector: PDD vs PS */}
             <div className="p-3.5 sm:p-4 rounded-2xl bg-nel-input/60 border border-nel-purple/40 space-y-2">
-              <label className="block text-xs font-bold uppercase text-white/80 flex items-center gap-1.5 font-dm">
-                <MapPin className="w-3.5 h-3.5 text-nel-pink" />
+              <label className="block text-xs font-bold uppercase text-[#645574] flex items-center gap-1.5 font-dm">
+                <MapPin className="w-3.5 h-3.5 text-[#8649AC]" />
                 <span>Default Device Site (PDD / PS)</span>
               </label>
-              <p className="text-xs text-white/60 mb-2">
+              <p className="text-xs text-[#8A7C96] mb-2">
                 Select which festival station this device routes to by default.
               </p>
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -109,30 +109,30 @@ export const AdminSettings: React.FC = () => {
                   onClick={() => setSettings({ ...settings, activeSite: 'PDD' })}
                   className={`py-3 px-3 rounded-xl text-xs sm:text-sm font-dm font-bold border transition cursor-pointer min-h-[48px] flex flex-col items-center justify-center ${
                     settings.activeSite === 'PDD'
-                      ? 'bg-nel-purple text-nel-pink border-nel-pink/60 shadow-lg'
-                      : 'bg-nel-input border-nel-purple/40 text-white/70 hover:text-white'
+                      ? 'bg-nel-purple text-[#8649AC] border-nel-pink/60 shadow-sm'
+                      : 'bg-nel-input border-nel-purple/40 text-[#756782] hover:text-[#33224B]'
                   }`}
                 >
                   <span className="font-bold">Innovation Hub</span>
-                  <span className="text-[10px] text-white/60 font-normal">Punggol Digital District</span>
+                  <span className="text-[10px] text-[#8A7C96] font-normal">Punggol Digital District</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSettings({ ...settings, activeSite: 'PS' })}
                   className={`py-3 px-3 rounded-xl text-xs sm:text-sm font-dm font-bold border transition cursor-pointer min-h-[48px] flex flex-col items-center justify-center ${
                     settings.activeSite === 'PS'
-                      ? 'bg-nel-purple text-nel-pink border-nel-pink/60 shadow-lg'
-                      : 'bg-nel-input border-nel-purple/40 text-white/70 hover:text-white'
+                      ? 'bg-nel-purple text-[#8649AC] border-nel-pink/60 shadow-sm'
+                      : 'bg-nel-input border-nel-purple/40 text-[#756782] hover:text-[#33224B]'
                   }`}
                 >
                   <span className="font-bold">Impact Hub</span>
-                  <span className="text-[10px] text-white/60 font-normal">Plaza Singapura</span>
+                  <span className="text-[10px] text-[#8A7C96] font-normal">Plaza Singapura</span>
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-white/80 mb-1.5 font-dm">
+              <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5 font-dm">
                 Festival & Event Name
               </label>
               <input
@@ -140,12 +140,12 @@ export const AdminSettings: React.FC = () => {
                 required
                 value={settings.festivalName}
                 onChange={(e) => setSettings({ ...settings, festivalName: e.target.value })}
-                className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/60 text-white text-base sm:text-sm font-dm focus:border-nel-pink focus:outline-none placeholder-white/40"
+                className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/60 text-[#33224B] text-base sm:text-sm font-dm focus:border-nel-pink focus:outline-none placeholder-white/40"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-white/80 mb-1.5 font-dm">
+              <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5 font-dm">
                 Max Draws Per Participant
               </label>
               <input
@@ -156,37 +156,37 @@ export const AdminSettings: React.FC = () => {
                 onChange={(e) =>
                   setSettings({ ...settings, maxDrawsPerParticipant: parseInt(e.target.value) || 1 })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/60 text-white text-base sm:text-sm font-dm font-mono focus:border-nel-pink focus:outline-none"
+                className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/60 text-[#33224B] text-base sm:text-sm font-dm font-mono focus:border-nel-pink focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-white/80 mb-1.5 font-dm">
+              <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5 font-dm">
                 Kiosk Welcome Greeting
               </label>
               <textarea
                 rows={3}
                 value={settings.welcomeMessage}
                 onChange={(e) => setSettings({ ...settings, welcomeMessage: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl bg-nel-input border border-nel-purple/60 text-white text-base sm:text-sm font-dm focus:border-nel-pink focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-nel-input border border-nel-purple/60 text-[#33224B] text-base sm:text-sm font-dm focus:border-nel-pink focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-white/80 mb-1.5 font-dm">
+              <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5 font-dm">
                 Lucky Dip Terms & Guidelines Summary
               </label>
               <textarea
                 rows={3}
                 value={settings.termsSummary}
                 onChange={(e) => setSettings({ ...settings, termsSummary: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl bg-nel-input border border-nel-purple/60 text-white text-base sm:text-xs font-dm focus:border-nel-pink focus:outline-none leading-relaxed"
+                className="w-full px-4 py-2.5 rounded-xl bg-nel-input border border-nel-purple/60 text-[#33224B] text-base sm:text-xs font-dm focus:border-nel-pink focus:outline-none leading-relaxed"
               />
             </div>
 
             {saveSuccess && (
-              <div className="p-3.5 rounded-xl bg-nel-purple/40 border border-nel-pink/60 text-nel-pink text-xs flex items-center gap-2 font-dm font-semibold">
-                <CheckCircle2 className="w-4 h-4 text-nel-pink shrink-0" />
+              <div className="p-3.5 rounded-xl bg-[#F0E8F9] border border-nel-pink/60 text-[#8649AC] text-xs flex items-center gap-2 font-dm font-semibold">
+                <CheckCircle2 className="w-4 h-4 text-[#8649AC] shrink-0" />
                 <span>Settings successfully committed to Cloud Firestore!</span>
               </div>
             )}
@@ -195,7 +195,7 @@ export const AdminSettings: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] rounded-2xl bg-nel-pink hover:brightness-105 active:scale-[0.98] text-nel-violet font-nel font-semibold text-sm shadow-xl shadow-nel-purple/40 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-60"
+                className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] rounded-2xl bg-nel-pink hover:brightness-105 active:scale-[0.98] text-nel-violet font-nel font-semibold text-sm shadow-sm shadow-nel-purple/40 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-60"
               >
                 <Save className="w-4 h-4 text-nel-violet" />
                 <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>
