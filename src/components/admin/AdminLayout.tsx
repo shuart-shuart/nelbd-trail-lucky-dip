@@ -46,7 +46,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   return (
     <div className="nel-staff-root min-h-screen bg-[#F8F6FD] text-[#2F2145] flex flex-col font-dm selection:bg-nel-pink selection:text-nel-violet overflow-x-hidden">
       {/* Navigation Header */}
-      <header className="bg-white border-b border-[#EAE2F5] sticky top-0 z-40">
+      <header className="admin-header sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo and Brand */}
@@ -56,7 +56,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   <Compass className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div className="min-w-0">
-                  <span className="font-nel font-semibold text-base sm:text-lg text-[#33224F] group-hover:text-[#8752B2] transition tracking-tight truncate block">
+                  <span className="font-dm font-semibold text-base sm:text-lg text-[#33224F] group-hover:text-[#8752B2] transition tracking-tight truncate block">
                     NELBD Trail Admin
                   </span>
                   <span className="hidden sm:inline-block text-[11px] px-2 py-0.2 rounded-full bg-[#F4EAF9] border border-[#E5CEEF] text-[#7A429A] font-dm font-bold">
@@ -232,7 +232,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       </header>
 
       {/* Page Title & Action Bar */}
-      <section className="bg-[#F1ECFA] border-b border-[#E5DCF2] py-4 sm:py-6">
+      <section className="admin-titlebar py-4 sm:py-6">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl font-nel font-semibold tracking-tight text-[#302047] break-words">
