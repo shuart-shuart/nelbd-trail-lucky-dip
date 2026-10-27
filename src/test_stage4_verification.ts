@@ -52,7 +52,6 @@ function runStage4Verification() {
         ticketNumber: `NELBD-${site}-${String(100000 + i)}`,
         participantId: `part_${i}`,
         participantNickname: `Walker_${i}`,
-        prizeId: tier === 'TOP' ? 'prize_top_bag' : `prize_standard_${i % 5}`,
         prizeName: tier === 'TOP' ? 'Festival Exclusive Tote' : `Prize Item ${i % 5}`,
         prizeTier: tier,
     prizeImageUrl: i === 1200 ? 'data:image/png;base64,historicalBase64Png' : '',
