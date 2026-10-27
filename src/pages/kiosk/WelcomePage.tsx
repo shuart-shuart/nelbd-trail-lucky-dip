@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
 import { SiteLocation } from '../../firebase/types';
 import abbeySvg from '../../assets/img/ABBEY.svg';
-import nelLogo from '../../assets/img/nel-logo.png';
+import nelLogo from '../../assets/img/nelbd-logo.png';
+import dateImage from '../../assets/img/date.png';
 
 /**
  * Flat signage-style welcome screen. The Abbey asset is the original SVG
@@ -28,18 +29,13 @@ export const WelcomePage: React.FC = () => {
       <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[15%] bg-[#D9D9D9] -z-10 pointer-events-none" aria-hidden="true" />
 
       {/* Module 1: logo/date split with the original Abbey illustration fully visible. */}
-      <section className="kiosk-welcome-hero w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
+      <section className="kiosk-welcome-hero kiosk-signage-outline w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
         <div className="kiosk-welcome-header grid grid-cols-2 gap-3 sm:gap-5 items-start">
           <div className="min-w-0">
             <h1 className="m-0"><img src={nelLogo} alt="New Everyday Life, By Design" className="block w-full h-auto object-contain object-left" /></h1>
           </div>
-          <div className="min-w-0 border-l border-nel-violet/60 pl-3 sm:pl-5 text-right">
-            <p className="font-nel font-semibold text-[clamp(.8rem,3vw,1.4rem)] leading-tight text-nel-violet whitespace-nowrap">
-              14 NOV <span aria-hidden="true">→</span> 6 DEC 2026
-            </p>
-            <p className="font-dm font-bold text-[10px] sm:text-xs leading-snug mt-2">
-              Various Locations Along The North East Line
-            </p>
+          <div className="min-w-0 flex items-start justify-end">
+            <img src={dateImage} alt="14 November to 6 December 2026" className="block w-full h-auto object-contain object-right" />
           </div>
         </div>
         <img
@@ -53,7 +49,7 @@ export const WelcomePage: React.FC = () => {
       <button
         type="button"
         onClick={() => navigate('/details')}
-        className="kiosk-start-button w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet min-h-[94px] sm:min-h-[116px] px-5 sm:px-8 flex items-center justify-center gap-4 sm:gap-6 font-nel font-semibold text-[clamp(1.45rem,5.3vw,2.6rem)] tracking-tight transition-colors hover:bg-[#ffc0de] active:bg-[#f7a7d1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
+        className="kiosk-start-button kiosk-signage-outline w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet min-h-[94px] sm:min-h-[116px] px-5 sm:px-8 flex items-center justify-center gap-4 sm:gap-6 font-nel font-semibold text-[clamp(1.45rem,5.3vw,2.6rem)] tracking-tight transition-colors hover:bg-[#ffc0de] active:bg-[#f7a7d1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
         aria-label="Press to start the trail lucky dip"
       >
         <span className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-nel-violet text-nel-pink shrink-0 flex items-center justify-center" aria-hidden="true">
@@ -63,8 +59,8 @@ export const WelcomePage: React.FC = () => {
       </button>
 
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
-      <div className="kiosk-venue-card w-full rounded-[12px] sm:rounded-[16px] bg-nel-pink p-2 sm:p-2.5">
-        <div role="group" aria-label="Redemption venue" className="grid grid-cols-2 overflow-hidden rounded-[10px] sm:rounded-[12px]">
+      <div className="kiosk-venue-card kiosk-signage-outline w-full rounded-[12px] sm:rounded-[16px] bg-nel-pink p-2 sm:p-2.5">
+        <div role="group" aria-label="Redemption venue" className="kiosk-venue-track grid grid-cols-2 rounded-full">
           {([['PDD', 'Innovation Hub'], ['PS', 'Impact Hub']] as const).map(([value, label]) => (
             <button
               key={value}
@@ -73,8 +69,8 @@ export const WelcomePage: React.FC = () => {
               onClick={() => handleToggleSite(value)}
               className={`kiosk-venue-button min-w-0 min-h-[48px] sm:min-h-[54px] px-1.5 sm:px-3 flex items-center justify-center gap-1.5 sm:gap-2 font-nel font-semibold text-[clamp(.77rem,2.7vw,1.05rem)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nel-violet cursor-pointer ${
                 session.site === value
-                  ? 'bg-nel-violet text-nel-pink'
-                  : 'bg-transparent text-nel-violet hover:bg-nel-violet/10'
+                  ? 'kiosk-venue-selected bg-nel-violet text-nel-pink'
+                  : 'kiosk-venue-unselected bg-transparent text-nel-violet hover:bg-nel-violet/10'
               }`}
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" aria-hidden="true" fill={session.site === value ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7"><path d="M12 22s7-7.2 7-13a7 7 0 1 0-14 0c0 5.8 7 13 7 13Z"/><circle cx="12" cy="9" r="2.5" fill={session.site === value ? '#270342' : 'none'}/></svg>
