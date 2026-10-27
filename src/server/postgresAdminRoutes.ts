@@ -84,3 +84,20 @@ postgresAdminRouter.put('/settings',async (req,res)=>{
     return res.json(rows[0]);
   } catch {return res.status(503).json({error:'Settings update unavailable'});}
 });
+
+postgresAdminRouter.get('/dashboard-stats',async (_req,res)=>{
+  try {
+    const [drawCount,participantCount,today]=await Promise.all([
+      getPool().query('SELECT count(*)::integer AS count FROM draws'),
+      getPool().query('SELECT count(*)::integer AS count FROM participants'),
+      getPool().query(`SELECT d.id,d.ticket_number AS "ticketNumber",
+        p.nickname AS "participantNickname",d.prize_id AS "prizeId",
+        d.prize_name AS "prizeName",d.prize_tier AS "prizeTier",d.site,d.status,
+        d.kiosk_id AS "kioskId",d.drawn_at AS "drawnAt",d.claimed_at AS "claimedAt"
+        FROM draws d JOIN participants p ON p.id=d.participant_id
+        WHERE (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date =
+              (now() AT TIME ZONE 'Asia/Singapore')::date ORDER BY d.drawn_at DESC`)
+    ]);
+    return res.json({totalDraws:drawCount.rows[0].count,totalParticipants:participantCount.rows[0].count,todayDraws:today.rows});
+  } catch {return res.status(503).json({error:'Dashboard statistics unavailable'});}
+});
