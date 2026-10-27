@@ -70,6 +70,7 @@ app.post('/api/lucky-dip/validate-participant', (req, res) => {
 // 3. Concurrency-safe atomic server-side draw endpoint
 app.post('/api/lucky-dip/draw', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT_JSON) return res.status(503).json({success:false,error:'Prize draws are not configured. Please ask booth crew for assistance.'});
   try {
     const token = /^Bearer (.+)$/.exec(req.get('authorization') || '')?.[1] || '';
     await requireStaff(token);
