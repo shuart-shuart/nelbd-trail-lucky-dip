@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
 import { SiteLocation } from '../../firebase/types';
 import abbeySvg from '../../assets/img/ABBEY.svg';
-import nelLogo from '../../assets/img/nelbd-logo.png';
+import nelLogo from '../../assets/img/nelbd-logo2.png';
 import dateImage from '../../assets/img/date.png';
 
 /**
@@ -32,10 +32,10 @@ export const WelcomePage: React.FC = () => {
       <section className="kiosk-welcome-hero kiosk-signage-outline w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
         <div className="kiosk-welcome-header grid grid-cols-2 gap-3 sm:gap-5 items-start">
           <div className="kiosk-brand-image min-w-0">
-            <h1 className="m-0"><img src={nelLogo} alt="New Everyday Life, By Design" className="block w-full h-auto object-contain object-left" /></h1>
+            <img src={nelLogo} alt="New Everyday Life, By Design" className="block w-full h-auto object-contain object-left" />
           </div>
-          <div className="kiosk-date-image min-w-0 flex items-start justify-end">
-            <img src={dateImage} alt="14 November to 6 December 2026" className="block w-full h-auto object-contain object-right" />
+          <div className="kiosk-date-image min-w-0 flex items-center justify-start">
+            <img src={dateImage} alt="14 November to 6 December 2026" className="block w-full h-auto object-contain object-left" />
           </div>
         </div>
         <img
@@ -43,6 +43,7 @@ export const WelcomePage: React.FC = () => {
           alt="Abbey illustration showing a child, walking adult and wheelchair user"
           className="block w-full h-auto max-h-[45dvh] object-contain object-center"
         />
+        <h1 className="kiosk-welcome-title font-nel font-bold text-center text-nel-violet">Design Trail Lucky Dip</h1>
       </section>
 
       {/* Module 2: the entire flat rounded rectangle is the start button. */}
@@ -59,7 +60,7 @@ export const WelcomePage: React.FC = () => {
       </button>
 
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
-      <div className="kiosk-venue-card kiosk-signage-outline w-full rounded-[12px] sm:rounded-[16px] bg-nel-pink p-2 sm:p-2.5">
+      <div className="kiosk-venue-card w-full rounded-[12px] sm:rounded-[16px] bg-nel-pink p-2 sm:p-2.5">
         <div role="group" aria-label="Redemption venue" className="kiosk-venue-track grid grid-cols-2 rounded-full">
           {([['PDD', 'Innovation Hub'], ['PS', 'Impact Hub']] as const).map(([value, label]) => (
             <button
