@@ -16,7 +16,7 @@ export const KioskLayout: React.FC<KioskLayoutProps> = ({ children }) => {
   return (
     <div className="nel-kiosk-root min-h-[100dvh] w-full bg-nel-violet text-white flex flex-col justify-between relative overflow-x-hidden selection:bg-nel-pink selection:text-nel-violet">
       {/* Main Centered Responsive Container */}
-      <main className="w-full max-w-md sm:max-w-lg mx-auto flex-1 flex flex-col justify-center px-4 py-5 sm:py-7 sm:px-6 z-10 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.75rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+      <main className="w-full max-w-md sm:max-w-lg lg:max-w-xl mx-auto flex-1 flex flex-col justify-center px-4 py-4 sm:py-6 sm:px-6 z-10 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.75rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
         {isPaused ? (
           <div className="w-full flex flex-col items-center text-center my-auto py-6 bg-nel-pink text-nel-violet rounded-3xl p-6 sm:p-8 border-4 border-nel-purple/30">
             <div
