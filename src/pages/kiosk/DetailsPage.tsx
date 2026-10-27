@@ -13,12 +13,12 @@ export const DetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { session, setParticipantDetails, setTicketNumber, resetSession } = useKiosk();
 
-  const [nickname, setName] = useState(session.nickname || '');
+  const [name, setName] = useState(session.name || '');
   const [mobileNumber, setMobileNumber] = useState(
     session.mobileNumber ? session.mobileNumber.replace('+65', '') : ''
   );
 
-  const [nicknameError, setNameError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
   const [mobileError, setMobileError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [isDuplicate, setIsDuplicate] = useState(false);
@@ -33,9 +33,9 @@ export const DetailsPage: React.FC = () => {
     setNameError(null);
     setMobileError(null);
 
-    const cleanNick = nickname.trim();
+    const cleanNick = name.trim();
     if (!cleanNick) {
-      setNameError('Please enter your nickname.');
+      setNameError('Please enter your name.');
       return;
     }
 
@@ -117,39 +117,39 @@ export const DetailsPage: React.FC = () => {
           {/* Name Field */}
           <div>
             <label
-              htmlFor="nickname-input"
+              htmlFor="name-input"
               className="block text-sm sm:text-base font-bold text-nel-violet mb-1.5 font-dm"
             >
               Name *
             </label>
             <input
-              id="nickname-input"
+              id="name-input"
               type="text"
               required
               maxLength={40}
               autoComplete="off"
-              aria-invalid={!!nicknameError}
-              aria-describedby={nicknameError ? "nickname-error" : undefined}
-              value={nickname}
+              aria-invalid={!!nameError}
+              aria-describedby={nameError ? "name-error" : undefined}
+              value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                if (nicknameError) setNameError(null);
+                if (nameError) setNameError(null);
               }}
               placeholder="e.g. Alex"
               className={`w-full min-h-[50px] px-4 py-3 rounded-xl bg-nel-pink border-2 text-base sm:text-lg font-dm font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none focus:ring-4 transition-all ${
-                nicknameError
+                nameError
                   ? 'border-red-600 focus:ring-red-300'
                   : 'border-nel-purple/80 focus:border-nel-violet focus:ring-nel-purple/20'
               }`}
             />
-            {nicknameError && (
+            {nameError && (
               <p
-                id="nickname-error"
+                id="name-error"
                 role="alert"
                 className="mt-1.5 text-xs sm:text-sm font-bold text-nel-purple flex items-center gap-1 font-dm"
               >
                 <AlertCircle className="w-4 h-4 text-nel-purple shrink-0" aria-hidden="true" />
-                <span>{nicknameError}</span>
+                <span>{nameError}</span>
               </p>
             )}
           </div>
@@ -160,7 +160,7 @@ export const DetailsPage: React.FC = () => {
               htmlFor="mobile-input"
               className="block text-sm sm:text-base font-bold text-nel-violet mb-1.5 font-dm"
             >
-              Singapore mobile number *
+              Singapore Mobile Number *
             </label>
             <div
               className={`flex items-center min-h-[50px] rounded-xl bg-nel-pink border-2 overflow-hidden focus-within:ring-4 transition-all ${
@@ -195,7 +195,7 @@ export const DetailsPage: React.FC = () => {
                 className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none font-dm"
               />
             </div>
-            <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">8 digits, starting with 8 or 9</p>
+            <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">Please enter 8 digits, without spaces.</p>
             {mobileError && (
               <p
                 id="mobile-error"
@@ -211,7 +211,7 @@ export const DetailsPage: React.FC = () => {
           {/* Editorial Acknowledgement Notice */}
           <div className="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
             <p className="text-[11px] sm:text-xs text-nel-violet/90 leading-relaxed font-dm">
-              Your mobile number is used to check previous Lucky Dip participation. Booklet stamps must be checked by booth crew. Limited to one redemption per person.
+              Your mobile number is used to check previous Lucky Dip participation, and your information is not held after the event. Limited to one redemption per person.
             </p>
           </div>
 
