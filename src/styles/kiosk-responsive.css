@@ -140,3 +140,63 @@
  border-width:2px;box-shadow:inset 0 0 0 5px #FF8DC6,inset 0 0 0 7px rgba(119,22,181,.72);
  }
 }
+
+/* Kiosk signage design system — palette and hierarchy shared across all steps.
+   NEL Rounded is reserved for H1; DM Sans for controls, labels and supporting text. */
+.nel-kiosk-root{
+ --signage-ink:#270342;
+ --signage-pink:#FF8DC6;
+ --signage-art:#7716B5;
+ --signage-spine:#D9D9D9;
+ --signage-outer:2px;
+ --signage-inner:1px;
+ --signage-inset:8px;
+}
+.nel-kiosk-root .kiosk-trail-spine{width:clamp(38px,11%,72px);background:var(--signage-spine);}
+.nel-kiosk-root .kiosk-welcome{gap:clamp(14px,2.5vw,22px);}
+.nel-kiosk-root .kiosk-welcome-hero{padding:clamp(18px,3vw,28px);}
+.nel-kiosk-root .kiosk-welcome-header{align-items:start;}
+.nel-kiosk-root .kiosk-date-image{justify-content:flex-end;align-items:flex-start;}
+.nel-kiosk-root .kiosk-date-image img{object-position:right top;}
+.nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(33dvh,330px);margin-top:clamp(6px,1.5vw,14px);}
+.nel-kiosk-root .kiosk-welcome-title{margin-top:clamp(4px,1vw,10px);}
+.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline,
+.nel-kiosk-root .kiosk-form-card,
+.nel-kiosk-root .kiosk-result-card{
+ border:var(--signage-outer) solid var(--signage-ink);
+ outline:none;
+ box-shadow:inset 0 0 0 var(--signage-inset) var(--signage-pink),
+ inset 0 0 0 calc(var(--signage-inset) + var(--signage-inner)) var(--signage-ink);
+}
+.nel-kiosk-root .kiosk-venue-card{border:0;box-shadow:none;padding:clamp(6px,1.3vw,9px);}
+.nel-kiosk-root .kiosk-venue-button{border-color:var(--signage-ink);color:var(--signage-ink);font-family:"DM Sans",sans-serif;}
+.nel-kiosk-root .kiosk-venue-selected{background:var(--signage-ink);color:var(--signage-pink);border-color:var(--signage-ink);}
+.nel-kiosk-root .kiosk-venue-unselected{background:transparent;color:var(--signage-ink);border-color:var(--signage-ink);}
+.nel-kiosk-root .kiosk-start-button{min-height:clamp(88px,13vw,128px);font-family:"DM Sans",sans-serif;font-weight:800;box-shadow:inset 0 0 0 8px var(--signage-pink),inset 0 0 0 9px var(--signage-ink);}
+.nel-kiosk-root .kiosk-start-button>span:first-child{width:clamp(52px,8vw,66px);height:clamp(52px,8vw,66px);}
+.nel-kiosk-root :is(.kiosk-details,.kiosk-draw,.kiosk-result) :is(p,span,label,input,button):not(.font-mono){font-family:"DM Sans",sans-serif;}
+.nel-kiosk-root :is(.kiosk-details,.kiosk-draw,.kiosk-result) h1,
+.nel-kiosk-root .kiosk-welcome h1{font-family:"NEL Rounded","NELRounded",sans-serif;}
+.nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{border-radius:18px;box-shadow:inset 0 0 0 8px var(--signage-pink),inset 0 0 0 9px var(--signage-ink);}
+.nel-kiosk-root .kiosk-form-card :is(input,.kiosk-primary-action){min-height:56px;}
+.nel-kiosk-root .kiosk-form-card input{border-color:var(--signage-ink);}
+.nel-kiosk-root .kiosk-form-card input:focus-visible{outline:2px solid var(--signage-ink);outline-offset:2px;}
+.nel-kiosk-root .kiosk-primary-action{background:var(--signage-ink);color:var(--signage-pink);border-color:var(--signage-ink);box-shadow:none;font-family:"DM Sans",sans-serif;font-weight:800;}
+.nel-kiosk-root .kiosk-draw-action circle[stroke="#270342"]{stroke:var(--signage-ink);}
+.nel-kiosk-root .kiosk-result-card :is(.border-dashed){border-style:solid;border-color:rgba(39,3,66,.3);}
+.nel-kiosk-root .kiosk-result-card .font-nel:not(h1){font-family:"DM Sans",sans-serif;}
+.nel-kiosk-root .kiosk-result-card .border-nel-purple{border-color:var(--signage-ink);}
+.nel-kiosk-root :is(button,input){touch-action:manipulation;}
+@media(max-width:380px){
+ .nel-kiosk-root .kiosk-trail-spine{width:38px;}
+ .nel-kiosk-root .kiosk-start-button{min-height:78px;}
+ .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(29dvh,220px);}
+ .nel-kiosk-root .kiosk-welcome .kiosk-signage-outline,
+ .nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{
+ box-shadow:inset 0 0 0 6px var(--signage-pink),inset 0 0 0 7px var(--signage-ink);
+ }
+}
+@media(max-height:720px){
+ .nel-kiosk-root .kiosk-start-button{min-height:68px;}
+ .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(25dvh,220px);}
+}

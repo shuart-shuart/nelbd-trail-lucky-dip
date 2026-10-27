@@ -129,7 +129,7 @@ export const DrawPage: React.FC = () => {
         </h1>
 
         {/* Short Supporting Instruction */}
-        <p className="font-nel font-semibold text-xl sm:text-2xl text-nel-pink mt-1 sm:mt-1.5 leading-[1.1]">
+        <p className="font-dm font-semibold text-xl sm:text-2xl text-nel-pink mt-1 sm:mt-1.5 leading-[1.1]">
           One tap. One surprise.
         </p>
       </header>
@@ -151,7 +151,7 @@ export const DrawPage: React.FC = () => {
           onClick={handleDraw}
           disabled={isDrawing}
           aria-label={isDrawing ? 'Drawing your prize...' : 'Tap to draw your prize'}
-          className={`relative w-[min(16rem,72vw,36dvh)] sm:w-[min(18rem,48dvh)] md:w-[min(20rem,50dvh)] aspect-square rounded-full flex flex-col items-center justify-center select-none cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-pink transition-transform duration-200 ${
+          className={`kiosk-draw-action relative w-[min(16rem,72vw,36dvh)] sm:w-[min(18rem,48dvh)] md:w-[min(20rem,50dvh)] aspect-square rounded-full flex flex-col items-center justify-center select-none cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-pink transition-transform duration-200 ${
             isDrawing ? 'scale-95 cursor-wait' : 'hover:scale-[1.02] active:scale-95'
           }`}
         >
@@ -166,7 +166,7 @@ export const DrawPage: React.FC = () => {
               cy="140"
               r="132"
               fill="#FF8DC6"
-              stroke="#7716B5"
+              stroke="#270342"
               strokeWidth="8"
             />
 
@@ -193,10 +193,10 @@ export const DrawPage: React.FC = () => {
                 <DrawPictogram />
 
                 {/* Centred Bold "TAP TO DRAW" Typography */}
-                <span className="font-nel font-semibold text-2xl sm:text-3xl text-nel-violet leading-none tracking-tight">
+                <span className="font-dm font-bold text-2xl sm:text-3xl text-nel-violet leading-none tracking-tight">
                   TAP HERE
                 </span>
-                <span className="font-nel font-semibold text-3xl sm:text-5xl text-nel-violet leading-none tracking-tight mt-1 sm:mt-1.5">
+                <span className="font-dm font-bold text-3xl sm:text-5xl text-nel-violet leading-none tracking-tight mt-1 sm:mt-1.5">
                   TO DRAW
                 </span>
               </>
@@ -207,7 +207,7 @@ export const DrawPage: React.FC = () => {
                   className="w-12 h-12 rounded-full border-4 border-nel-violet border-t-transparent animate-spin mb-2"
                   aria-hidden="true"
                 />
-                <span className="font-nel font-semibold text-lg sm:text-xl text-nel-violet tracking-wide">
+                <span className="font-dm font-bold text-lg sm:text-xl text-nel-violet tracking-wide">
                   DRAWING...
                 </span>
               </div>
