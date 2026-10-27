@@ -142,7 +142,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="flex items-center space-x-2">
           <Link
             to="/"
-            className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F5B2D6] hover:brightness-105 active:scale-98 text-[#3D2454] font-nel font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition shadow cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F5B2D6] hover:brightness-105 active:scale-98 text-[#3D2454] font-dm font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition shadow cursor-pointer"
           >
             <span>Launch Kiosk</span>
             <ExternalLink className="w-3.5 h-3.5 text-[#3D2454]" />
@@ -153,7 +153,7 @@ export const AdminDashboard: React.FC = () => {
       {/* Top Status Metrics Cards: 2-col on mobile, 4-col on desktop */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
         {/* Today's Draws & Totals */}
-        <div className="bg-white border border-[#E9E0F3] rounded-2xl p-3.5 sm:p-5 shadow-sm flex flex-col justify-between">
+        <div className="admin-card rounded-2xl p-3.5 sm:p-5 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5 sm:mb-2">
               <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase text-[#796C88] font-dm truncate">
@@ -161,7 +161,7 @@ export const AdminDashboard: React.FC = () => {
               </span>
               <History className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B4AB2] shrink-0" />
             </div>
-            <div className="text-xl sm:text-2xl font-nel font-semibold text-[#33224B] font-mono">
+            <div className="text-xl sm:text-2xl font-dm font-semibold text-[#33224B] font-mono">
               {todayDrawsCount}{' '}
               <span className="text-[11px] sm:text-xs font-normal text-[#8A7D99] font-dm">
                 ({allTimeTotalDraws} all-time)
@@ -175,7 +175,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Total Calculated Stock */}
-        <div className="bg-white border border-[#E9E0F3] rounded-2xl p-3.5 sm:p-5 shadow-sm flex flex-col justify-between">
+        <div className="admin-card rounded-2xl p-3.5 sm:p-5 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5 sm:mb-2">
               <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase text-[#796C88] font-dm truncate">
@@ -183,7 +183,7 @@ export const AdminDashboard: React.FC = () => {
               </span>
               <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B4AB2] shrink-0" />
             </div>
-            <div className="text-xl sm:text-2xl font-nel font-semibold text-[#8B4AB2] font-mono">
+            <div className="text-xl sm:text-2xl font-dm font-semibold text-[#8B4AB2] font-mono">
               {grandTotalRemaining}{' '}
               <span className="text-[11px] sm:text-xs font-normal text-[#8A7D99] font-dm">
                 / {grandTotalAllocated}
@@ -197,7 +197,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Top Prize Today & Remaining */}
-        <div className="bg-white border border-[#E9E0F3] rounded-2xl p-3.5 sm:p-5 shadow-sm flex flex-col justify-between">
+        <div className="admin-card rounded-2xl p-3.5 sm:p-5 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5 sm:mb-2">
               <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase text-[#796C88] font-dm truncate">
@@ -205,7 +205,7 @@ export const AdminDashboard: React.FC = () => {
               </span>
               <Server className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#B47B23] shrink-0" />
             </div>
-            <div className="text-xl sm:text-2xl font-nel font-semibold text-[#B47B23] font-mono">
+            <div className="text-xl sm:text-2xl font-dm font-semibold text-[#B47B23] font-mono">
               {topPrizesRemaining}{' '}
               <span className="text-[11px] sm:text-xs font-normal text-[#8A7D99] font-dm">
                 left
@@ -218,7 +218,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Unique Participants & Kiosk Availability */}
-        <div className="bg-white border border-[#E9E0F3] rounded-2xl p-3.5 sm:p-5 relative overflow-hidden shadow-sm flex flex-col justify-between">
+        <div className="admin-card rounded-2xl p-3.5 sm:p-5 relative overflow-hidden shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5 sm:mb-2">
               <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase text-[#796C88] font-dm truncate">
@@ -231,7 +231,7 @@ export const AdminDashboard: React.FC = () => {
                 title={settings.kioskActive ? 'Kiosk Live' : 'Kiosk Paused'}
               />
             </div>
-            <div className="text-xl sm:text-2xl font-nel font-semibold text-[#33224B] font-mono">
+            <div className="text-xl sm:text-2xl font-dm font-semibold text-[#33224B] font-mono">
               {uniqueParticipantsCount}
             </div>
           </div>
@@ -281,7 +281,7 @@ export const AdminDashboard: React.FC = () => {
       {prizes.length === 0 && (
         <div className="mb-6 p-4 sm:p-6 rounded-3xl bg-[#F1EAF9] border border-[#DEC9ED] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h3 className="text-sm sm:text-base font-nel font-semibold text-[#33224B] flex items-center gap-2">
+            <h3 className="text-sm sm:text-base font-dm font-semibold text-[#33224B] flex items-center gap-2">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B4AB2]" />
               <span>Initialize Festival Prize Catalog & Site Inventories</span>
             </h3>
@@ -292,7 +292,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             onClick={handleSeed}
             disabled={isSeeding}
-            className="w-full md:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-[#F5B2D6] hover:brightness-105 text-[#3D2454] font-nel font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer shrink-0"
+            className="w-full md:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-[#F5B2D6] hover:brightness-105 text-[#3D2454] font-dm font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer shrink-0"
           >
             <RefreshCw className={`w-4 h-4 text-[#3D2454] ${isSeeding ? 'animate-spin' : ''}`} />
             <span>{isSeeding ? 'Seeding...' : 'Seed Sample Catalog'}</span>
@@ -311,13 +311,13 @@ export const AdminDashboard: React.FC = () => {
         {/* Inventory Card */}
         <Link
           to="/admin/inventory"
-          className="group bg-white hover:bg-[#F9F5FE] border border-[#E9E0F3] hover:border-[#CBAEE7] rounded-3xl p-5 sm:p-6 transition flex flex-col justify-between shadow-sm"
+          className="admin-card group rounded-3xl p-5 sm:p-6 transition flex flex-col justify-between shadow-sm"
         >
           <div>
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#F0E8F9] border border-[#E4CEEF] flex items-center justify-center text-[#8B4AB2] mb-3 sm:mb-4 group-hover:scale-110 transition">
               <Gift className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <h3 className="text-base sm:text-lg font-nel font-semibold text-[#33224B] group-hover:text-[#8B4AB2] transition">
+            <h3 className="text-base sm:text-lg font-dm font-semibold text-[#33224B] group-hover:text-[#8B4AB2] transition">
               Site Inventory Matrix
             </h3>
             <p className="text-xs text-[#796C88] mt-1 leading-relaxed font-dm">
@@ -333,13 +333,13 @@ export const AdminDashboard: React.FC = () => {
         {/* History Card */}
         <Link
           to="/admin/history"
-          className="group bg-white hover:bg-[#F9F5FE] border border-[#E9E0F3] hover:border-[#CBAEE7] rounded-3xl p-5 sm:p-6 transition flex flex-col justify-between shadow-sm"
+          className="admin-card group rounded-3xl p-5 sm:p-6 transition flex flex-col justify-between shadow-sm"
         >
           <div>
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#F0E8F9] border border-[#E4CEEF] flex items-center justify-center text-[#8B4AB2] mb-3 sm:mb-4 group-hover:scale-110 transition">
               <History className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <h3 className="text-base sm:text-lg font-nel font-semibold text-[#33224B] group-hover:text-[#8B4AB2] transition">
+            <h3 className="text-base sm:text-lg font-dm font-semibold text-[#33224B] group-hover:text-[#8B4AB2] transition">
               Draw History & Participants
             </h3>
             <p className="text-xs text-[#796C88] mt-1 leading-relaxed font-dm">
@@ -355,13 +355,13 @@ export const AdminDashboard: React.FC = () => {
         {/* Settings Card */}
         <Link
           to="/admin/settings"
-          className="group bg-white hover:bg-[#F9F5FE] border border-[#E9E0F3] hover:border-[#CBAEE7] rounded-3xl p-5 sm:p-6 transition flex flex-col justify-between shadow-sm"
+          className="admin-card group rounded-3xl p-5 sm:p-6 transition flex flex-col justify-between shadow-sm"
         >
           <div>
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#F0E8F9] border border-[#E4CEEF] flex items-center justify-center text-[#8B4AB2] mb-3 sm:mb-4 group-hover:scale-110 transition">
               <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <h3 className="text-base sm:text-lg font-nel font-semibold text-[#33224B] group-hover:text-[#8B4AB2] transition">
+            <h3 className="text-base sm:text-lg font-dm font-semibold text-[#33224B] group-hover:text-[#8B4AB2] transition">
               Kiosk & Site Settings
             </h3>
             <p className="text-xs text-[#796C88] mt-1 leading-relaxed font-dm">
