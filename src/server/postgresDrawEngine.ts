@@ -3,13 +3,13 @@ import { getPool, withTransaction } from './postgres.ts';
 import type { DrawExecutionRequest, DrawResultScreenPayload } from './drawEngine.ts';
 
 function normalizeSingaporeMobile(phone: string): string {
-  const cleaned = (phone || '').replace(/[\\s\\-()]/g, '');
+  const cleaned = (phone || '').replace(/[^+0-9]/g, '');
   if (cleaned.startsWith('+65')) return cleaned;
   if (cleaned.startsWith('65') && cleaned.length === 10) return '+' + cleaned;
   return '+65' + cleaned;
 }
 function isValidSingaporeMobile(phone: string): boolean {
-  return /^\\+65[89]\\d{7}$/.test(normalizeSingaporeMobile(phone));
+  return new RegExp('^[+]65[89][0-9]{7}$').test(normalizeSingaporeMobile(phone));
 }
 function getSingaporeCalendarDate(date = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-GB', {
