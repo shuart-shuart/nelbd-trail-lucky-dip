@@ -323,7 +323,7 @@ export const AdminHistory: React.FC = () => {
       </div>
 
       {/* Search and Filter Toolbar */}
-      <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 mb-6 flex flex-col gap-3 sm:gap-4 shadow-sm">
+      <div className="admin-card p-3.5 sm:p-5 mb-6 flex flex-col gap-3 sm:gap-4 shadow-sm">
         {/* Search Input - Full width on mobile */}
         <div className="relative w-full">
           <Search className="w-4 h-4 text-[#33224B]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -411,11 +411,11 @@ export const AdminHistory: React.FC = () => {
 
       {activeTab === 'draws' ? (
         /* Draws Container */
-        <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+        <div className="admin-card overflow-hidden shadow-sm">
           <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-nel-purple/40 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <History className="w-4 h-4 sm:w-5 sm:h-5 text-[#8649AC]" />
-              <span className="text-xs sm:text-sm font-nel font-semibold text-[#33224B] uppercase tracking-wider">
+              <span className="text-xs sm:text-sm font-dm font-semibold text-[#33224B] uppercase tracking-wider">
                 Lucky Dip Records ({filteredDraws.length})
               </span>
             </div>
@@ -428,7 +428,7 @@ export const AdminHistory: React.FC = () => {
           {filteredDraws.length === 0 ? (
             <div className="p-8 sm:p-12 text-center">
               <Award className="w-12 h-12 text-[#33224B]/40 mx-auto mb-3" />
-              <h3 className="text-base font-nel font-semibold text-[#645574]">No records found</h3>
+              <h3 className="text-base font-dm font-semibold text-[#645574]">No records found</h3>
               <p className="text-xs text-[#8A7C96] mt-1 max-w-sm mx-auto font-dm">
                 As participants draw prizes at PDD and PS kiosks, their records will display here.
               </p>
@@ -475,7 +475,7 @@ export const AdminHistory: React.FC = () => {
                         )}
                         <div className="min-w-0">
                           <span className="text-[10px] text-[#33224B]/50 uppercase block font-semibold">Prize Won</span>
-                          <span className="font-semibold text-[#33224B] text-sm truncate block font-nel">
+                          <span className="font-semibold text-[#33224B] text-sm truncate block font-dm">
                             {draw.prizeName}
                           </span>
                         </div>
@@ -483,7 +483,7 @@ export const AdminHistory: React.FC = () => {
                       <span
                         className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border shrink-0 ${
                           draw.prizeTier === 'TOP'
-                            ? 'bg-nel-pink text-nel-violet border-white/30 font-nel font-semibold'
+                            ? 'bg-nel-pink text-nel-violet border-white/30 font-dm font-semibold'
                             : 'bg-nel-purple/50 text-[#8649AC] border-nel-pink/40'
                         }`}
                       >
@@ -555,7 +555,7 @@ export const AdminHistory: React.FC = () => {
                             {draw.site}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-semibold text-[#33224B] font-nel">
+                        <td className="px-6 py-4 font-semibold text-[#33224B] font-dm">
                           <div className="flex items-center gap-2.5">
                             {getPrizeThumbnailUrl(draw) && (
                               <div className="w-8 h-8 rounded-lg bg-[#F1EAF9] border border-[#E2CBF0] p-0.5 shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
@@ -576,7 +576,7 @@ export const AdminHistory: React.FC = () => {
                           <span
                             className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
                               draw.prizeTier === 'TOP'
-                                ? 'bg-nel-pink text-nel-violet border-white/30 font-nel font-semibold'
+                                ? 'bg-nel-pink text-nel-violet border-white/30 font-dm font-semibold'
                                 : 'bg-nel-purple/50 text-[#8649AC] border-nel-pink/40'
                             }`}
                           >
@@ -674,11 +674,11 @@ export const AdminHistory: React.FC = () => {
         </div>
       ) : (
         /* Participants Container (Protected Administrator View) */
-        <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+        <div className="admin-card overflow-hidden shadow-sm">
           <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-nel-purple/40 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-[#8649AC]" />
-              <span className="text-xs sm:text-sm font-nel font-semibold text-[#33224B] uppercase tracking-wider">
+              <span className="text-xs sm:text-sm font-dm font-semibold text-[#33224B] uppercase tracking-wider">
                 Protected Participant Directory ({filteredParticipants.length})
               </span>
             </div>
