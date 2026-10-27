@@ -226,3 +226,7 @@
  .nel-kiosk-root .kiosk-draw-header{padding:10px 12px;}
  .nel-kiosk-root .kiosk-draw-action{width:min(74vw,35dvh);}
 }
+
+.nel-kiosk-root .kiosk-trail-intro{max-width:48ch;margin:12px auto 0;font-size:clamp(12px,1.8vw,16px);line-height:1.45;font-weight:600;}
+.nel-kiosk-root .kiosk-trail-disclaimer{max-width:52ch;margin:0 auto;line-height:1.45;}
+@media(max-width:380px){.nel-kiosk-root .kiosk-trail-intro{font-size:12px;line-height:1.35;}.nel-kiosk-root .kiosk-trail-disclaimer{font-size:11px;}}
