@@ -27,6 +27,7 @@ import {
   getPrizes,
 } from '../../firebase/firestoreService';
 import { Draw, DrawStatus, Participant, SiteLocation } from '../../firebase/types';
+import { getPostgresDrawHistory, getPostgresParticipants, getPostgresDashboardStats, getPostgresPrizesWithInventory } from '../../api/postgresAdminClient';
 
 export const AdminHistory: React.FC = () => {
   const [draws, setDraws] = useState<Draw[]>([]);
@@ -48,6 +49,23 @@ export const AdminHistory: React.FC = () => {
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      let active=true;
+      const refresh=async()=>{
+        try {
+          const [latest,people,stats,catalogue]=await Promise.all([
+            getPostgresDrawHistory(200),getPostgresParticipants(),getPostgresDashboardStats(),getPostgresPrizesWithInventory()
+          ]);
+          if(!active)return;
+          setDraws(latest);setParticipants(people);setTotalDrawsCount(stats.totalDraws);
+          setHasMore(stats.totalDraws>latest.length);
+          setPrizesMap(Object.fromEntries(catalogue.map(p=>[p.id,p.imageUrl||''])));
+        }catch(err){console.error('PostgreSQL history refresh failed',err);}
+      };
+      void refresh();
+      const interval=setInterval(()=>void refresh(),15000);
+      return ()=>{active=false;clearInterval(interval);};
+    }
     // 1. Fetch total historical count via fast server aggregation
     getDrawsCount()
       .then((c) => setTotalDrawsCount(c))
@@ -90,6 +108,7 @@ export const AdminHistory: React.FC = () => {
 
   // Dedicated ticket code search directly against Firestore if not currently in loaded cache
   useEffect(() => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') return;
     const trimmed = searchQuery.trim().toUpperCase();
     if (trimmed.startsWith('NELBD-') && trimmed.length >= 10) {
       const alreadyLoaded = draws.some((d) => d.ticketNumber?.toUpperCase() === trimmed);
@@ -109,6 +128,7 @@ export const AdminHistory: React.FC = () => {
   }, [searchQuery, draws]);
 
   const handleLoadMore = async () => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') return;
     if (!lastVisibleDoc || isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     try {
@@ -131,6 +151,7 @@ export const AdminHistory: React.FC = () => {
   };
 
   const handleLoadAll = async () => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') return;
     if (isLoadingAll) return;
     setIsLoadingAll(true);
     try {
@@ -146,6 +167,7 @@ export const AdminHistory: React.FC = () => {
   };
 
   const handleSearchFullHistory = async () => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') return;
     if (isSearchingFull) return;
     setIsSearchingFull(true);
     try {
