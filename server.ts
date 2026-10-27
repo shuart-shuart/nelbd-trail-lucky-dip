@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { executeLuckyDipDraw } from './src/server/drawEngine.ts';
-import { requireStaff } from './src/server/firebaseAdmin.ts';
+import { requireStaff, db } from './src/server/firebaseAdmin.ts';
 function getSingaporeCalendarDate(): string {
   const parts = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Singapore',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
   const get = (type: string) => parts.find(part => part.type === type)?.value || '';
@@ -67,6 +67,27 @@ app.post('/api/lucky-dip/validate-participant', (req, res) => {
   });
 });
 
+// Staff-only, read-only diagnostic. Never modifies inventory or participant records.
+app.get('/api/lucky-dip/staff-check', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const token = /^Bearer (.+)$/.exec(req.get('authorization') || '')?.[1] || '';
+  if (!token) return res.status(401).json({ ok: false, stage: 'sign-in', error: 'Sign in with the authorized staff Google account.' });
+  let staffId: string;
+  try {
+    staffId = await requireStaff(token);
+  } catch (err: any) {
+    console.error('Staff verification failed:', err?.code || err?.message || 'unknown');
+    return res.status(403).json({ ok: false, stage: 'staff-authorization', error: 'Staff account not authorized or token verification unavailable.' });
+  }
+  try {
+    await db.doc('settings/luckyDip').get();
+    return res.json({ ok: true, stage: 'ready', staffVerified: Boolean(staffId), firestoreReachable: true });
+  } catch (err: any) {
+    console.error('Firestore credential probe failed:', err?.code || err?.message || 'unknown');
+    return res.status(503).json({ ok: false, stage: 'firestore-credentials', error: 'Google Cloud credentials or Firestore access unavailable.' });
+  }
+});
+
 // 3. Concurrency-safe atomic server-side draw endpoint
 app.post('/api/lucky-dip/draw', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -74,7 +95,8 @@ app.post('/api/lucky-dip/draw', async (req, res) => {
   try {
     const token = /^Bearer (.+)$/.exec(req.get('authorization') || '')?.[1] || '';
     await requireStaff(token);
-  } catch {
+  } catch (err: any) {
+    console.error('Draw staff authorization failed:', err?.code || err?.message || 'unknown');
     return res.status(403).json({ success: false, error: 'Staff authorization required. Ask booth crew to sign in.' });
   }
   const body = req.body || {};
