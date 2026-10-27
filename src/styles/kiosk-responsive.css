@@ -45,3 +45,14 @@
  .nel-kiosk-root .kiosk-venue-button{min-height:44px;}
 }
 @media(prefers-reduced-motion:reduce){.nel-kiosk-root *, .nel-kiosk-root *::before,.nel-kiosk-root *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+
+/* Welcome signage: subtle inset double stroke without altering module geometry. */
+.nel-kiosk-root .kiosk-signage-outline{position:relative;border:2px solid var(--nel-purple,#7716B5);box-shadow:inset 0 0 0 5px #FF8DC6,inset 0 0 0 6px rgba(119,22,181,.48);}
+.nel-kiosk-root .kiosk-venue-card{padding:clamp(7px,1.7vw,11px);border-radius:999px;}
+.nel-kiosk-root .kiosk-venue-track{gap:clamp(5px,1.2vw,10px);align-items:stretch;overflow:visible;}
+.nel-kiosk-root .kiosk-venue-button{border-radius:999px;min-width:0;min-height:52px;border:2px solid var(--nel-purple,#7716B5);font-family:"DM Sans",sans-serif;font-weight:700;transition:background-color .15s ease,color .15s ease;}
+.nel-kiosk-root .kiosk-venue-selected{background:var(--nel-violet,#270342);color:var(--nel-pink,#FF8DC6);border-color:var(--nel-violet,#270342);}
+.nel-kiosk-root .kiosk-venue-unselected{background:transparent;color:var(--nel-violet,#270342);}
+.nel-kiosk-root .kiosk-venue-unselected:hover{background:rgba(39,3,66,.08);}
+.nel-kiosk-root .kiosk-welcome-header img{display:block;width:100%;height:auto;max-height:112px;object-fit:contain;}
+@media(max-width:380px){.nel-kiosk-root .kiosk-venue-track{gap:4px;}.nel-kiosk-root .kiosk-venue-card{padding:6px;}.nel-kiosk-root .kiosk-venue-button{min-height:48px;padding-inline:4px;font-size:12px;}}
