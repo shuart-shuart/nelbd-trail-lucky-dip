@@ -25,8 +25,6 @@ export const WelcomePage: React.FC = () => {
 
   return (
     <div className="kiosk-welcome relative w-full max-w-xl mx-auto flex flex-col gap-4 sm:gap-5 py-4 sm:py-6 my-auto isolate">
-      {/* Flat signpost, 15% of module width, behind all three cards. */}
-      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[15%] bg-[#D9D9D9] -z-10 pointer-events-none" aria-hidden="true" />
 
       {/* Module 1: logo/date split with the original Abbey illustration fully visible. */}
       <section className="kiosk-welcome-hero kiosk-signage-outline w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
