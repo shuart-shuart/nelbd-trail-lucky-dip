@@ -74,3 +74,10 @@ export async function getPostgresPrizesWithInventory(): Promise<PrizeWithInvento
 export async function getPostgresDashboardStats():Promise<{totalDraws:number;totalParticipants:number;todayDraws:any[]}> {
   return json('/dashboard-stats');
 }
+
+export async function getPostgresParticipants():Promise<import('../firebase/types').Participant[]> {
+  return json('/participants');
+}
+export async function getPostgresInventoryAdjustments():Promise<import('../firebase/types').InventoryAdjustment[]> {
+  return json('/inventory-adjustments');
+}
