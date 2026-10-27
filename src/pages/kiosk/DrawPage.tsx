@@ -1,14 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
-import { useAuth } from '../../context/AuthContext';
 import { executeServerLuckyDipDraw } from '../../api/luckyDipClient';
 import { DuplicateParticipantView } from '../../components/kiosk/DuplicateParticipantView';
 import { DrawPictogram } from '../../components/kiosk/DrawPictogram';
 
 export const DrawPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAdmin, loading: authLoading, signInWithGoogle, error: authError } = useAuth();
   const { session, setDrawResult, resetSession } = useKiosk();
 
   const [isDrawing, setIsDrawing] = useState(false);
@@ -34,7 +32,6 @@ export const DrawPage: React.FC = () => {
   };
 
   const handleDraw = async () => {
-    if (!isAdmin || authLoading) { setErrorMessage('Staff must sign in to activate this kiosk.'); return; }
     // Prevent multiple concurrent taps
     if (isDrawing) return;
     setIsDrawing(true);
@@ -90,15 +87,6 @@ export const DrawPage: React.FC = () => {
       setIsDrawing(false);
     }
   };
-
-  if (authLoading || !isAdmin) return (
-    <div className="w-full max-w-md mx-auto rounded-3xl bg-nel-pink text-nel-violet p-8 text-center font-dm">
-      <h1 className="font-nel text-3xl mb-3">Staff activation required</h1>
-      <p className="mb-5">An authorized staff member must sign in before this kiosk can award prizes.</p>
-      <button type="button" disabled={authLoading} onClick={() => void signInWithGoogle()} className="bg-nel-violet text-nel-pink rounded-xl px-6 py-4 font-bold">{authLoading ? 'Checking…' : 'Sign in with Google'}</button>
-      {authError && <p role="alert" className="mt-3 text-sm">{authError}</p>}
-    </div>
-  );
 
   // If duplicate participant was detected, show friendly standalone state
   if (isDuplicate) {
