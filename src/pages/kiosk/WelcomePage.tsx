@@ -105,11 +105,11 @@ export const WelcomePage: React.FC = () => {
           type="button"
           onClick={handleStart}
           aria-label="Press here to start lucky dip"
-          className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 flex items-center justify-center transition-transform duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-pink rounded-full cursor-pointer ml-auto"
+          className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 shrink-0 flex items-center justify-center transition-transform duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-pink rounded-full cursor-pointer ml-auto"
         >
           <svg
             viewBox="0 0 160 160"
-            className="w-full h-full filter drop-shadow-md"
+            className="w-full h-full filter drop-shadow-md" aria-hidden="true" focusable="false"
           >
             {/* Outer Bold Purple Ring (4px stroke matching square above & left circle) */}
             <circle
@@ -178,15 +178,14 @@ export const WelcomePage: React.FC = () => {
       */}
       <footer className="w-full mt-2 sm:mt-3">
         <div
-          role="radiogroup"
+          role="group"
           aria-label="Select Redemption Venue"
           className="w-full rounded-2xl sm:rounded-3xl bg-[#270342] border-3 sm:border-4 border-nel-purple overflow-hidden flex items-stretch"
         >
           {/* Option 1: Innovation Hub */}
           <button
             type="button"
-            role="radio"
-            aria-checked={session.site === 'PDD'}
+            aria-pressed={session.site === 'PDD'}
             onClick={() => handleToggleSite('PDD')}
             className={`flex-1 py-3 px-3 sm:px-4 cursor-pointer flex flex-col items-center justify-center text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nel-pink ${
               session.site === 'PDD'
@@ -215,8 +214,7 @@ export const WelcomePage: React.FC = () => {
           {/* Option 2: Impact Hub */}
           <button
             type="button"
-            role="radio"
-            aria-checked={session.site === 'PS'}
+            aria-pressed={session.site === 'PS'}
             onClick={() => handleToggleSite('PS')}
             className={`flex-1 py-3 px-3 sm:px-4 cursor-pointer flex flex-col items-center justify-center text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nel-pink ${
               session.site === 'PS'

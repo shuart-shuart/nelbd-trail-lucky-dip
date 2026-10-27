@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
 import { useKiosk } from '../../context/KioskContext';
 import { db } from '../../firebase/config';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
@@ -8,7 +8,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 export const ResultPage: React.FC = () => {
   const navigate = useNavigate();
   const { session, resetSession } = useKiosk();
-  const [countdown, setCountdown] = useState(45);
+  const [countdown, setCountdown] = useState(180);
   const resetSessionRef = useRef(resetSession);
 
   useEffect(() => {
@@ -90,10 +90,21 @@ export const ResultPage: React.FC = () => {
         - High-contrast prize name in oversized NEL Rounded SemiBold
         - Integrated pink/purple signage framing (no stark white blocks)
       */}
-      <div className="w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-5 sm:p-7 md:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl flex flex-col items-center justify-between">
+      <div className="relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-5 sm:p-7 md:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl flex flex-col items-center justify-between">
         
+        {/* Close control: ends this result session and returns to Welcome. */}
+        <button
+          type="button"
+          onClick={handleFinish}
+          aria-label="Close prize result and return to welcome"
+          title="Close"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-11 h-11 rounded-full bg-nel-violet text-nel-pink border-2 border-nel-purple flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-purple/50"
+        >
+          <X className="w-6 h-6" aria-hidden="true" />
+        </button>
+
         {/* Top Tag & Campaign Header */}
-        <div className="w-full flex items-center justify-between pb-2">
+        <div className="w-full flex items-center justify-between pb-2 pr-12">
           <span className="font-dm font-bold text-[10px] sm:text-xs text-nel-purple uppercase tracking-wider">
             New Everyday Life, By Design
           </span>
@@ -124,7 +135,7 @@ export const ResultPage: React.FC = () => {
           */}
           {prizeImageUrl && (
             <div className="mb-3 sm:mb-4">
-              <div className="w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl bg-nel-pink border-2 border-nel-purple outline outline-1 outline-offset-[-3px] outline-nel-purple/40 p-2.5 sm:p-3 flex items-center justify-center">
+              <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl bg-nel-pink border-2 border-nel-purple outline outline-1 outline-offset-[-3px] outline-nel-purple/40 p-2.5 sm:p-3 flex items-center justify-center">
                 <img
                   src={prizeImageUrl}
                   alt={prizeName}
@@ -158,19 +169,10 @@ export const ResultPage: React.FC = () => {
           )}
         </div>
 
-        {/* ONE Primary Action: FINISH (Signage bar) */}
+        {/* Automatic return to Welcome after three minutes on the result screen */}
         <div className="w-full max-w-sm">
-          <button
-            type="button"
-            onClick={handleFinish}
-            className="w-full min-h-[58px] py-4 px-6 rounded-2xl bg-nel-violet hover:bg-[#340557] active:scale-[0.98] text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-purple shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-purple"
-          >
-            <span>FINISH</span>
-            <ArrowRight className="w-6 h-6 text-nel-pink stroke-[2.5]" aria-hidden="true" />
-          </button>
-
           {/* Automatic Reset Countdown */}
-          <p className="text-xs text-nel-purple font-medium font-dm mt-3" aria-live="polite">
+          <p className="text-xs text-nel-purple font-medium font-dm mt-3" aria-live="off">
             Resetting in {countdown}s
           </p>
         </div>
