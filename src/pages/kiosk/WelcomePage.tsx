@@ -2,14 +2,16 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
 import { SiteLocation } from '../../firebase/types';
-import { WelcomeIllustration } from '../../components/kiosk/WelcomeIllustration';
 import abbeySvg from '../../assets/img/ABBEY.svg';
 
+/**
+ * Flat signage-style welcome screen. The Abbey asset is the original SVG
+ * already committed under src/assets/img/ABBEY.svg (not a generated redraw).
+ */
 export const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
   const { session, setSite, resetSession } = useKiosk();
 
-  // Reset any previous participant session on mounting the welcome screen
   useEffect(() => {
     if (session.nickname || session.mobileNumber || session.ticketNumber || session.drawResult) {
       resetSession();
@@ -17,224 +19,72 @@ export const WelcomePage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleStart = () => {
-    navigate('/details');
-  };
-
-  const handleToggleSite = (newSite: SiteLocation) => {
-    setSite(newSite);
-  };
+  const handleToggleSite = (newSite: SiteLocation) => setSite(newSite);
 
   return (
-    <div className="w-full flex flex-col items-center justify-center my-auto py-2 sm:py-4 selection:bg-nel-pink selection:text-nel-violet">
-      
-      {/* 
-        ========================================================================
-        1. TOP — RECTANGULAR WELCOME CARD
-        ========================================================================
-        Wide, landscape-oriented NEL Pink card with rounded corners and consistent
-        double-outline border (bold outer purple border + thin inner purple outline).
-        Contains event info, replaceable people illustration, dashed divider,
-        and welcome headline.
-      */}
-      <div className="w-full bg-nel-pink rounded-[32px] sm:rounded-[38px] border-4 border-nel-purple p-1.5 sm:p-2 shadow-2xl">
-        <div className="w-full rounded-[24px] sm:rounded-[30px] border-2 border-nel-purple/60 p-5 sm:p-7 flex flex-col relative text-nel-violet">
-          
-          {/* Top-left: Event Title | Top-right: Date Information */}
-          <header className="flex items-start justify-between gap-2 pb-2">
-            <div className="text-left">
-              <h2 className="font-nel font-semibold text-lg sm:text-2xl text-nel-purple leading-tight tracking-tight">
-                New Everyday Life,
-              </h2>
-              <h2 className="font-nel font-semibold text-lg sm:text-2xl text-nel-purple leading-tight tracking-tight">
-                By Design
-              </h2>
-            </div>
+    <div className="relative w-full max-w-xl mx-auto flex flex-col gap-4 sm:gap-5 py-4 sm:py-6 my-auto isolate">
+      {/* Flat signpost, 15% of module width, behind all three cards. */}
+      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[15%] bg-nel-pink -z-10 pointer-events-none" aria-hidden="true" />
 
-            <div className="text-right flex flex-col items-end">
-              <span className="font-dm font-bold text-[11px] sm:text-xs text-nel-violet tracking-wide uppercase">
-                14 NOV ➔ 6 DEC 2026
-              </span>
-            </div>
-          </header>
-
-          {/* Centre: Replaceable Inclusive-Design Illustration Component */}
-          <div className="py-2.5 sm:py-4 flex items-center justify-center">
-            <WelcomeIllustration
-              src={abbeySvg}
-              alt="Design Trail Walkers Illustration"
-              className="w-full max-w-[360px] sm:max-w-[420px] md:max-w-[450px] h-[135px] sm:h-[160px] md:h-[175px]"
-            />
-          </div>
-
-          {/* Dashed Horizontal Divider */}
-          <div
-            className="w-full border-b-2 sm:border-b-3 border-dashed border-nel-purple/50 my-2.5 sm:my-3.5"
-            aria-hidden="true"
-          />
-
-          {/* Main Headline */}
-          <div className="py-1 text-left">
-            <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.08] tracking-tight">
-              Completed the trail?
+      {/* Module 1: logo/date split with the original Abbey illustration fully visible. */}
+      <section className="w-full rounded-[26px] sm:rounded-[32px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 items-start">
+          <div className="min-w-0">
+            <h1 className="font-nel font-semibold text-[clamp(1.05rem,4.4vw,2.15rem)] leading-[1.13] tracking-tight text-nel-violet">
+              New Everyday Life,<span className="block">By Design</span>
             </h1>
-            <p className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-purple leading-[1.08] tracking-tight mt-0.5 sm:mt-1">
-              Your prize awaits.
-            </p>
           </div>
-
-          {/* Supporting Label */}
-          <div className="pt-2 text-left">
-            <p className="font-dm font-bold text-[10px] sm:text-xs text-nel-purple uppercase tracking-wider">
-              DESIGN TRAIL LUCKY DIP
+          <div className="min-w-0 border-l border-nel-violet/60 pl-3 sm:pl-5 text-right">
+            <p className="font-nel font-semibold text-[clamp(.8rem,3vw,1.4rem)] leading-tight text-nel-violet whitespace-nowrap">
+              14 NOV <span aria-hidden="true">→</span> 6 DEC 2026
+            </p>
+            <p className="font-dm font-bold text-[10px] sm:text-xs leading-snug mt-2">
+              Various Locations Along The North East Line
             </p>
           </div>
         </div>
-      </div>
+        <div className="w-full border-t-2 border-dashed border-nel-violet/70 mt-5 mb-3" aria-hidden="true" />
+        <img
+          src={abbeySvg}
+          alt="Abbey illustration showing a child, walking adult and wheelchair user"
+          className="block w-full h-auto max-h-[45dvh] object-contain object-center"
+        />
+      </section>
 
-      {/* 
-        ========================================================================
-        2. MIDDLE — CIRCLE SIGNAGE BUTTON
-        ========================================================================
-        Positioned to the right of the screen below the top card.
-        Interactive double-outline circular button ("PRESS HERE TO START").
-      */}
-      <div className="w-full my-3 sm:my-4 flex justify-end items-center pr-1 sm:pr-2">
-        {/* CIRCULAR START BUTTON */}
-        <button
-          type="button"
-          onClick={handleStart}
-          aria-label="Press here to start lucky dip"
-          className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 shrink-0 flex items-center justify-center transition-transform duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-pink rounded-full cursor-pointer ml-auto"
-        >
-          <svg
-            viewBox="0 0 160 160"
-            className="w-full h-full filter drop-shadow-md" aria-hidden="true" focusable="false"
-          >
-            {/* Outer Bold Purple Ring (4px stroke matching square above & left circle) */}
-            <circle
-              cx="80"
-              cy="80"
-              r="76"
-              fill="#FF8DC6"
-              stroke="#7716B5"
-              strokeWidth="4"
-            />
+      {/* Module 2: the entire flat rounded rectangle is the start button. */}
+      <button
+        type="button"
+        onClick={() => navigate('/details')}
+        className="w-full rounded-[24px] sm:rounded-[28px] bg-nel-pink text-nel-violet min-h-[94px] sm:min-h-[116px] px-5 sm:px-8 flex items-center justify-center gap-4 sm:gap-6 font-nel font-semibold text-[clamp(1.45rem,5.3vw,2.6rem)] tracking-tight transition-colors hover:bg-[#ffc0de] active:bg-[#f7a7d1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
+        aria-label="Press to start the trail lucky dip"
+      >
+        <span className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-nel-violet text-nel-pink shrink-0 flex items-center justify-center" aria-hidden="true">
+          <svg viewBox="0 0 24 24" className="w-7 h-7 sm:w-9 sm:h-9" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h16M13 5l7 7-7 7"/></svg>
+        </span>
+        <span>PRESS TO START</span>
+      </button>
 
-            {/* Inner Thin Purple Outline (2px stroke with even 6px gap) */}
-            <circle
-              cx="80"
-              cy="80"
-              r="68"
-              fill="none"
-              stroke="#7716B5"
-              strokeWidth="1.8"
-            />
-
-            {/* Right-pointing Arrow (➔) communicating progression */}
-            <path
-              d="M69 44 H83 V37 L94 49 L83 61 V54 H69 Z"
-              fill="#270342"
-            />
-
-            {/* "PRESS HERE" (NEL Rounded SemiBold) */}
-            <text
-              x="80"
-              y="82"
-              textAnchor="middle"
-              fill="#270342"
-              fontFamily="NEL Rounded, sans-serif"
-              fontWeight="600"
-              fontSize="14"
-              letterSpacing="1"
-            >
-              PRESS HERE
-            </text>
-
-            {/* "TO START" (NEL Rounded SemiBold, larger) */}
-            <text
-              x="80"
-              y="108"
-              textAnchor="middle"
-              fill="#270342"
-              fontFamily="NEL Rounded, sans-serif"
-              fontWeight="600"
-              fontSize="20"
-              letterSpacing="1.5"
-            >
-              TO START
-            </text>
-          </svg>
-        </button>
-      </div>
-
-      {/* 
-        ========================================================================
-        3. BOTTOM — VENUE SELECTOR SIGNAGE STRIP
-        ========================================================================
-        Unified horizontal two-option signage strip aligned with the welcome card.
-        Clean NEL Purple outer border, subtle vertical divider, equal options.
-        Stationary layout with zero hover jumps (only background-color/color transitions).
-      */}
-      <footer className="w-full mt-2 sm:mt-3">
-        <div
-          role="group"
-          aria-label="Select Redemption Venue"
-          className="w-full rounded-2xl sm:rounded-3xl bg-[#270342] border-3 sm:border-4 border-nel-purple overflow-hidden flex items-stretch"
-        >
-          {/* Option 1: Innovation Hub */}
-          <button
-            type="button"
-            aria-pressed={session.site === 'PDD'}
-            onClick={() => handleToggleSite('PDD')}
-            className={`flex-1 py-3 px-3 sm:px-4 cursor-pointer flex flex-col items-center justify-center text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nel-pink ${
-              session.site === 'PDD'
-                ? 'bg-nel-pink text-nel-violet'
-                : 'bg-[#270342] text-nel-pink hover:bg-nel-purple/25'
-            }`}
-          >
-            <span className="font-nel font-semibold text-xs sm:text-sm md:text-base leading-tight">
-              Innovation Hub
-            </span>
-            <span
-              className={`text-[10px] sm:text-xs font-dm mt-1 leading-tight ${
-                session.site === 'PDD' ? 'text-nel-violet/90 font-medium' : 'text-nel-pink/80'
+      {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
+      <div className="w-full rounded-[22px] sm:rounded-[26px] bg-nel-pink p-2 sm:p-2.5">
+        <div role="group" aria-label="Redemption venue" className="grid grid-cols-2 overflow-hidden rounded-[16px] sm:rounded-[18px]">
+          {([['PDD', 'Innovation Hub'], ['PS', 'Impact Hub']] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={session.site === value}
+              onClick={() => handleToggleSite(value)}
+              className={`min-w-0 min-h-[48px] sm:min-h-[54px] px-1.5 sm:px-3 flex items-center justify-center gap-1.5 sm:gap-2 font-nel font-semibold text-[clamp(.77rem,2.7vw,1.05rem)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nel-violet cursor-pointer ${
+                session.site === value
+                  ? 'bg-nel-violet text-nel-pink'
+                  : 'bg-transparent text-nel-violet hover:bg-nel-violet/10'
               }`}
             >
-              Nexus at Punggol Coast Mall
-            </span>
-          </button>
-
-          {/* Subtle vertical divider between the two options */}
-          <div
-            className="w-[2px] self-stretch bg-nel-purple flex-shrink-0"
-            aria-hidden="true"
-          />
-
-          {/* Option 2: Impact Hub */}
-          <button
-            type="button"
-            aria-pressed={session.site === 'PS'}
-            onClick={() => handleToggleSite('PS')}
-            className={`flex-1 py-3 px-3 sm:px-4 cursor-pointer flex flex-col items-center justify-center text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nel-pink ${
-              session.site === 'PS'
-                ? 'bg-nel-pink text-nel-violet'
-                : 'bg-[#270342] text-nel-pink hover:bg-nel-purple/25'
-            }`}
-          >
-            <span className="font-nel font-semibold text-xs sm:text-sm md:text-base leading-tight">
-              Impact Hub
-            </span>
-            <span
-              className={`text-[10px] sm:text-xs font-dm mt-1 leading-tight ${
-                session.site === 'PS' ? 'text-nel-violet/90 font-medium' : 'text-nel-pink/80'
-              }`}
-            >
-              Plaza Singapura
-            </span>
-          </button>
+              <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" aria-hidden="true" fill={session.site === value ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7"><path d="M12 22s7-7.2 7-13a7 7 0 1 0-14 0c0 5.8 7 13 7 13Z"/><circle cx="12" cy="9" r="2.5" fill={session.site === value ? '#270342' : 'none'}/></svg>
+              <span>{label}</span>
+            </button>
+          ))}
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
