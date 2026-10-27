@@ -64,3 +64,23 @@ postgresAdminRouter.post('/inventory/:id/:site/quantity',async (req,res)=>{
     return res.json(row);
   } catch(e) {console.error('Inventory adjustment failed',e);return res.status(503).json({error:'Inventory update failed'});}
 });
+
+postgresAdminRouter.put('/settings',async (req,res)=>{
+  const admin=res.locals.admin;
+  if(admin.role!=='super_admin') return res.status(403).json({error:'Super admin required'});
+  const b=req.body||{};
+  if(typeof b.festivalName!=='string'||b.festivalName.trim().length<1||b.festivalName.length>120||
+     typeof b.kioskActive!=='boolean'||!['PDD','PS'].includes(b.activeSite)||
+     typeof b.welcomeMessage!=='string'||b.welcomeMessage.length>2000||
+     typeof b.termsSummary!=='string'||b.termsSummary.length>4000||
+     b.maxDrawsPerParticipant!==1)
+    return res.status(400).json({error:'Invalid settings; maximum draws per participant must remain one'});
+  try {
+    const {rows}=await getPool().query(`UPDATE kiosk_settings
+      SET festival_name=$1,kiosk_active=$2,active_site=$3,welcome_message=$4,
+          terms_summary=$5,max_draws_per_participant=1,updated_at=now()
+      WHERE id=1 RETURNING *`,
+      [b.festivalName.trim(),b.kioskActive,b.activeSite,b.welcomeMessage,b.termsSummary]);
+    return res.json(rows[0]);
+  } catch {return res.status(503).json({error:'Settings update unavailable'});}
+});
