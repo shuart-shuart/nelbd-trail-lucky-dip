@@ -106,11 +106,6 @@ export const DetailsPage: React.FC = () => {
         <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
           Ready for your Lucky Dip?
         </h1>
-
-        <p className="font-dm text-sm sm:text-base mt-3">Show your Design Trail booklet with at least eight embossed stamps to our booth crew before continuing.</p>
-        {/* Booklet Dashed Divider */}
-        <div className="w-full border-b-2 sm:border-b-4 border-dashed border-nel-purple/35 my-4" aria-hidden="true" />
-
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate className="w-full space-y-4 sm:space-y-5">
           
