@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { executeLuckyDipDraw, getSingaporeCalendarDate } from './src/server/drawEngine.ts';
+import { getSingaporeCalendarDate } from './src/server/drawEngine.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,7 +24,7 @@ app.get('/api/lucky-dip/status', (req, res) => {
     service: 'NELBD Trail Lucky Dip Secure Server Engine',
     supportedSites: ['PDD', 'PS'],
     tiers: ['STANDARD', 'TOP'],
-    algorithmReady: true,
+    algorithmReady: false,
     singaporeDate: getSingaporeCalendarDate(),
     timestamp: new Date().toISOString(),
   });
@@ -62,37 +62,9 @@ app.post('/api/lucky-dip/validate-participant', (req, res) => {
 });
 
 // 3. Concurrency-safe atomic server-side draw endpoint
-app.post('/api/lucky-dip/draw', async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  try {
-    const body = req.body || {};
-    const site = body.site === 'PS' ? 'PS' : 'PDD';
-    const nickname = (body.nickname || '').trim();
-    const mobileNumber = (body.mobileNumber || '').trim();
-    const kioskId = body.kioskId || `KIOSK-${site}-01`;
-    const ticketNumber = body.ticketNumber;
-
-    // Execute atomic server-side draw with Firestore transaction
-    const drawResult = await executeLuckyDipDraw({
-      nickname,
-      mobileNumber,
-      site,
-      kioskId,
-      ticketNumber,
-    });
-
-    if (!drawResult.success) {
-      return res.status(400).json(drawResult);
-    }
-
-    return res.json(drawResult);
-  } catch (err: any) {
-    console.error('Server error handling lucky dip draw:', err);
-    return res.status(500).json({
-      success: false,
-      error: 'Server draw execution error. Please try again.',
-    });
-  }
+app.post('/api/lucky-dip/draw', (_req, res) => {
+  // Fail closed until Admin SDK transaction, authentication and deployed Firestore rules are verified.
+  res.status(503).json({success:false,error:'Prize draws are not available yet. Please ask our booth crew for assistance.'});
 });
 
 // ---------------------------------------------------------------------------
