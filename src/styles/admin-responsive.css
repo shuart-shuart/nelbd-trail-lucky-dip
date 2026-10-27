@@ -1,0 +1,92 @@
+/* Staff portal accessibility and responsive polish. Scoped to admin only. */
+.nel-staff-root {
+  --staff-ink:#302047;
+  --staff-muted:#62536f;
+  --staff-outline:#cdb8e4;
+  color:var(--staff-ink);
+  line-height:1.5;
+}
+.nel-staff-root :is(button,a,input,select,textarea):focus-visible {
+  outline:3px solid #7716b5;
+  outline-offset:2px;
+}
+.nel-staff-root :is(button,a) { touch-action:manipulation; }
+.nel-staff-root :is(input,select,textarea) {
+  font-size:16px;
+}
+.nel-staff-root input::placeholder,.nel-staff-root textarea::placeholder {
+  color:#766884;
+  opacity:1;
+}
+/* Form controls that used the kiosk's dark background with dark admin text. */
+.nel-staff-root input.bg-nel-input,
+.nel-staff-root textarea.bg-nel-input,
+.nel-staff-root select.bg-nel-input {
+  background:#fff;
+  color:#302047;
+  border-color:#bba3d3;
+}
+.nel-staff-root input.bg-nel-input:focus,
+.nel-staff-root textarea.bg-nel-input:focus {
+  border-color:#7716b5;
+}
+.nel-staff-root div.bg-nel-input {
+  background:#f2ecfa;
+  border-color:#cdb8e4;
+  color:#302047;
+}
+.nel-staff-root div.bg-nel-input button { color:#49375f; }
+.nel-staff-root div.bg-nel-input button:hover { color:#270342; background:#e6d7f6; }
+.nel-staff-root div.bg-nel-input button[class*="bg-emerald"],
+.nel-staff-root div.bg-nel-input button[class*="bg-amber"],
+.nel-staff-root div.bg-nel-input button[class*="bg-[#F1EAF9]"] {
+  background:#fff;
+  color:#5c237e;
+  border:1px solid #a77bc8;
+  box-shadow:0 1px 3px rgba(39,3,66,.12);
+}
+.nel-staff-root [class*="text-[#8A7C96]"],
+.nel-staff-root [class*="text-[#756784]"] { color:#62536f; }
+.nel-staff-root :is(p,span,label,th,td) { overflow-wrap:break-word; }
+.nel-staff-root table { border-collapse:separate; border-spacing:0; }
+.nel-staff-root table thead,
+.nel-staff-root table thead.bg-nel-input\/80 {
+  background:#493153;
+  color:#fff;
+}
+.nel-staff-root table thead th {
+  font-family:var(--font-body);
+  font-size:12px;
+  font-weight:700;
+  line-height:1.4;
+  letter-spacing:.02em;
+  color:#fff;
+  white-space:normal;
+}
+.nel-staff-root table tbody { color:#3d3050; }
+.nel-staff-root table tbody tr:nth-child(even) { background:#faf7fd; }
+.nel-staff-root table tbody tr:hover { background:#f0e7fa; }
+.nel-staff-root table td { line-height:1.5; }
+.nel-staff-root table td.font-mono,
+.nel-staff-root table tbody.font-mono { font-variant-numeric:tabular-nums; }
+.nel-staff-root table tbody.font-mono td { font-size:13px; }
+.nel-staff-root table th,
+.nel-staff-root table td { vertical-align:middle; }
+.nel-staff-root .overflow-x-auto { scrollbar-width:thin; scrollbar-color:#ad8cc9 #f2ecfa; }
+@media (max-width:1023px) {
+  .nel-staff-root table { min-width:680px; }
+  .nel-staff-root main { min-width:0; }
+}
+@media (max-width:767px) {
+  .nel-staff-root main { padding-inline:16px; }
+  .nel-staff-root section { min-width:0; }
+  .nel-staff-root button { min-height:40px; }
+  .nel-staff-root .overflow-x-auto { max-width:100%; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .nel-staff-root *, .nel-staff-root *::before, .nel-staff-root *::after {
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}
