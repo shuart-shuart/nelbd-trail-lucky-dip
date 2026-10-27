@@ -1,0 +1,11 @@
+.nel-staff-root{min-height:100vh;background:var(--ui-bg);color:var(--ui-text);}
+.nel-staff-root .admin-header{background:#fff;border-bottom:1px solid var(--ui-border);}
+.nel-staff-root .admin-titlebar{background:#F1ECFA;border-bottom:1px solid #E5DCF2;}
+.nel-staff-root .admin-card{background:var(--ui-panel);border:1px solid var(--ui-border);border-radius:var(--ui-radius);box-shadow:var(--ui-shadow);}
+.nel-staff-root .admin-card:hover:is(a){border-color:#CBAEE7;background:#F9F5FE;}
+.nel-staff-root .admin-muted{color:var(--ui-muted);}
+.nel-staff-root .admin-accent{color:var(--ui-accent);}
+.nel-staff-root .admin-nav-active{background:#EEE4FA;color:#6E369E;border:1px solid #DCC8F0;}
+.nel-staff-root .admin-nav-inactive{color:#6E6381;}
+.nel-staff-root .admin-nav-inactive:hover{color:#45246C;background:#F4EFFB;}
+.nel-staff-root .admin-stat{font-variant-numeric:tabular-nums;}
