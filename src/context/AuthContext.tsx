@@ -8,6 +8,8 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { checkAdminStatus, registerAdminUser } from '../firebase/firestoreService';
+import { postgresAdminLogin, postgresAdminLogout, postgresAdminMe } from '../api/postgresAdminClient';
+const postgresMode = import.meta.env.VITE_DATA_BACKEND === 'postgres';
 
 export const BOOTSTRAP_ADMIN_EMAIL = 'work@anotherunit.xyz';
 
@@ -17,6 +19,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   signInWithGoogle: () => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
 }
@@ -30,6 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (postgresMode) {
+      postgresAdminMe().then((admin) => {
+        setUser({ uid: admin.id, email: admin.email, displayName: admin.email } as User);
+        setIsAdmin(true);
+      }).catch(() => { setUser(null); setIsAdmin(false); }).finally(() => setLoading(false));
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
@@ -62,7 +72,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
+  const signInWithPassword = async (email: string, password: string) => {
+    setError(null); setLoading(true);
+    try {
+      const admin = await postgresAdminLogin(email,password);
+      setUser({uid:admin.id,email:admin.email,displayName:admin.email} as User);
+      setIsAdmin(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sign in failed');
+      setUser(null); setIsAdmin(false);
+    } finally {setLoading(false);}
+  };
+
   const signInWithGoogle = async () => {
+    if (postgresMode) {setError('Use your admin email and password.'); return;}
     setError(null);
     setLoading(true);
     try {
@@ -80,7 +103,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth);
+      if (postgresMode) await postgresAdminLogout();
+      else await firebaseSignOut(auth);
       setUser(null);
       setIsAdmin(false);
     } catch (err) {
@@ -98,6 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         error,
         signInWithGoogle,
+        signInWithPassword,
         signOut,
         clearError,
       }}
