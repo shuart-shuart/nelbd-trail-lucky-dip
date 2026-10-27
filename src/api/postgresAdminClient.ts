@@ -38,8 +38,17 @@ export async function savePostgresSettings(settings:Setting):Promise<Setting> {
 export async function getPostgresInventory() {
   return json<any[]>('/inventory');
 }
-export async function getPostgresDrawHistory(limit=50) {
-  return json<any[]>('/draws?limit='+Math.max(1,Math.min(200,limit)));
+export async function getPostgresDrawHistory(limit=50,offset=0) {
+  return json<any[]>('/draws?limit='+Math.max(1,Math.min(500,limit))+'&offset='+Math.max(0,offset));
+}
+export async function getAllPostgresDrawHistory() {
+  const all:any[]=[];
+  for(let offset=0;offset<1000000;offset+=500) {
+    const page=await getPostgresDrawHistory(500,offset);
+    all.push(...page);
+    if(page.length<500)return all;
+  }
+  throw new Error('History export exceeded safety limit');
 }
 export async function updatePostgresRemaining(prizeId:string,site:'PDD'|'PS',remainingQuantity:number) {
   return json<any>('/inventory/'+encodeURIComponent(prizeId)+'/'+site+'/quantity',{
