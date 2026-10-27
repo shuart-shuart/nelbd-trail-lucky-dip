@@ -1,0 +1,3 @@
+:root{--font-display:"NEL Rounded",sans-serif;--font-body:"DM Sans",sans-serif;--nel-purple:#7716B5;--nel-pink:#FF8DC6;--nel-violet:#270342;--ui-radius:18px;--ui-gap:16px;--ui-focus:#7716B5;}
+.nel-kiosk-root{--ui-bg:#270342;--ui-panel:#390A59;--ui-text:#fff;--ui-muted:#EAD8F5;--ui-border:#7716B5;--ui-accent:#FF8DC6;--ui-shadow:0 10px 28px rgba(0,0,0,.22);}
+.nel-staff-root{--ui-bg:#F8F6FD;--ui-panel:#fff;--ui-text:#33224B;--ui-muted:#756782;--ui-border:#E8DEF1;--ui-accent:#7716B5;--ui-shadow:0 2px 12px rgba(61,36,84,.06);}
