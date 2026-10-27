@@ -1,6 +1,8 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { executeLuckyDipDraw } from './src/server/drawEngine.ts';
+import { requireStaff } from './src/server/firebaseAdmin.ts';
 function getSingaporeCalendarDate(): string {
   const parts = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Singapore',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
   const get = (type: string) => parts.find(part => part.type === type)?.value || '';
@@ -28,7 +30,7 @@ app.get('/api/lucky-dip/status', (req, res) => {
     service: 'NELBD Trail Lucky Dip Secure Server Engine',
     supportedSites: ['PDD', 'PS'],
     tiers: ['STANDARD', 'TOP'],
-    algorithmReady: false,
+    algorithmReady: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL)),
     singaporeDate: getSingaporeCalendarDate(),
     timestamp: new Date().toISOString(),
   });
@@ -66,9 +68,32 @@ app.post('/api/lucky-dip/validate-participant', (req, res) => {
 });
 
 // 3. Concurrency-safe atomic server-side draw endpoint
-app.post('/api/lucky-dip/draw', (_req, res) => {
-  // Fail closed until Admin SDK transaction, authentication and deployed Firestore rules are verified.
-  res.status(503).json({success:false,error:'Prize draws are not available yet. Please ask our booth crew for assistance.'});
+app.post('/api/lucky-dip/draw', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (!(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL))) return res.status(503).json({success:false,error:'Prize draws are not configured. Please ask booth crew for assistance.'});
+  try {
+    const token = /^Bearer (.+)$/.exec(req.get('authorization') || '')?.[1] || '';
+    await requireStaff(token);
+  } catch {
+    return res.status(403).json({ success: false, error: 'Staff authorization required. Ask booth crew to sign in.' });
+  }
+  const body = req.body || {};
+  if (typeof body.nickname !== 'string' || typeof body.mobileNumber !== 'string' ||
+      !['PDD', 'PS'].includes(body.site) || body.nickname.length > 64 ||
+      typeof body.ticketNumber !== 'string' || !/^NELBD-(PDD|PS)-[0-9]{6}$/.test(body.ticketNumber)) {
+    return res.status(400).json({ success: false, error: 'Invalid participant or ticket details.' });
+  }
+  try {
+    const result = await executeLuckyDipDraw({
+      nickname: body.nickname, mobileNumber: body.mobileNumber,
+      site: body.site, ticketNumber: body.ticketNumber,
+      kioskId: typeof body.kioskId === 'string' ? body.kioskId.slice(0, 64) : undefined,
+    });
+    return res.status(result.success ? 200 : 400).json(result);
+  } catch (error) {
+    console.error('Draw failed', error);
+    return res.status(503).json({ success: false, error: 'Draw unavailable. Please ask booth crew for assistance.' });
+  }
 });
 
 // ---------------------------------------------------------------------------
