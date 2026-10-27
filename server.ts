@@ -88,16 +88,28 @@ app.get('/api/lucky-dip/staff-check', async (req, res) => {
   }
 });
 
+const drawAttempts = new Map<string, number[]>();
+
 // 3. Concurrency-safe atomic server-side draw endpoint
 app.post('/api/lucky-dip/draw', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   if (!(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL))) return res.status(503).json({success:false,error:'Prize draws are not configured. Please ask booth crew for assistance.'});
-  try {
-    const token = /^Bearer (.+)$/.exec(req.get('authorization') || '')?.[1] || '';
-    await requireStaff(token);
-  } catch (err: any) {
-    console.error('Draw staff authorization failed:', err?.code || err?.message || 'unknown');
-    return res.status(403).json({ success: false, error: 'Staff authorization required. Ask booth crew to sign in.' });
+  // Staff checks the physical booklet before sharing the kiosk. No additional
+  // Google sign-in is required for participants; duplicate and inventory rules
+  // remain enforced atomically by executeLuckyDipDraw.
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const recent = drawAttempts.get(ip) || [];
+  const withinWindow = recent.filter((time) => now - time < 60_000);
+  if (withinWindow.length >= 30) {
+    return res.status(429).json({ success: false, error: 'Too many attempts. Please wait a moment and try again.' });
+  }
+  withinWindow.push(now);
+  drawAttempts.set(ip, withinWindow);
+  if (drawAttempts.size > 2000) {
+    for (const [key, attempts] of drawAttempts) {
+      if (!attempts.some((time) => now - time < 60_000)) drawAttempts.delete(key);
+    }
   }
   const body = req.body || {};
   if (typeof body.nickname !== 'string' || typeof body.mobileNumber !== 'string' ||
