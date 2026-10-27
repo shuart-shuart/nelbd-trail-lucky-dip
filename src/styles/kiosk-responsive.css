@@ -1,0 +1,47 @@
+/* Mobile-first kiosk refinements. All overrides are scoped to the public kiosk. */
+.nel-kiosk-root{font-family:"DM Sans",sans-serif;min-height:100dvh;overflow-x:clip;}
+.nel-kiosk-root h1{font-family:"NEL Rounded",sans-serif;font-weight:600;overflow-wrap:anywhere;text-wrap:balance;}
+.nel-kiosk-root :is(h2,h3,h4,h5,h6,p,span,label,button,input,textarea,select,a,small){font-family:"DM Sans",sans-serif;}
+.nel-kiosk-root :is(button,input,select,textarea){font-size:max(16px,1rem);}
+.nel-kiosk-root button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.nel-kiosk-root :is(button,a,input):focus-visible{outline:3px solid #fff;outline-offset:3px;}
+.nel-kiosk-root .kiosk-main{width:100%;max-width:720px;min-width:0;margin-inline:auto;padding-inline:max(16px,env(safe-area-inset-left)) max(16px,env(safe-area-inset-right));padding-block:max(20px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-bottom));}
+.nel-kiosk-root .kiosk-welcome{width:100%;max-width:620px;gap:clamp(12px,2.5vw,20px);}
+.nel-kiosk-root .kiosk-welcome-hero{padding:clamp(16px,3.5vw,30px);}
+.nel-kiosk-root .kiosk-welcome-header{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;}
+.nel-kiosk-root .kiosk-welcome-header p{white-space:normal;overflow-wrap:normal;line-height:1.25;}
+.nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(40dvh,400px);}
+.nel-kiosk-root .kiosk-start-button{min-height:76px;padding:14px 18px;gap:12px;font-size:clamp(20px,4.7vw,34px);line-height:1.1;}
+.nel-kiosk-root .kiosk-start-button>span:last-child{min-width:0;text-wrap:balance;}
+.nel-kiosk-root .kiosk-venue-button{min-height:52px;padding:8px 6px;font-size:clamp(13px,2.3vw,17px);line-height:1.2;}
+.nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{padding:clamp(18px,4vw,32px);}
+.nel-kiosk-root .kiosk-details form :is(input,button){min-height:52px;}
+.nel-kiosk-root .kiosk-details input{font-size:16px;}
+.nel-kiosk-root .kiosk-result-card img{max-width:100%;height:auto;}
+.nel-kiosk-root .kiosk-result-card section>div{overflow-wrap:anywhere;}
+.nel-kiosk-root .kiosk-draw,.nel-kiosk-root .kiosk-result,.nel-kiosk-root .kiosk-details{width:100%;min-width:0;}
+@media(max-width:380px){
+ .nel-kiosk-root .kiosk-main{padding-inline:12px;}
+ .nel-kiosk-root .kiosk-welcome-hero{padding:14px;}
+ .nel-kiosk-root .kiosk-welcome-header{gap:8px;}
+ .nel-kiosk-root .kiosk-welcome-header p{font-size:clamp(10px,3vw,13px);}
+ .nel-kiosk-root .kiosk-start-button{min-height:68px;gap:10px;font-size:19px;}
+ .nel-kiosk-root .kiosk-venue-button{font-size:12px;gap:4px;}
+ .nel-kiosk-root .kiosk-venue-button svg{width:14px;height:14px;}
+ .nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{padding:16px;}
+}
+@media(min-width:768px){
+ .nel-kiosk-root .kiosk-main{max-width:780px;padding-inline:32px;padding-block:28px 40px;}
+ .nel-kiosk-root .kiosk-welcome{max-width:650px;}
+ .nel-kiosk-root .kiosk-start-button{min-height:104px;}
+ .nel-kiosk-root .kiosk-venue-button{min-height:58px;}
+ .nel-kiosk-root .kiosk-details,.nel-kiosk-root .kiosk-draw,.nel-kiosk-root .kiosk-result{max-width:650px;margin-inline:auto;}
+}
+@media(max-height:720px) and (orientation:landscape){
+ .nel-kiosk-root .kiosk-main{justify-content:flex-start;padding-block:12px 24px;}
+ .nel-kiosk-root .kiosk-welcome{gap:10px;padding-block:0;}
+ .nel-kiosk-root .kiosk-welcome-hero>img{max-height:24dvh;}
+ .nel-kiosk-root .kiosk-start-button{min-height:60px;}
+ .nel-kiosk-root .kiosk-venue-button{min-height:44px;}
+}
+@media(prefers-reduced-motion:reduce){.nel-kiosk-root *, .nel-kiosk-root *::before,.nel-kiosk-root *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important;}}

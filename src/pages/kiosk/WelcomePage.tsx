@@ -23,13 +23,13 @@ export const WelcomePage: React.FC = () => {
   const handleToggleSite = (newSite: SiteLocation) => setSite(newSite);
 
   return (
-    <div className="relative w-full max-w-xl mx-auto flex flex-col gap-4 sm:gap-5 py-4 sm:py-6 my-auto isolate">
+    <div className="kiosk-welcome relative w-full max-w-xl mx-auto flex flex-col gap-4 sm:gap-5 py-4 sm:py-6 my-auto isolate">
       {/* Flat signpost, 15% of module width, behind all three cards. */}
       <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[15%] bg-nel-pink -z-10 pointer-events-none" aria-hidden="true" />
 
       {/* Module 1: logo/date split with the original Abbey illustration fully visible. */}
-      <section className="w-full rounded-[26px] sm:rounded-[32px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 items-start">
+      <section className="kiosk-welcome-hero w-full rounded-[26px] sm:rounded-[32px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
+        <div className="kiosk-welcome-header grid grid-cols-2 gap-3 sm:gap-5 items-start">
           <div className="min-w-0">
             <h1 className="m-0"><img src={nelLogo} alt="New Everyday Life, By Design" className="block w-full h-auto object-contain object-left" /></h1>
           </div>
@@ -54,7 +54,7 @@ export const WelcomePage: React.FC = () => {
       <button
         type="button"
         onClick={() => navigate('/details')}
-        className="w-full rounded-[24px] sm:rounded-[28px] bg-nel-pink text-nel-violet min-h-[94px] sm:min-h-[116px] px-5 sm:px-8 flex items-center justify-center gap-4 sm:gap-6 font-nel font-semibold text-[clamp(1.45rem,5.3vw,2.6rem)] tracking-tight transition-colors hover:bg-[#ffc0de] active:bg-[#f7a7d1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
+        className="kiosk-start-button w-full rounded-[24px] sm:rounded-[28px] bg-nel-pink text-nel-violet min-h-[94px] sm:min-h-[116px] px-5 sm:px-8 flex items-center justify-center gap-4 sm:gap-6 font-nel font-semibold text-[clamp(1.45rem,5.3vw,2.6rem)] tracking-tight transition-colors hover:bg-[#ffc0de] active:bg-[#f7a7d1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
         aria-label="Press to start the trail lucky dip"
       >
         <span className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-nel-violet text-nel-pink shrink-0 flex items-center justify-center" aria-hidden="true">
@@ -64,7 +64,7 @@ export const WelcomePage: React.FC = () => {
       </button>
 
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
-      <div className="w-full rounded-[22px] sm:rounded-[26px] bg-nel-pink p-2 sm:p-2.5">
+      <div className="kiosk-venue-card w-full rounded-[22px] sm:rounded-[26px] bg-nel-pink p-2 sm:p-2.5">
         <div role="group" aria-label="Redemption venue" className="grid grid-cols-2 overflow-hidden rounded-[16px] sm:rounded-[18px]">
           {([['PDD', 'Innovation Hub'], ['PS', 'Impact Hub']] as const).map(([value, label]) => (
             <button
@@ -72,7 +72,7 @@ export const WelcomePage: React.FC = () => {
               type="button"
               aria-pressed={session.site === value}
               onClick={() => handleToggleSite(value)}
-              className={`min-w-0 min-h-[48px] sm:min-h-[54px] px-1.5 sm:px-3 flex items-center justify-center gap-1.5 sm:gap-2 font-nel font-semibold text-[clamp(.77rem,2.7vw,1.05rem)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nel-violet cursor-pointer ${
+              className={`kiosk-venue-button min-w-0 min-h-[48px] sm:min-h-[54px] px-1.5 sm:px-3 flex items-center justify-center gap-1.5 sm:gap-2 font-nel font-semibold text-[clamp(.77rem,2.7vw,1.05rem)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nel-violet cursor-pointer ${
                 session.site === value
                   ? 'bg-nel-violet text-nel-pink'
                   : 'bg-transparent text-nel-violet hover:bg-nel-violet/10'

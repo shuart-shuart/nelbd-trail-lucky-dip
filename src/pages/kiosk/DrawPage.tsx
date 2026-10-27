@@ -106,7 +106,7 @@ export const DrawPage: React.FC = () => {
   }
 
   return (
-    <div className="w-full flex flex-col items-center justify-between text-center my-auto py-2 sm:py-3">
+    <div className="kiosk-draw w-full flex flex-col items-center justify-between text-center my-auto py-2 sm:py-3">
       
       {/* 
         HEADER SECTION

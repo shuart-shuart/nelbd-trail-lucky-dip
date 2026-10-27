@@ -81,7 +81,7 @@ export const ResultPage: React.FC = () => {
     session.site === 'PS' ? 'Impact Hub' : 'Innovation Hub';
 
   return (
-    <div className="w-full flex flex-col items-center justify-between text-center my-auto py-2">
+    <div className="kiosk-result w-full flex flex-col items-center justify-between text-center my-auto py-2">
       {/* 
         BOOKLET CAMPAIGN RESULT PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
         Follows the official signage reference:
@@ -90,7 +90,7 @@ export const ResultPage: React.FC = () => {
         - High-contrast prize name in oversized NEL Rounded SemiBold
         - Integrated pink/purple signage framing (no stark white blocks)
       */}
-      <div className="relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-5 sm:p-7 md:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl flex flex-col items-center justify-between">
+      <div className="kiosk-result-card relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-5 sm:p-7 md:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl flex flex-col items-center justify-between">
         
         {/* Close control: ends this result session and returns to Welcome. */}
         <button
