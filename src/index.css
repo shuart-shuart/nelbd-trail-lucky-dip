@@ -112,3 +112,19 @@ input, textarea {
   font-family: var(--font-display);
   letter-spacing: -0.015em;
 }
+
+/* Kiosk typography: NEL Rounded is reserved exclusively for H1 headings.
+   All supporting text, controls and SVG lettering use DM Sans. */
+.nel-kiosk-root :where(h1) {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+.nel-kiosk-root :where(:not(h1)).font-nel,
+.nel-kiosk-root :where(:not(h1)).font-display,
+.nel-kiosk-root :where(:not(h1)).font-heading,
+.nel-kiosk-root :where(h2, h3, h4, h5, h6, p, span, label, button, input, small, aside, footer, svg text) {
+  font-family: var(--font-body);
+}
+.nel-kiosk-root :where(svg text) {
+  font-family: "DM Sans", sans-serif;
+}
