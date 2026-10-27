@@ -1,16 +1,10 @@
 import crypto from 'crypto';
-import { initializeApp } from 'firebase/app';
-import {
-  getFirestore,
-  doc,
-  collection,
-  getDocs,
-  runTransaction,
-} from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json' with { type: 'json' };
+import { db } from './firebaseAdmin.ts';
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+const doc = (_db: typeof db, ...segments: string[]) => db.doc(segments.join('/'));
+const collection = (_db: typeof db, path: string) => db.collection(path);
+const getDocs = (ref: FirebaseFirestore.CollectionReference) => ref.get();
+const runTransaction = <T>(_: typeof db, handler: (tx: FirebaseFirestore.Transaction) => Promise<T>) => db.runTransaction(handler);
 
 export type SiteLocation = 'PDD' | 'PS';
 export type PrizeTier = 'STANDARD' | 'TOP';
