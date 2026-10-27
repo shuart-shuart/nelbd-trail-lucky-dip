@@ -188,6 +188,7 @@ export async function executeLuckyDipDraw(
         }
 
         const existingDrawData = existingDrawSnap.data();
+        if (!existingDrawData) throw new Error('DRAW_NOT_FOUND');
         const existingTicket = (existingDrawData?.ticketNumber || '').trim().toUpperCase();
 
         // Security check: Only recover if the request ticketNumber explicitly matches the original draw ticket
@@ -272,6 +273,7 @@ export async function executeLuckyDipDraw(
         if (!invSnap.exists) continue;
 
         const invData = invSnap.data();
+        if (!invData) continue;
         const remaining = Number(invData.remainingQuantity) || 0;
         const claimed = Number(invData.claimedQuantity) || 0;
         const allocated = Number(invData.allocatedQuantity) || 0;
