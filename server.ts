@@ -1,4 +1,5 @@
 import express from 'express';
+import { checkPostgres } from './src/server/postgres.ts';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { executeLuckyDipDraw } from './src/server/drawEngine.ts';
@@ -34,6 +35,19 @@ app.get('/api/lucky-dip/status', (req, res) => {
     singaporeDate: getSingaporeCalendarDate(),
     timestamp: new Date().toISOString(),
   });
+});
+
+// Read-only migration diagnostic. Does not switch the active Firebase draw route.
+app.get('/api/migration/postgres-health', async (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ready: false, reason: 'DATABASE_URL_NOT_SET' });
+  try {
+    const ready = await checkPostgres();
+    return res.status(ready ? 200 : 503).json({ ready, database: 'postgresql' });
+  } catch (err) {
+    console.error('PostgreSQL health check failed:', err instanceof Error ? err.message : 'unknown');
+    return res.status(503).json({ ready: false, reason: 'DATABASE_CONNECTION_FAILED' });
+  }
 });
 
 // 2. Participant validation endpoint
