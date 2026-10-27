@@ -115,3 +115,28 @@
  .nel-kiosk-root .kiosk-welcome .kiosk-signage-outline{border-width:2px;box-shadow:inset 0 0 0 5px #FF8DC6,inset 0 0 0 7px rgba(119,22,181,.72);}
  .nel-kiosk-root .kiosk-welcome-title{font-size:clamp(1.35rem,6vw,1.65rem);}
 }
+
+/* One vertical trail through every kiosk route, behind pink interactive panels. */
+.nel-kiosk-root.kiosk-connected-trail{isolation:isolate;overflow-x:clip;}
+.nel-kiosk-root .kiosk-trail-spine{
+ position:absolute;z-index:0;pointer-events:none;
+ top:0;bottom:0;left:50%;transform:translateX(-50%);
+ width:clamp(44px,15%,92px);background:#D9D9D9;
+}
+.nel-kiosk-root .kiosk-trail-content{position:relative;z-index:1;justify-content:flex-start;min-height:100dvh;}
+.nel-kiosk-root .kiosk-details,.nel-kiosk-root .kiosk-draw,.nel-kiosk-root .kiosk-result{
+ position:relative;z-index:1;width:100%;margin-block:auto;
+}
+.nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{
+ border:3px solid #7716B5;
+ outline:none;
+ box-shadow:inset 0 0 0 7px #FF8DC6,inset 0 0 0 9px rgba(119,22,181,.72);
+}
+.nel-kiosk-root .kiosk-welcome{position:relative;z-index:1;}
+.nel-kiosk-root .kiosk-venue-card{box-shadow:none;border:0;}
+@media(max-width:380px){
+ .nel-kiosk-root .kiosk-trail-spine{width:44px;}
+ .nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{
+ border-width:2px;box-shadow:inset 0 0 0 5px #FF8DC6,inset 0 0 0 7px rgba(119,22,181,.72);
+ }
+}
