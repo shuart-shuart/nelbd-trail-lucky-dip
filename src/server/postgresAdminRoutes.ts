@@ -101,3 +101,23 @@ postgresAdminRouter.get('/dashboard-stats',async (_req,res)=>{
     return res.json({totalDraws:drawCount.rows[0].count,totalParticipants:participantCount.rows[0].count,todayDraws:today.rows});
   } catch {return res.status(503).json({error:'Dashboard statistics unavailable'});}
 });
+
+postgresAdminRouter.get('/participants',async (req,res)=>{
+  try {
+    const limit=Math.min(1000,Math.max(1,Number(req.query.limit)||500));
+    const {rows}=await getPool().query(`SELECT id,nickname,mobile_number AS "mobileNumber",
+      site,created_at AS "createdAt" FROM participants ORDER BY created_at DESC LIMIT $1`,[limit]);
+    return res.json(rows);
+  } catch {return res.status(503).json({error:'Participants unavailable'});}
+});
+postgresAdminRouter.get('/inventory-adjustments',async (req,res)=>{
+  try {
+    const limit=Math.min(1000,Math.max(1,Number(req.query.limit)||500));
+    const {rows}=await getPool().query(`SELECT a.id,a.prize_id AS "prizeId",p.name AS "prizeName",
+      a.site,a.previous_quantity AS "previousQuantity",a.new_quantity AS "newQuantity",
+      a.delta,a.reason,a.adjusted_by AS "adjustedByEmail",a.created_at AS "createdAt"
+      FROM inventory_adjustments a JOIN prizes p ON p.id=a.prize_id
+      ORDER BY a.created_at DESC LIMIT $1`,[limit]);
+    return res.json(rows);
+  } catch {return res.status(503).json({error:'Inventory audit unavailable'});}
+});
