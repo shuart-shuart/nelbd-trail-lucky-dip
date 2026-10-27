@@ -817,7 +817,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           {/* + Add Prize */}
           <button
             onClick={handleOpenAdd}
-            className="flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-xl bg-nel-pink hover:brightness-105 active:scale-98 text-nel-violet font-nel font-semibold text-xs flex items-center justify-center gap-1.5 transition shadow cursor-pointer"
+            className="flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-xl bg-nel-pink hover:brightness-105 active:scale-98 text-nel-violet font-dm font-semibold text-xs flex items-center justify-center gap-1.5 transition shadow cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>+ Add Prize</span>
@@ -848,7 +848,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {/* TOTAL INVENTORY */}
-        <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div className="admin-card p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-[#8A7C96] mb-1.5 sm:mb-2 truncate">
             <span className="flex items-center gap-1 sm:gap-1.5 truncate">
               <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8649AC] shrink-0" />
@@ -872,7 +872,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
 
         {/* PDD */}
-        <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div className="admin-card p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-[#8A7C96] mb-1.5 sm:mb-2">
             <span className="flex items-center gap-1 sm:gap-1.5 truncate">
               <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8649AC] shrink-0" />
@@ -897,7 +897,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
 
         {/* PS */}
-        <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div className="admin-card p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold uppercase text-[#8A7C96] mb-1.5 sm:mb-2">
             <span className="flex items-center gap-1 sm:gap-1.5 truncate">
               <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 shrink-0" />
@@ -976,7 +976,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {activeTab === 'inventory' ? (
         <>
           {/* Search & Filter Toolbar */}
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 mb-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-sm">
+          <div className="admin-card p-3.5 sm:p-4 mb-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-sm">
             <div className="relative w-full md:w-80">
               <Search className="w-4 h-4 text-[#8A7C96] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -1030,7 +1030,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           {/* ------------------------------------------------------------- */}
           {/* INVENTORY PRESENTATION: DESKTOP TABLE & MOBILE CARD LIST */}
           {/* ------------------------------------------------------------- */}
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+          <div className="admin-card overflow-hidden shadow-sm">
             <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-nel-purple/40 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-[#8649AC]" />
@@ -1052,7 +1052,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 </p>
                 <button
                   onClick={handleOpenAdd}
-                  className="px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-pink hover:brightness-105 active:scale-98 text-nel-violet font-nel font-semibold text-xs shadow cursor-pointer"
+                  className="px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-pink hover:brightness-105 active:scale-98 text-nel-violet font-dm font-semibold text-xs shadow cursor-pointer"
                 >
                   + Add Prize
                 </button>
@@ -1481,7 +1481,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       ) : (
         /* Audit Trail Tab */
         <div className="space-y-4">
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-sm">
+          <div className="admin-card p-3.5 sm:p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-sm">
             <div className="relative w-full md:w-72">
               <Search className="w-4 h-4 text-[#8A7C96] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -1532,7 +1532,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
             </div>
           </div>
 
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+          <div className="admin-card overflow-hidden shadow-sm">
             <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-nel-purple/40 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <HistoryIcon className="w-4 h-4 text-[#8649AC]" />
@@ -1682,7 +1682,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
+          <div className="admin-card max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
             <button
               onClick={() => setIsAddModalOpen(false)}
               className="absolute top-4 right-4 sm:top-5 sm:right-5 text-[#8A7C96] hover:text-[#33224B] p-2 rounded-xl hover:bg-[#F1EAF9] transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -1870,7 +1870,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 <button
                   type="submit"
                   disabled={isSubmittingAdd}
-                  className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-nel-pink hover:brightness-105 active:scale-98 text-nel-violet font-nel font-semibold text-xs shadow transition cursor-pointer flex items-center justify-center"
+                  className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-nel-pink hover:brightness-105 active:scale-98 text-nel-violet font-dm font-semibold text-xs shadow transition cursor-pointer flex items-center justify-center"
                 >
                   {isSubmittingAdd ? 'Creating...' : 'Create Prize'}
                 </button>
@@ -1885,7 +1885,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isEditModalOpen && editingPrize && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
+          <div className="admin-card max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
             <button
               onClick={() => setIsEditModalOpen(false)}
               className="absolute top-4 right-4 sm:top-5 sm:right-5 text-[#8A7C96] hover:text-[#33224B] p-2 rounded-xl hover:bg-[#F1EAF9] transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -2097,7 +2097,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 <button
                   type="submit"
                   disabled={isSubmittingEdit}
-                  className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-nel-pink hover:brightness-105 active:scale-98 text-nel-violet font-nel font-semibold text-xs shadow transition cursor-pointer flex items-center justify-center"
+                  className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-nel-pink hover:brightness-105 active:scale-98 text-nel-violet font-dm font-semibold text-xs shadow transition cursor-pointer flex items-center justify-center"
                 >
                   {isSubmittingEdit ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -2178,7 +2178,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isAdjustModalOpen && adjustingPrize && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
+          <div className="admin-card max-w-md w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
             <button
               onClick={() => setIsAdjustModalOpen(false)}
               className="absolute top-4 right-4 sm:top-5 sm:right-5 text-[#8A7C96] hover:text-[#33224B] p-2 rounded-xl hover:bg-[#F1EAF9] transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -2323,7 +2323,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isCsvModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col p-4 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div className="admin-card max-w-3xl w-full max-h-[92vh] flex flex-col p-4 sm:p-6 shadow-2xl relative overflow-hidden">
             <button
               onClick={() => {
                 setIsCsvModalOpen(false);
