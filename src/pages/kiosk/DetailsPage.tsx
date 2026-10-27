@@ -90,7 +90,7 @@ export const DetailsPage: React.FC = () => {
         BOOKLET EDITORIAL PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
         Follows the official signage reference with outer bold border and inset double outline.
       */}
-      <div className="w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-6 sm:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl">
+      <div className="kiosk-sign-card w-full sm:rounded-[32px] p-6 sm:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl">
         
         {/* Step Header */}
         <div className="flex items-center justify-between pb-1">
@@ -103,7 +103,7 @@ export const DetailsPage: React.FC = () => {
         </div>
 
         {/* Heading in NEL Rounded */}
-        <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
+        <h1 className="font-dm font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
           Let's get your prize.
         </h1>
 
@@ -219,7 +219,7 @@ export const DetailsPage: React.FC = () => {
             <button
               type="submit"
               disabled={isChecking}
-              className="w-full min-h-[58px] py-4 px-6 rounded-2xl bg-nel-violet hover:bg-[#340557] active:scale-[0.98] text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-purple/50 shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-purple"
+              className="w-full min-h-[58px] py-4 px-6 rounded-2xl bg-nel-violet hover:bg-[#340557] active:scale-[0.98] text-nel-pink font-dm font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-purple/50 shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-purple"
             >
               <span>{isChecking ? 'VERIFYING...' : 'CONTINUE'}</span>
               {!isChecking && <ArrowRight className="w-6 h-6 text-nel-pink stroke-[2.5]" aria-hidden="true" />}
