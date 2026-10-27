@@ -163,7 +163,7 @@ export async function executeLuckyDipDraw(
       const phoneLockRef = doc(db, 'participantPhones', phoneDocId);
       const phoneLockSnap = await transaction.get(phoneLockRef);
 
-      if (phoneLockSnap.exists()) {
+      if (phoneLockSnap.exists) {
         const phoneLockData = phoneLockSnap.data();
         const existingDrawId = phoneLockData?.drawId;
         const requestedTicket = (request.ticketNumber || '').trim().toUpperCase();
@@ -180,7 +180,7 @@ export async function executeLuckyDipDraw(
         const existingDrawRef = doc(db, 'draws', existingDrawId);
         const existingDrawSnap = await transaction.get(existingDrawRef);
 
-        if (!existingDrawSnap.exists()) {
+        if (!existingDrawSnap.exists) {
           const error = new Error('DRAW_NOT_FOUND');
           (error as any).userMessage =
             'Your previous draw record could not be found. Please ask our booth crew for assistance.';
@@ -254,7 +254,7 @@ export async function executeLuckyDipDraw(
       const dailyTopRef = doc(db, 'dailyTopPrizes', singaporeDate);
       const dailyTopSnap = await transaction.get(dailyTopRef);
       const isTopPrizeAlreadyAwardedToday =
-        dailyTopSnap.exists() && dailyTopSnap.data()?.awarded === true;
+        dailyTopSnap.exists && dailyTopSnap.data()?.awarded === true;
 
       // 1c. Read site inventories for all candidate prizes
       const eligiblePool: {
@@ -269,7 +269,7 @@ export async function executeLuckyDipDraw(
         const invRef = doc(db, 'inventory', `${prize.id}_${site}`);
         const invSnap = await transaction.get(invRef);
 
-        if (!invSnap.exists()) continue;
+        if (!invSnap.exists) continue;
 
         const invData = invSnap.data();
         const remaining = Number(invData.remainingQuantity) || 0;
