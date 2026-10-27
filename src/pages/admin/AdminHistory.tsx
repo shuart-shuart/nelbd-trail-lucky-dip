@@ -27,7 +27,7 @@ import {
   getPrizes,
 } from '../../firebase/firestoreService';
 import { Draw, DrawStatus, Participant, SiteLocation } from '../../firebase/types';
-import { getPostgresDrawHistory, getPostgresParticipants, getPostgresDashboardStats, getPostgresPrizesWithInventory } from '../../api/postgresAdminClient';
+import { getPostgresDrawHistory, getAllPostgresDrawHistory, getPostgresParticipants, getPostgresDashboardStats, getPostgresPrizesWithInventory } from '../../api/postgresAdminClient';
 
 export const AdminHistory: React.FC = () => {
   const [draws, setDraws] = useState<Draw[]>([]);
@@ -128,7 +128,17 @@ export const AdminHistory: React.FC = () => {
   }, [searchQuery, draws]);
 
   const handleLoadMore = async () => {
-    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') return;
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      if(isLoadingMore||!hasMore)return;
+      setIsLoadingMore(true);
+      try {
+        const page=await getPostgresDrawHistory(200,draws.length);
+        setDraws(prev=>[...prev,...page.filter(d=>!prev.some(x=>x.id===d.id))]);
+        setHasMore(page.length===200);
+      }catch(err){console.error('PostgreSQL history pagination failed',err);}
+      finally{setIsLoadingMore(false);}
+      return;
+    }
     if (!lastVisibleDoc || isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     try {
@@ -151,11 +161,10 @@ export const AdminHistory: React.FC = () => {
   };
 
   const handleLoadAll = async () => {
-    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') return;
     if (isLoadingAll) return;
     setIsLoadingAll(true);
     try {
-      const all = await fetchAllDraws();
+      const all = import.meta.env.VITE_DATA_BACKEND === 'postgres' ? await getAllPostgresDrawHistory() : await fetchAllDraws();
       setDraws(all);
       setHasMore(false);
       setLastVisibleDoc(null);
@@ -167,7 +176,6 @@ export const AdminHistory: React.FC = () => {
   };
 
   const handleSearchFullHistory = async () => {
-    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') return;
     if (isSearchingFull) return;
     setIsSearchingFull(true);
     try {
@@ -219,6 +227,7 @@ export const AdminHistory: React.FC = () => {
   const handleStatusChange = async (draw: Draw, newStatus: DrawStatus) => {
     setProcessingId(draw.id);
     try {
+      if (import.meta.env.VITE_DATA_BACKEND === 'postgres') throw new Error('PostgreSQL draws are immediately claimed and status changes are disabled.');
       await updateDrawStatus(draw.id, newStatus, draw.prizeId, draw.site);
     } catch (err) {
       console.error('Failed to update draw status:', err);
@@ -234,7 +243,7 @@ export const AdminHistory: React.FC = () => {
       try {
         let exportData: Draw[] = draws;
         if (draws.length < totalDrawsCount) {
-          exportData = await fetchAllDraws();
+          exportData = import.meta.env.VITE_DATA_BACKEND === 'postgres' ? await getAllPostgresDrawHistory() : await fetchAllDraws();
         }
         const filteredExport = exportData.filter((draw) => {
           const q = (searchQuery || '').toLowerCase();
