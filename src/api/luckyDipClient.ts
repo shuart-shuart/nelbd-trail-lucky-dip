@@ -1,4 +1,5 @@
 import { SiteLocation, PrizeTier } from '../firebase/types';
+import { auth } from '../firebase/config';
 
 export interface DrawRequest {
   ticketNumber?: string;
@@ -35,10 +36,13 @@ const DEFAULT_CONNECTION_ERROR = "We're having trouble connecting. Please ask ou
  */
 export async function executeServerLuckyDipDraw(payload: DrawRequest): Promise<DrawResponse> {
   try {
+    const token = await auth.currentUser?.getIdToken();
+    if (!token) return { success: false, error: 'Ask booth crew to sign in before drawing.' };
     const res = await fetch('/api/lucky-dip/draw', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     });
