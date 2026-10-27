@@ -112,7 +112,7 @@ export const DrawPage: React.FC = () => {
         HEADER SECTION
         Reduced excessive top whitespace, keeping heading and circle visually connected.
       */}
-      <header className="mb-3 sm:mb-5">
+      <header className="kiosk-draw-header mb-3 sm:mb-5">
         <div className="inline-flex items-center gap-2 mb-1">
           <span className="font-dm font-bold text-[10px] sm:text-xs uppercase tracking-wider text-nel-pink/80">
             Step 2 of 2
@@ -167,7 +167,7 @@ export const DrawPage: React.FC = () => {
               r="132"
               fill="#FF8DC6"
               stroke="#270342"
-              strokeWidth="8"
+              strokeWidth="3"
             />
 
             {/* Inset Thin Inner Purple Outline */}
@@ -176,8 +176,8 @@ export const DrawPage: React.FC = () => {
               cy="140"
               r="120"
               fill="none"
-              stroke="#7716B5"
-              strokeWidth="2.5"
+              stroke="#270342"
+              strokeWidth="1.5"
             />
           </svg>
 
@@ -235,8 +235,8 @@ export const DrawPage: React.FC = () => {
         Clean, non-interactive site indicator near bottom edge.
         Removed repeated event title and horizontal divider as requested.
       */}
-      <footer className="w-full mt-3 flex items-center justify-center" aria-hidden="true">
-        <span className="font-mono text-[11px] font-bold text-white/40 tracking-wider uppercase">
+      <footer className="kiosk-draw-footer w-full mt-3 flex items-center justify-center" aria-hidden="true">
+        <span className="font-dm text-[11px] font-bold text-nel-pink tracking-wider uppercase">
           {site}
         </span>
       </footer>

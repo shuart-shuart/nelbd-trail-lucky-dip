@@ -200,3 +200,29 @@
  .nel-kiosk-root .kiosk-start-button{min-height:68px;}
  .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(25dvh,220px);}
 }
+
+/* Draw readability: the grey spine stays visible, but never crosses text. */
+.nel-kiosk-root .kiosk-draw{gap:clamp(18px,3dvh,30px);}
+.nel-kiosk-root .kiosk-draw-header{
+ position:relative;z-index:1;
+ width:100%;max-width:620px;
+ padding:clamp(14px,3vw,24px) clamp(12px,3vw,24px);
+ background:#270342;
+ border-radius:18px;
+}
+.nel-kiosk-root .kiosk-draw-header h1{color:#FF8DC6;overflow-wrap:anywhere;}
+.nel-kiosk-root .kiosk-draw-header p{color:#FF8DC6;}
+.nel-kiosk-root .kiosk-draw-action{flex-shrink:0;max-width:min(82vw,420px);width:min(82vw,420px,46dvh);}
+.nel-kiosk-root .kiosk-draw-action svg circle{vector-effect:non-scaling-stroke;}
+.nel-kiosk-root .kiosk-draw-footer{position:relative;z-index:1;}
+.nel-kiosk-root .kiosk-draw-footer span{
+ display:inline-flex;align-items:center;justify-content:center;
+ min-height:32px;padding:6px 18px;border-radius:999px;
+ background:#270342;color:#FF8DC6;
+ font-family:"DM Sans",sans-serif;
+}
+@media(max-height:720px){
+ .nel-kiosk-root .kiosk-draw{gap:10px;}
+ .nel-kiosk-root .kiosk-draw-header{padding:10px 12px;}
+ .nel-kiosk-root .kiosk-draw-action{width:min(74vw,35dvh);}
+}
