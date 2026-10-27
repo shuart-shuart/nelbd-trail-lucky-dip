@@ -4,7 +4,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS participants (
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
  nickname text NOT NULL CHECK (length(trim(nickname)) BETWEEN 1 AND 64),
- mobile_number text NOT NULL UNIQUE CHECK (mobile_number ~ '^\\+65[89][0-9]{7}$'),
+ mobile_number text NOT NULL UNIQUE CHECK (mobile_number ~ '^[+]65[89][0-9]{7}$'),
  site text NOT NULL CHECK (site IN ('PDD','PS')),
  created_at timestamptz NOT NULL DEFAULT now()
 );
