@@ -1,6 +1,23 @@
 import crypto from 'node:crypto';
 import { getPool, withTransaction } from './postgres.ts';
-import { getSingaporeCalendarDate, isValidSingaporeMobile, normalizeSingaporeMobile, type DrawExecutionRequest, type DrawResultScreenPayload } from './drawEngine.ts';
+import type { DrawExecutionRequest, DrawResultScreenPayload } from './drawEngine.ts';
+
+function normalizeSingaporeMobile(phone: string): string {
+  const cleaned = (phone || '').replace(/[\\s\\-()]/g, '');
+  if (cleaned.startsWith('+65')) return cleaned;
+  if (cleaned.startsWith('65') && cleaned.length === 10) return '+' + cleaned;
+  return '+65' + cleaned;
+}
+function isValidSingaporeMobile(phone: string): boolean {
+  return /^\\+65[89]\\d{7}$/.test(normalizeSingaporeMobile(phone));
+}
+function getSingaporeCalendarDate(date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Singapore', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(date);
+  const part = (type: string) => parts.find(p => p.type === type)?.value || '';
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
 
 const failure = (error: string): DrawResultScreenPayload => ({ success: false, error });
 
