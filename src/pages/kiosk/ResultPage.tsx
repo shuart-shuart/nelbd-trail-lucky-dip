@@ -124,7 +124,7 @@ export const ResultPage: React.FC = () => {
           */}
           {prizeImageUrl && (
             <div className="mb-3 sm:mb-4">
-              <div className="w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl bg-nel-pink border-2 border-nel-purple outline outline-1 outline-offset-[-3px] outline-nel-purple/40 p-2.5 sm:p-3 flex items-center justify-center">
+              <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl bg-nel-pink border-2 border-nel-purple outline outline-1 outline-offset-[-3px] outline-nel-purple/40 p-2.5 sm:p-3 flex items-center justify-center">
                 <img
                   src={prizeImageUrl}
                   alt={prizeName}
@@ -170,7 +170,7 @@ export const ResultPage: React.FC = () => {
           </button>
 
           {/* Automatic Reset Countdown */}
-          <p className="text-xs text-nel-purple font-medium font-dm mt-3" aria-live="polite">
+          <p className="text-xs text-nel-purple font-medium font-dm mt-3" aria-live="off">
             Resetting in {countdown}s
           </p>
         </div>
