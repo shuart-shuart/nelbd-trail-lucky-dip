@@ -41,8 +41,8 @@ export const WelcomePage: React.FC = () => {
           alt="Abbey illustration showing a child, walking adult and wheelchair user"
           className="block w-full h-auto max-h-[45dvh] object-contain object-center"
         />
-        <h1 className="kiosk-welcome-title font-nel font-bold text-center text-nel-violet">Spot Design Along Your Commute</h1>
-        <p className="kiosk-trail-intro font-dm text-center text-nel-violet">Explore 17 North East Line stations. Collect at least eight embossed stamps in your Design Trail booklet for a chance to win NELBD merchandise or Grab vouchers.</p>
+        <h1 className="kiosk-welcome-title font-nel font-bold text-center text-nel-violet">Design Trail Lucky Dip</h1>
+        <p className="kiosk-trail-intro font-dm text-center text-nel-violet">Try your luck for an exclusive NELBD merchandise or Grab vouchers!</p>
       </section>
 
       {/* Module 2: the entire flat rounded rectangle is the start button. */}
@@ -55,10 +55,8 @@ export const WelcomePage: React.FC = () => {
         <span className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-nel-violet text-nel-pink shrink-0 flex items-center justify-center" aria-hidden="true">
           <svg viewBox="0 0 24 24" className="w-7 h-7 sm:w-9 sm:h-9" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h16M13 5l7 7-7 7"/></svg>
         </span>
-        <span>START LUCKY DIP</span>
+        <span>Press to Start</span>
       </button>
-
-      <p className="kiosk-trail-disclaimer text-center font-dm text-nel-pink text-xs">Bring your booklet with at least eight stamps to the booth crew. While stocks last. One redemption per person.</p>
 
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
       <div className="kiosk-venue-card w-full rounded-[12px] sm:rounded-[16px] bg-nel-pink p-2 sm:p-2.5">
