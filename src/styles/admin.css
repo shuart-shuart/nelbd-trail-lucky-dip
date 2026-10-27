@@ -9,3 +9,6 @@
 .nel-staff-root .admin-nav-inactive{color:#6E6381;}
 .nel-staff-root .admin-nav-inactive:hover{color:#45246C;background:#F4EFFB;}
 .nel-staff-root .admin-stat{font-variant-numeric:tabular-nums;}
+
+.nel-staff-root .admin-card{padding:1rem;}
+@media(min-width:640px){.nel-staff-root .admin-card{padding:1.5rem;}}
