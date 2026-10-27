@@ -90,7 +90,7 @@ export const ResultPage: React.FC = () => {
         - High-contrast prize name in oversized NEL Rounded SemiBold
         - Integrated pink/purple signage framing (no stark white blocks)
       */}
-      <div className="relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-5 sm:p-7 md:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl flex flex-col items-center justify-between">
+      <div className="kiosk-sign-card relative w-full sm:rounded-[32px] p-5 sm:p-7 md:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl flex flex-col items-center justify-between">
         
         {/* Close control: ends this result session and returns to Welcome. */}
         <button
@@ -113,7 +113,7 @@ export const ResultPage: React.FC = () => {
 
         {/* Celebration Headline */}
         <div className="py-1">
-          <h1 className="font-nel font-semibold text-3xl sm:text-4xl md:text-5xl text-nel-violet tracking-tight uppercase leading-[1.05]">
+          <h1 className="font-dm font-semibold text-3xl sm:text-4xl md:text-5xl text-nel-violet tracking-tight uppercase leading-[1.05]">
             YOU'VE WON!
           </h1>
         </div>
@@ -146,7 +146,7 @@ export const ResultPage: React.FC = () => {
           )}
 
           {/* Actual Prize Name in Oversized NEL Rounded Typography */}
-          <div className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-nel-violet leading-[1.08] tracking-tight px-2 break-words max-w-md">
+          <div className="font-dm font-semibold text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-nel-violet leading-[1.08] tracking-tight px-2 break-words max-w-md">
             {prizeName}
           </div>
         </section>
@@ -159,7 +159,7 @@ export const ResultPage: React.FC = () => {
           Uses square with double-outline styling and violet tint.
         */}
         <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-purple/15 border-2 border-nel-purple outline outline-1 outline-offset-[-3px] outline-nel-purple/40 text-center mb-4">
-          <p className="font-nel font-semibold text-base sm:text-lg text-nel-violet leading-tight">
+          <p className="font-dm font-semibold text-base sm:text-lg text-nel-violet leading-tight">
             Show this screen to our booth crew.
           </p>
           {ticketNumber && (
