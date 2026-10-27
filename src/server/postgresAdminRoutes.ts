@@ -25,13 +25,14 @@ postgresAdminRouter.get('/inventory',async (_req,res)=>{
 });
 postgresAdminRouter.get('/draws',async (req,res)=>{
   try {
-    const limit=Math.min(200,Math.max(1,Number(req.query.limit)||50));
+    const limit=Math.min(500,Math.max(1,Number(req.query.limit)||50));
+    const offset=Math.max(0,Math.min(1000000,Number(req.query.offset)||0));
     const {rows}=await getPool().query(`SELECT d.id,d.ticket_number AS "ticketNumber",
       p.nickname AS "participantNickname",d.prize_id AS "prizeId",d.prize_name AS "prizeName",
       d.prize_tier AS "prizeTier",d.site,d.status,d.kiosk_id AS "kioskId",
       d.drawn_at AS "drawnAt",d.claimed_at AS "claimedAt"
       FROM draws d JOIN participants p ON p.id=d.participant_id
-      ORDER BY d.drawn_at DESC,d.id DESC LIMIT $1`,[limit]);
+      ORDER BY d.drawn_at DESC,d.id DESC LIMIT $1 OFFSET $2`,[limit,offset]);
     res.json(rows);
   } catch {res.status(503).json({error:'Draw history unavailable'});}
 });
