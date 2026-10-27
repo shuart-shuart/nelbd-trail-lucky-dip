@@ -84,8 +84,17 @@ export async function getPostgresDashboardStats():Promise<{totalDraws:number;tot
   return json('/dashboard-stats');
 }
 
-export async function getPostgresParticipants():Promise<import('../firebase/types').Participant[]> {
-  return json('/participants');
+export async function getPostgresParticipants(limit=500,offset=0):Promise<import('../firebase/types').Participant[]> {
+  return json('/participants?limit='+Math.min(1000,Math.max(1,limit))+'&offset='+Math.max(0,offset));
+}
+export async function getAllPostgresParticipants() {
+  const all:import('../firebase/types').Participant[]=[];
+  for(let offset=0;offset<1000000;offset+=1000) {
+    const page=await getPostgresParticipants(1000,offset);
+    all.push(...page);
+    if(page.length<1000)return all;
+  }
+  throw new Error('Participant export exceeded safety limit');
 }
 export async function getPostgresInventoryAdjustments():Promise<import('../firebase/types').InventoryAdjustment[]> {
   return json('/inventory-adjustments');
