@@ -57,30 +57,23 @@ service cloud.firestore {
     // Write allowed for administrators OR atomic server-side draw inventory deduction
     match /inventory/{inventoryId} {
       allow get, list: if true;
-      allow write: if isAdmin() || (
-        isValidId(inventoryId) &&
-        incoming().remainingQuantity is number &&
-        incoming().remainingQuantity >= 0 &&
-        incoming().claimedQuantity is number
-      );
+      allow write: if isAdmin();
     }
 
     // --- Participant Phones Collection (Duplicate Check) ---
     // Enforces: Normalized Singapore mobile number may receive only one prize across festival
     // Public listing is strictly forbidden (PII protection); single get and create permitted for atomic checks
     match /participantPhones/{phoneId} {
-      allow get: if true;
-      allow list: if isAdmin();
-      allow create: if isValidId(phoneId) && 
-        incoming().keys().hasAll(['mobileNumber', 'drawId', 'createdAt']);
+      allow get, list: if isAdmin();
+      allow create: if false;
       allow update, delete: if isAdmin();
     }
 
     // --- Daily Top Prizes Collection (Daily Lock) ---
     // Enforces: Max one TOP prize awarded per calendar day across both sites in Asia/Singapore timezone
     match /dailyTopPrizes/{date} {
-      allow get, list: if true;
-      allow create: if isValidId(date) && incoming().awarded == true;
+      allow get, list: if isAdmin();
+      allow create: if false;
       allow update, delete: if isAdmin();
     }
 
@@ -90,18 +83,16 @@ service cloud.firestore {
     match /participants/{participantId} {
       allow list: if isAdmin();
       allow get: if isAdmin();
-      allow create: if isValidId(participantId) && 
-        incoming().keys().hasAll(['nickname', 'mobileNumber', 'site', 'createdAt']);
+      allow create: if false;
       allow update, delete: if isAdmin() && isValidId(participantId);
     }
 
     // --- Draws Collection ---
     // Public can get their specific draw; admin can list and manage history
     match /draws/{drawId} {
-      allow get: if isValidId(drawId);
+      allow get: if isAdmin();
       allow list: if isAdmin();
-      allow create: if isValidId(drawId) && 
-        incoming().keys().hasAll(['ticketNumber', 'prizeId', 'site', 'status', 'drawnAt']);
+      allow create: if false;
       allow update, delete: if isAdmin() && isValidId(drawId);
     }
 
@@ -109,7 +100,7 @@ service cloud.firestore {
     // Audit logs readable only by authenticated administrators
     match /inventoryAdjustments/{adjustmentId} {
       allow read: if isAdmin();
-      allow create: if isValidId(adjustmentId);
+      allow create: if isAdmin() && isValidId(adjustmentId);
       allow update, delete: if isAdmin();
     }
 
