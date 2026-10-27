@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
 import { SiteLocation } from '../../firebase/types';
 import abbeySvg from '../../assets/img/ABBEY.svg';
+import nelLogo from '../../assets/img/nel-logo.png';
 
 /**
  * Flat signage-style welcome screen. The Abbey asset is the original SVG
@@ -30,9 +31,7 @@ export const WelcomePage: React.FC = () => {
       <section className="w-full rounded-[26px] sm:rounded-[32px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
         <div className="grid grid-cols-2 gap-3 sm:gap-5 items-start">
           <div className="min-w-0">
-            <h1 className="font-nel font-semibold text-[clamp(1.05rem,4.4vw,2.15rem)] leading-[1.13] tracking-tight text-nel-violet">
-              New Everyday Life,<span className="block">By Design</span>
-            </h1>
+            <h1 className="m-0"><img src={nelLogo} alt="New Everyday Life, By Design" className="block w-full h-auto object-contain object-left" /></h1>
           </div>
           <div className="min-w-0 border-l border-nel-violet/60 pl-3 sm:pl-5 text-right">
             <p className="font-nel font-semibold text-[clamp(.8rem,3vw,1.4rem)] leading-tight text-nel-violet whitespace-nowrap">
