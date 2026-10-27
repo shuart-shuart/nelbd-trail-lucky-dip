@@ -126,7 +126,9 @@ export const DetailsPage: React.FC = () => {
               type="text"
               required
               maxLength={40}
-              autoComplete="nickname"
+              autoComplete="off"
+              aria-invalid={!!nicknameError}
+              aria-describedby={nicknameError ? "nickname-error" : undefined}
               value={nickname}
               onChange={(e) => {
                 setNickname(e.target.value);
@@ -175,7 +177,9 @@ export const DetailsPage: React.FC = () => {
               <input
                 id="mobile-input"
                 type="tel"
-                inputMode="tel"
+                inputMode="numeric"
+                aria-invalid={!!mobileError}
+                aria-describedby={mobileError ? "mobile-error" : "mobile-help"}
                 pattern="[0-9]*"
                 autoComplete="tel-national"
                 required
@@ -186,10 +190,11 @@ export const DetailsPage: React.FC = () => {
                   setMobileNumber(digits);
                   if (mobileError) setMobileError(null);
                 }}
-                placeholder="8123 4567"
+                placeholder="81234567"
                 className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none font-dm"
               />
             </div>
+            <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">8 digits, starting with 8 or 9</p>
             {mobileError && (
               <p
                 id="mobile-error"
