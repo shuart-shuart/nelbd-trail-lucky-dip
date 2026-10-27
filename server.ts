@@ -30,7 +30,7 @@ app.get('/api/lucky-dip/status', (req, res) => {
     service: 'NELBD Trail Lucky Dip Secure Server Engine',
     supportedSites: ['PDD', 'PS'],
     tiers: ['STANDARD', 'TOP'],
-    algorithmReady: true,
+    algorithmReady: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON),
     singaporeDate: getSingaporeCalendarDate(),
     timestamp: new Date().toISOString(),
   });
