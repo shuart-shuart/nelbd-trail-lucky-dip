@@ -274,6 +274,7 @@ export const AdminInventory: React.FC = () => {
   // DIRECT IMAGE UPLOAD HANDLER
   // -------------------------------------------------------------
   const handleDirectImageUpload = async (prize: PrizeWithInventory, file: File) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Image editing is not yet supported on PostgreSQL.', 'error'); return; }
     setIsUploadingImageFor(prize.id);
     try {
       const dataUrl = await processPngUpload(file);
@@ -301,6 +302,7 @@ export const AdminInventory: React.FC = () => {
   };
 
   const handleSaveAddPrize = async (e: React.FormEvent) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize creation is not yet supported on PostgreSQL.', 'error'); return; }
     e.preventDefault();
     setAddError(null);
 
@@ -363,6 +365,7 @@ export const AdminInventory: React.FC = () => {
   };
 
   const handleSaveEditPrize = async (e: React.FormEvent) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize editing is not yet supported on PostgreSQL.', 'error'); return; }
     e.preventDefault();
     if (!editingPrize) return;
     setEditError(null);
@@ -420,6 +423,7 @@ export const AdminInventory: React.FC = () => {
   };
 
   const handleConfirmDeleteFromEdit = async () => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize deletion is not yet supported on PostgreSQL.', 'error'); return; }
     if (!editingPrize) return;
     setIsDeletingFromEdit(true);
     setEditError(null);
@@ -518,6 +522,7 @@ export const AdminInventory: React.FC = () => {
   // DELETE / DEACTIVATE HANDLER
   // -------------------------------------------------------------
   const handleToggleActive = async (prize: PrizeWithInventory) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize activation is not yet supported on PostgreSQL.', 'error'); return; }
     const nextActive = !prize.isActive;
 
     // Check TOP prize rule when activating
@@ -539,6 +544,7 @@ export const AdminInventory: React.FC = () => {
   };
 
   const handleDeletePrize = async (prize: PrizeWithInventory) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize deletion is not yet supported on PostgreSQL.', 'error'); return; }
     const drawCount = drawCountsByPrize[prize.id] || 0;
     const adjCount = adjustmentCountsByPrize[prize.id] || 0;
 
