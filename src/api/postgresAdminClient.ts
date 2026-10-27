@@ -1,3 +1,4 @@
+import type { PrizeWithInventory, SiteInventory } from '../firebase/types';
 import type { Setting } from '../firebase/types';
 
 async function json<T>(path: string, init?: RequestInit): Promise<T> {
@@ -44,4 +45,32 @@ export async function updatePostgresRemaining(prizeId:string,site:'PDD'|'PS',rem
   return json<any>('/inventory/'+encodeURIComponent(prizeId)+'/'+site+'/quantity',{
     method:'POST',body:JSON.stringify({remainingQuantity}),
   });
+}
+
+export async function getPostgresPrizesWithInventory(): Promise<PrizeWithInventory[]> {
+  const rows=await getPostgresInventory();
+  const grouped=new Map<string,any>();
+  for(const row of rows) {
+    const prize=grouped.get(row.id)||{
+      id:row.id,name:row.name,description:row.description,tier:row.tier,
+      icon:row.icon,imageUrl:row.imageUrl,isActive:row.isActive,
+      createdAt:'',updatedAt:''
+    };
+    const inv:SiteInventory={
+      id:row.id+'_'+row.site,prizeId:row.id,site:row.site,
+      allocatedQuantity:row.allocatedQuantity,remainingQuantity:row.remainingQuantity,
+      claimedQuantity:row.claimedQuantity,updatedAt:''
+    };
+    if(row.site==='PDD') prize.pddInventory=inv;
+    else prize.psInventory=inv;
+    grouped.set(row.id,prize);
+  }
+  return Array.from(grouped.values()).filter(p=>p.pddInventory&&p.psInventory).map(p=>({
+    ...p,totalAllocated:p.pddInventory.allocatedQuantity+p.psInventory.allocatedQuantity,
+    totalRemaining:p.pddInventory.remainingQuantity+p.psInventory.remainingQuantity,
+    totalClaimed:p.pddInventory.claimedQuantity+p.psInventory.claimedQuantity,
+  }));
+}
+export async function getPostgresDashboardStats():Promise<{totalDraws:number;totalParticipants:number;todayDraws:any[]}> {
+  return json('/dashboard-stats');
 }
