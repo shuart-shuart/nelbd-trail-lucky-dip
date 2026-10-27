@@ -27,7 +27,7 @@ import {
   getPrizes,
 } from '../../firebase/firestoreService';
 import { Draw, DrawStatus, Participant, SiteLocation } from '../../firebase/types';
-import { getPostgresDrawHistory, getAllPostgresDrawHistory, getPostgresParticipants, getPostgresDashboardStats, getPostgresPrizesWithInventory } from '../../api/postgresAdminClient';
+import { getPostgresDrawHistory, getAllPostgresDrawHistory, getPostgresParticipants, getAllPostgresParticipants, getPostgresDashboardStats, getPostgresPrizesWithInventory } from '../../api/postgresAdminClient';
 
 export const AdminHistory: React.FC = () => {
   const [draws, setDraws] = useState<Draw[]>([]);
@@ -285,7 +285,11 @@ export const AdminHistory: React.FC = () => {
       }
     } else {
       const headers = ['Nickname', 'Mobile Number', 'Registered Site', 'Registration Timestamp'];
-      const rows = filteredParticipants.map((p) => [
+      const participantsForExport = import.meta.env.VITE_DATA_BACKEND === 'postgres' ? await getAllPostgresParticipants() : filteredParticipants;
+      const rows = participantsForExport.filter((p) => {
+        const q=(searchQuery||'').toLowerCase();
+        return ((p.nickname||'').toLowerCase().includes(q)||(p.mobileNumber||'').toLowerCase().includes(q)) && (siteFilter==='all'||p.site===siteFilter);
+      }).map((p) => [
         `"${(p.nickname || '').replace(/"/g, '""')}"`,
         `"${p.mobileNumber || ''}"`,
         `"${p.site || ''}"`,
