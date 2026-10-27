@@ -13,12 +13,12 @@ export const DetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { session, setParticipantDetails, setTicketNumber, resetSession } = useKiosk();
 
-  const [nickname, setNickname] = useState(session.nickname || '');
+  const [nickname, setName] = useState(session.nickname || '');
   const [mobileNumber, setMobileNumber] = useState(
     session.mobileNumber ? session.mobileNumber.replace('+65', '') : ''
   );
 
-  const [nicknameError, setNicknameError] = useState<string | null>(null);
+  const [nicknameError, setNameError] = useState<string | null>(null);
   const [mobileError, setMobileError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [isDuplicate, setIsDuplicate] = useState(false);
@@ -30,12 +30,12 @@ export const DetailsPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setNicknameError(null);
+    setNameError(null);
     setMobileError(null);
 
     const cleanNick = nickname.trim();
     if (!cleanNick) {
-      setNicknameError('Please enter your nickname.');
+      setNameError('Please enter your nickname.');
       return;
     }
 
@@ -113,13 +113,13 @@ export const DetailsPage: React.FC = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate className="w-full space-y-4 sm:space-y-5">
           
-          {/* Nickname Field */}
+          {/* Name Field */}
           <div>
             <label
               htmlFor="nickname-input"
               className="block text-sm sm:text-base font-bold text-nel-violet mb-1.5 font-dm"
             >
-              Nickname *
+              Name *
             </label>
             <input
               id="nickname-input"
@@ -131,8 +131,8 @@ export const DetailsPage: React.FC = () => {
               aria-describedby={nicknameError ? "nickname-error" : undefined}
               value={nickname}
               onChange={(e) => {
-                setNickname(e.target.value);
-                if (nicknameError) setNicknameError(null);
+                setName(e.target.value);
+                if (nicknameError) setNameError(null);
               }}
               placeholder="e.g. Alex"
               className={`w-full min-h-[50px] px-4 py-3 rounded-xl bg-nel-pink border-2 text-base sm:text-lg font-dm font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none focus:ring-4 transition-all ${
