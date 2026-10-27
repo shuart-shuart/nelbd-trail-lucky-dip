@@ -21,3 +21,19 @@ No historical participant, draw or redemption records will be imported. No old i
 
 ## Operational caution
 The free Render Postgres database expires on 26 November 2026. Upgrade to a durable plan before the event. Database backups, encryption, data retention and access controls must be reviewed before handling participants' mobile numbers.
+
+## First admin account (private one-off step)
+
+After applying all SQL migrations from the Render service's private network, set
+`NELBD_BOOTSTRAP_EMAIL` and `NELBD_BOOTSTRAP_PASSWORD` as temporary, secret
+environment variables. Use a unique password of at least 16 characters.
+Run `CONFIRM_NELBD_ADMIN_BOOTSTRAP=YES npx tsx scripts/bootstrap-postgres-admin.ts`
+in the private service environment, with `DATABASE_URL` available.
+Remove the two temporary bootstrap secrets immediately afterward.
+
+The script refuses to run if any super-admin already exists. It never creates
+a hardcoded default account and never prints the password. Do not add credentials
+to GitHub, a migration file, a shell command history, or a support chat.
+
+**Do not enable PostgreSQL frontend/backend flags or merge until the new
+authentication, inventory, kiosk and reporting flows have passed staging tests.**
