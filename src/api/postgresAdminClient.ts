@@ -30,7 +30,7 @@ export async function getPostgresSettings(): Promise<Setting> {
     maxDrawsPerParticipant:row.max_draws_per_participant,updatedAt:row.updated_at};
 }
 export async function savePostgresSettings(settings:Setting):Promise<Setting> {
-  const row=await json<any>('/settings',{method:'PUT',body:JSON.stringify(settings)});
+  const row=await json<any>('/settings',{method:'PUT',body:JSON.stringify({...settings,maxDrawsPerParticipant:1})});
   return {festivalName:row.festival_name,kioskActive:row.kiosk_active,activeSite:row.active_site,
     welcomeMessage:row.welcome_message,termsSummary:row.terms_summary,
     maxDrawsPerParticipant:row.max_draws_per_participant,updatedAt:row.updated_at};
