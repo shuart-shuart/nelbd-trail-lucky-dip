@@ -14,9 +14,11 @@ export const KioskLayout: React.FC<KioskLayoutProps> = ({ children }) => {
   const isPaused = !isSettingsLoading && settings && settings.kioskActive === false;
 
   return (
-    <div className="nel-kiosk-root kiosk-shell min-h-[100dvh] w-full bg-nel-violet text-white flex flex-col justify-between relative overflow-x-hidden selection:bg-nel-pink selection:text-nel-violet">
+    <div className="nel-kiosk-root kiosk-shell kiosk-connected-trail min-h-[100dvh] w-full bg-nel-violet text-white flex flex-col justify-between relative overflow-x-hidden selection:bg-nel-pink selection:text-nel-violet">
+      {/* The continuous grey trail sits behind each step, never over controls. */}
+      <div className="kiosk-trail-spine" aria-hidden="true" />
       {/* Main Centered Responsive Container */}
-      <main className="kiosk-main w-full max-w-md sm:max-w-lg lg:max-w-xl mx-auto flex-1 flex flex-col justify-center px-4 py-4 sm:py-6 sm:px-6 z-10 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.75rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+      <main className="kiosk-main kiosk-trail-content w-full max-w-md sm:max-w-lg lg:max-w-xl mx-auto flex-1 flex flex-col justify-center px-4 py-4 sm:py-6 sm:px-6 z-10 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.75rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
         {isPaused ? (
           <div className="w-full flex flex-col items-center text-center my-auto py-6 bg-nel-pink text-nel-violet rounded-3xl p-6 sm:p-8 border-4 border-nel-purple/30">
             <div
