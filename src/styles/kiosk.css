@@ -1,0 +1,4 @@
+.nel-kiosk-root{min-height:100dvh;background:var(--ui-bg);color:var(--ui-text);}
+.nel-kiosk-root .kiosk-panel{background:var(--ui-panel);color:var(--ui-text);border-radius:var(--ui-radius);}
+.nel-kiosk-root .kiosk-accent{color:var(--ui-accent);}
+.nel-kiosk-root .kiosk-muted{color:var(--ui-muted);}
