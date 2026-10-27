@@ -91,3 +91,27 @@
  .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(26dvh,230px);}
  .nel-kiosk-root .kiosk-start-button{min-height:64px;}
 }
+
+/* Signage iteration: first two modules only; clean third pill without outer stroke. */
+.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline{
+ border-width:3px;
+ box-shadow:inset 0 0 0 7px #FF8DC6,inset 0 0 0 9px rgba(119,22,181,.72);
+}
+.nel-kiosk-root .kiosk-welcome .kiosk-venue-card{
+ border:0;
+ box-shadow:none;
+}
+.nel-kiosk-root .kiosk-welcome .kiosk-date-image{justify-content:flex-start;align-items:center;}
+.nel-kiosk-root .kiosk-welcome .kiosk-date-image img{
+ width:40%;max-width:40%;height:auto;max-height:none;object-position:left center;
+}
+.nel-kiosk-root .kiosk-welcome-title{
+ margin:clamp(8px,1.8vw,16px) 0 0;
+ font-size:clamp(1.5rem,4.6vw,2.45rem);
+ line-height:1.12;
+ letter-spacing:-.025em;
+}
+@media(max-width:380px){
+ .nel-kiosk-root .kiosk-welcome .kiosk-signage-outline{border-width:2px;box-shadow:inset 0 0 0 5px #FF8DC6,inset 0 0 0 7px rgba(119,22,181,.72);}
+ .nel-kiosk-root .kiosk-welcome-title{font-size:clamp(1.35rem,6vw,1.65rem);}
+}
