@@ -43,6 +43,7 @@ import {
   InventoryAdjustment,
 } from '../../firebase/types';
 import { useAuth } from '../../context/AuthContext';
+import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining } from '../../api/postgresAdminClient';
 
 interface ParsedCsvItem {
   rowNumber: number;
@@ -128,6 +129,18 @@ export const AdminInventory: React.FC = () => {
 
   // Subscriptions
   useEffect(() => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      let active=true;
+      const refresh=async()=>{
+        try {
+          const [items,audit]=await Promise.all([getPostgresPrizesWithInventory(),getPostgresInventoryAdjustments()]);
+          if(active){setPrizes(items);setAdjustments(audit);}
+        }catch(err){console.error('PostgreSQL inventory refresh failed',err);}
+      };
+      void refresh();
+      const timer=setInterval(()=>void refresh(),15000);
+      return ()=>{active=false;clearInterval(timer);};
+    }
     const unsubPrizes = subscribeToPrizesWithInventory(setPrizes);
     const unsubAdj = subscribeToInventoryAdjustments(setAdjustments);
 
@@ -475,7 +488,11 @@ export const AdminInventory: React.FC = () => {
 
     setIsSubmittingAdjustment(true);
     try {
-      await updateSiteInventoryQuantity({
+      if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+        await updatePostgresRemaining(adjustingPrize.id,adjustSite,calculatedNewRemaining);
+        const [items,audit]=await Promise.all([getPostgresPrizesWithInventory(),getPostgresInventoryAdjustments()]);
+        setPrizes(items);setAdjustments(audit);
+      } else await updateSiteInventoryQuantity({
         prizeId: adjustingPrize.id,
         prizeName: adjustingPrize.name,
         site: adjustSite,
