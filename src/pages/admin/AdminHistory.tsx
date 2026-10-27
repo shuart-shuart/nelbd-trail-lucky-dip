@@ -282,28 +282,28 @@ export const AdminHistory: React.FC = () => {
           type="button"
           onClick={handleExportCsv}
           disabled={isExporting}
-          className="w-full sm:w-auto px-4 py-2 min-h-[44px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 active:scale-98 text-white text-xs font-bold flex items-center justify-center gap-1.5 border border-nel-purple/50 transition shadow cursor-pointer disabled:opacity-50"
+          className="w-full sm:w-auto px-4 py-2 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 active:scale-98 text-[#33224B] text-xs font-bold flex items-center justify-center gap-1.5 border border-[#E8DEF1] transition shadow cursor-pointer disabled:opacity-50"
         >
           {isExporting ? (
-            <RefreshCw className="w-3.5 h-3.5 text-nel-pink animate-spin" />
+            <RefreshCw className="w-3.5 h-3.5 text-[#8649AC] animate-spin" />
           ) : (
-            <Download className="w-3.5 h-3.5 text-nel-pink" />
+            <Download className="w-3.5 h-3.5 text-[#8649AC]" />
           )}
           <span>{isExporting ? 'Exporting CSV...' : `Export ${activeTab === 'draws' ? 'Draws' : 'Participants'} CSV`}</span>
         </button>
       }
     >
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 mb-4 border-b border-nel-purple/30 pb-2">
+      <div className="flex flex-wrap items-center gap-2 mb-4 border-b border-[#E7DCEF] pb-2">
         <button
           onClick={() => setActiveTab('draws')}
           className={`px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-dm font-bold transition flex items-center gap-1.5 cursor-pointer ${
             activeTab === 'draws'
-              ? 'bg-nel-purple text-nel-pink border border-nel-pink/50 shadow'
-              : 'text-white/70 hover:text-white'
+              ? 'bg-nel-purple text-[#8649AC] border border-nel-pink/50 shadow'
+              : 'text-[#756782] hover:text-[#33224B]'
           }`}
         >
-          <History className="w-4 h-4 text-nel-pink shrink-0" />
+          <History className="w-4 h-4 text-[#8649AC] shrink-0" />
           <span>Draw History ({totalDrawsCount > 0 ? totalDrawsCount : draws.length})</span>
         </button>
         <button
@@ -313,26 +313,26 @@ export const AdminHistory: React.FC = () => {
           }}
           className={`px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-dm font-bold transition flex items-center gap-1.5 cursor-pointer ${
             activeTab === 'participants'
-              ? 'bg-nel-purple text-nel-pink border border-nel-pink/50 shadow'
-              : 'text-white/70 hover:text-white'
+              ? 'bg-nel-purple text-[#8649AC] border border-nel-pink/50 shadow'
+              : 'text-[#756782] hover:text-[#33224B]'
           }`}
         >
-          <Users className="w-4 h-4 text-nel-pink shrink-0" />
+          <Users className="w-4 h-4 text-[#8649AC] shrink-0" />
           <span>Registered Participants ({participants.length})</span>
         </button>
       </div>
 
       {/* Search and Filter Toolbar */}
-      <div className="bg-nel-surface border border-nel-purple/50 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 mb-6 flex flex-col gap-3 sm:gap-4 shadow-xl">
+      <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 mb-6 flex flex-col gap-3 sm:gap-4 shadow-sm">
         {/* Search Input - Full width on mobile */}
         <div className="relative w-full">
-          <Search className="w-4 h-4 text-white/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#33224B]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={activeTab === 'draws' ? 'Search ticket, nickname or prize...' : 'Search nickname or mobile...'}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-nel-input border border-nel-purple/60 text-white text-base sm:text-sm font-dm focus:border-nel-pink focus:outline-none placeholder-white/40 min-h-[44px]"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-nel-input border border-nel-purple/60 text-[#33224B] text-base sm:text-sm font-dm focus:border-nel-pink focus:outline-none placeholder-white/40 min-h-[44px]"
           />
         </div>
 
@@ -340,15 +340,15 @@ export const AdminHistory: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Site Filter */}
           <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial">
-            <MapPin className="w-3.5 h-3.5 text-nel-pink mx-1 shrink-0" />
+            <MapPin className="w-3.5 h-3.5 text-[#8649AC] mx-1 shrink-0" />
             {(['all', 'PDD', 'PS'] as const).map((site) => (
               <button
                 key={site}
                 onClick={() => setSiteFilter(site)}
                 className={`px-2.5 sm:px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-dm font-bold transition cursor-pointer flex-1 sm:flex-initial text-center ${
                   siteFilter === site
-                    ? 'bg-nel-purple text-nel-pink border border-nel-pink/50 shadow'
-                    : 'text-white/70 hover:text-white'
+                    ? 'bg-nel-purple text-[#8649AC] border border-nel-pink/50 shadow'
+                    : 'text-[#756782] hover:text-[#33224B]'
                 }`}
               >
                 {site === 'all' ? 'All Sites' : `Site ${site}`}
@@ -359,15 +359,15 @@ export const AdminHistory: React.FC = () => {
           {/* Status Filter (for draws tab) */}
           {activeTab === 'draws' && (
             <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial">
-              <Filter className="w-3.5 h-3.5 text-nel-pink mx-1 shrink-0" />
+              <Filter className="w-3.5 h-3.5 text-[#8649AC] mx-1 shrink-0" />
               {(['all', 'pending', 'claimed'] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   className={`px-2.5 sm:px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-dm font-bold capitalize transition cursor-pointer flex-1 sm:flex-initial text-center ${
                     statusFilter === status
-                      ? 'bg-nel-purple text-nel-pink border border-nel-pink/50 shadow'
-                      : 'text-white/70 hover:text-white'
+                      ? 'bg-nel-purple text-[#8649AC] border border-nel-pink/50 shadow'
+                      : 'text-[#756782] hover:text-[#33224B]'
                   }`}
                 >
                   {status}
@@ -380,11 +380,11 @@ export const AdminHistory: React.FC = () => {
 
       {/* Full-History Search Notice if active search is entered and backlog exists */}
       {activeTab === 'draws' && searchQuery.trim().length > 0 && draws.length < totalDrawsCount && (
-        <div className="mb-4 p-3.5 rounded-2xl bg-nel-purple/40 border border-nel-pink/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-dm shadow-lg">
-          <div className="text-white/80">
-            <span className="font-bold text-nel-pink">Filtered Search:</span> Showing results from{' '}
-            <strong className="text-white font-mono">{draws.length}</strong> loaded draws.{' '}
-            <span className="text-white/60">
+        <div className="mb-4 p-3.5 rounded-2xl bg-[#F0E8F9] border border-[#E2CBF0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-dm shadow-sm">
+          <div className="text-[#645574]">
+            <span className="font-bold text-[#8649AC]">Filtered Search:</span> Showing results from{' '}
+            <strong className="text-[#33224B] font-mono">{draws.length}</strong> loaded draws.{' '}
+            <span className="text-[#8A7C96]">
               ({totalDrawsCount - draws.length} older records in full archive)
             </span>
           </div>
@@ -411,15 +411,15 @@ export const AdminHistory: React.FC = () => {
 
       {activeTab === 'draws' ? (
         /* Draws Container */
-        <div className="bg-nel-surface border border-nel-purple/50 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl">
+        <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
           <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-nel-purple/40 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <History className="w-4 h-4 sm:w-5 sm:h-5 text-nel-pink" />
-              <span className="text-xs sm:text-sm font-nel font-semibold text-white uppercase tracking-wider">
+              <History className="w-4 h-4 sm:w-5 sm:h-5 text-[#8649AC]" />
+              <span className="text-xs sm:text-sm font-nel font-semibold text-[#33224B] uppercase tracking-wider">
                 Lucky Dip Records ({filteredDraws.length})
               </span>
             </div>
-            <span className="text-xs text-white/60 font-dm">
+            <span className="text-xs text-[#8A7C96] font-dm">
               Total logged: {totalDrawsCount > 0 ? totalDrawsCount : draws.length}
               {draws.length < totalDrawsCount && ` (${draws.length} loaded)`}
             </span>
@@ -427,9 +427,9 @@ export const AdminHistory: React.FC = () => {
 
           {filteredDraws.length === 0 ? (
             <div className="p-8 sm:p-12 text-center">
-              <Award className="w-12 h-12 text-white/40 mx-auto mb-3" />
-              <h3 className="text-base font-nel font-semibold text-white/80">No records found</h3>
-              <p className="text-xs text-white/60 mt-1 max-w-sm mx-auto font-dm">
+              <Award className="w-12 h-12 text-[#33224B]/40 mx-auto mb-3" />
+              <h3 className="text-base font-nel font-semibold text-[#645574]">No records found</h3>
+              <p className="text-xs text-[#8A7C96] mt-1 max-w-sm mx-auto font-dm">
                 As participants draw prizes at PDD and PS kiosks, their records will display here.
               </p>
             </div>
@@ -441,18 +441,18 @@ export const AdminHistory: React.FC = () => {
                   <div key={draw.id} className="p-4 space-y-3 font-dm hover:bg-nel-purple/10 transition">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="font-mono font-bold text-nel-pink text-sm bg-nel-input px-2.5 py-1 rounded-lg border border-nel-purple/40 inline-block mb-1">
+                        <span className="font-mono font-bold text-[#8649AC] text-sm bg-nel-input px-2.5 py-1 rounded-lg border border-nel-purple/40 inline-block mb-1">
                           {draw.ticketNumber}
                         </span>
-                        <div className="font-semibold text-white text-base">
+                        <div className="font-semibold text-[#33224B] text-base">
                           {draw.participantNickname || 'Trail Walker'}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
-                        <span className="px-2 py-0.5 rounded bg-nel-input text-xs font-mono font-bold text-nel-pink border border-nel-purple/40">
+                        <span className="px-2 py-0.5 rounded bg-nel-input text-xs font-mono font-bold text-[#8649AC] border border-nel-purple/40">
                           Site {draw.site}
                         </span>
-                        <span className="text-[11px] text-white/50 font-mono">
+                        <span className="text-[11px] text-[#33224B]/50 font-mono">
                           {draw.drawnAt ? new Date(draw.drawnAt).toLocaleTimeString() : 'Recent'}
                         </span>
                       </div>
@@ -462,7 +462,7 @@ export const AdminHistory: React.FC = () => {
                     <div className="p-3 rounded-xl bg-nel-input/60 border border-nel-purple/40 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0">
                         {getPrizeThumbnailUrl(draw) && (
-                          <div className="w-10 h-10 rounded-xl bg-nel-purple/30 border border-nel-pink/30 p-1 shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
+                          <div className="w-10 h-10 rounded-xl bg-[#F1EAF9] border border-[#E2CBF0] p-1 shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
                             <img
                               src={getPrizeThumbnailUrl(draw)}
                               alt={draw.prizeName}
@@ -474,8 +474,8 @@ export const AdminHistory: React.FC = () => {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <span className="text-[10px] text-white/50 uppercase block font-semibold">Prize Won</span>
-                          <span className="font-semibold text-white text-sm truncate block font-nel">
+                          <span className="text-[10px] text-[#33224B]/50 uppercase block font-semibold">Prize Won</span>
+                          <span className="font-semibold text-[#33224B] text-sm truncate block font-nel">
                             {draw.prizeName}
                           </span>
                         </div>
@@ -484,7 +484,7 @@ export const AdminHistory: React.FC = () => {
                         className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border shrink-0 ${
                           draw.prizeTier === 'TOP'
                             ? 'bg-nel-pink text-nel-violet border-white/30 font-nel font-semibold'
-                            : 'bg-nel-purple/50 text-nel-pink border-nel-pink/40'
+                            : 'bg-nel-purple/50 text-[#8649AC] border-nel-pink/40'
                         }`}
                       >
                         {draw.prizeTier}
@@ -496,12 +496,12 @@ export const AdminHistory: React.FC = () => {
                       <span
                         className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${
                           draw.status === 'claimed'
-                            ? 'bg-nel-purple/60 border-nel-pink/50 text-nel-pink'
+                            ? 'bg-nel-purple/60 border-nel-pink/50 text-[#8649AC]'
                             : 'bg-amber-950/70 border-amber-500/60 text-amber-300'
                         }`}
                       >
                         {draw.status === 'claimed' ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-nel-pink" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#8649AC]" />
                         ) : (
                           <Clock className="w-3.5 h-3.5 text-amber-400" />
                         )}
@@ -517,7 +517,7 @@ export const AdminHistory: React.FC = () => {
                           <span>{processingId === draw.id ? 'Updating...' : 'Mark Claimed'}</span>
                         </button>
                       ) : (
-                        <span className="text-xs text-white/50 font-medium">Claim Confirmed</span>
+                        <span className="text-xs text-[#33224B]/50 font-medium">Claim Confirmed</span>
                       )}
                     </div>
                   </div>
@@ -526,8 +526,8 @@ export const AdminHistory: React.FC = () => {
 
               {/* Desktop Table View (Visible on lg screens and up) */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full text-left text-sm text-white/90">
-                  <thead className="bg-[#140122] text-[11px] uppercase font-bold text-white/70 border-b border-nel-purple/40 font-dm">
+                <table className="w-full text-left text-sm text-[#3F3153]">
+                  <thead className="bg-[#140122] text-[11px] uppercase font-bold text-[#756782] border-b border-nel-purple/40 font-dm">
                     <tr>
                       <th className="px-6 py-3.5">Ticket Code</th>
                       <th className="px-6 py-3.5">Participant</th>
@@ -543,22 +543,22 @@ export const AdminHistory: React.FC = () => {
                     {filteredDraws.map((draw) => (
                       <tr key={draw.id} className="hover:bg-nel-purple/15 transition font-dm">
                         <td className="px-6 py-4">
-                          <span className="font-mono font-bold text-nel-pink text-sm bg-nel-input px-2.5 py-1 rounded-lg border border-nel-purple/40">
+                          <span className="font-mono font-bold text-[#8649AC] text-sm bg-nel-input px-2.5 py-1 rounded-lg border border-nel-purple/40">
                             {draw.ticketNumber}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-semibold text-white">
+                        <td className="px-6 py-4 font-semibold text-[#33224B]">
                           {draw.participantNickname || 'Trail Walker'}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-2 py-0.5 rounded bg-nel-input text-xs font-mono font-bold text-nel-pink border border-nel-purple/40">
+                          <span className="px-2 py-0.5 rounded bg-nel-input text-xs font-mono font-bold text-[#8649AC] border border-nel-purple/40">
                             {draw.site}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-semibold text-white font-nel">
+                        <td className="px-6 py-4 font-semibold text-[#33224B] font-nel">
                           <div className="flex items-center gap-2.5">
                             {getPrizeThumbnailUrl(draw) && (
-                              <div className="w-8 h-8 rounded-lg bg-nel-purple/30 border border-nel-pink/30 p-0.5 shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
+                              <div className="w-8 h-8 rounded-lg bg-[#F1EAF9] border border-[#E2CBF0] p-0.5 shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
                                 <img
                                   src={getPrizeThumbnailUrl(draw)}
                                   alt={draw.prizeName}
@@ -577,25 +577,25 @@ export const AdminHistory: React.FC = () => {
                             className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
                               draw.prizeTier === 'TOP'
                                 ? 'bg-nel-pink text-nel-violet border-white/30 font-nel font-semibold'
-                                : 'bg-nel-purple/50 text-nel-pink border-nel-pink/40'
+                                : 'bg-nel-purple/50 text-[#8649AC] border-nel-pink/40'
                             }`}
                           >
                             {draw.prizeTier}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-xs text-white/60 font-mono">
+                        <td className="px-6 py-4 text-xs text-[#8A7C96] font-mono">
                           {draw.drawnAt ? new Date(draw.drawnAt).toLocaleTimeString() : 'Recent'}
                         </td>
                         <td className="px-6 py-4">
                           <span
                             className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${
                               draw.status === 'claimed'
-                                ? 'bg-nel-purple/60 border-nel-pink/50 text-nel-pink'
+                                ? 'bg-nel-purple/60 border-nel-pink/50 text-[#8649AC]'
                                 : 'bg-amber-950/70 border-amber-500/60 text-amber-300'
                             }`}
                           >
                             {draw.status === 'claimed' ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-nel-pink" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-[#8649AC]" />
                             ) : (
                               <Clock className="w-3.5 h-3.5 text-amber-400" />
                             )}
@@ -612,7 +612,7 @@ export const AdminHistory: React.FC = () => {
                               Mark Claimed
                             </button>
                           ) : (
-                            <span className="text-xs text-white/40 font-medium">Claimed</span>
+                            <span className="text-xs text-[#33224B]/40 font-medium">Claimed</span>
                           )}
                         </td>
                       </tr>
@@ -624,10 +624,10 @@ export const AdminHistory: React.FC = () => {
           )}
 
           {/* Pagination & Cursor Navigation Toolbar */}
-          <div className="p-4 sm:p-5 bg-nel-input/50 border-t border-nel-purple/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-dm">
-            <div className="text-white/70">
-              Showing <span className="font-mono text-nel-pink font-bold">{filteredDraws.length}</span> matching{' '}
-              <span className="text-white/50">({draws.length} loaded from {totalDrawsCount > 0 ? totalDrawsCount : draws.length} total)</span>
+          <div className="p-4 sm:p-5 bg-nel-input/50 border-t border-[#E7DCEF] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-dm">
+            <div className="text-[#756782]">
+              Showing <span className="font-mono text-[#8649AC] font-bold">{filteredDraws.length}</span> matching{' '}
+              <span className="text-[#33224B]/50">({draws.length} loaded from {totalDrawsCount > 0 ? totalDrawsCount : draws.length} total)</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -636,7 +636,7 @@ export const AdminHistory: React.FC = () => {
                   type="button"
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className="px-4 py-2 min-h-[38px] rounded-xl bg-nel-purple hover:bg-[#340557] active:scale-98 text-nel-pink font-bold border border-nel-pink/40 shadow transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-2 min-h-[38px] rounded-xl bg-nel-purple hover:bg-[#340557] active:scale-98 text-[#8649AC] font-bold border border-nel-pink/40 shadow transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {isLoadingMore ? (
                     <>
@@ -657,7 +657,7 @@ export const AdminHistory: React.FC = () => {
                   type="button"
                   onClick={handleLoadAll}
                   disabled={isLoadingAll}
-                  className="px-3.5 py-2 min-h-[38px] rounded-xl bg-nel-purple/30 hover:bg-slate-700 text-white/80 hover:text-white font-medium border border-nel-purple/50 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-3.5 py-2 min-h-[38px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 text-[#645574] hover:text-[#33224B] font-medium border border-[#E8DEF1] transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {isLoadingAll ? (
                     <>
@@ -674,21 +674,21 @@ export const AdminHistory: React.FC = () => {
         </div>
       ) : (
         /* Participants Container (Protected Administrator View) */
-        <div className="bg-nel-surface border border-nel-purple/50 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl">
+        <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
           <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-nel-purple/40 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-nel-pink" />
-              <span className="text-xs sm:text-sm font-nel font-semibold text-white uppercase tracking-wider">
+              <ShieldCheck className="w-5 h-5 text-[#8649AC]" />
+              <span className="text-xs sm:text-sm font-nel font-semibold text-[#33224B] uppercase tracking-wider">
                 Protected Participant Directory ({filteredParticipants.length})
               </span>
             </div>
-            <span className="text-xs text-nel-pink font-medium font-dm">
+            <span className="text-xs text-[#8649AC] font-medium font-dm">
               PII Restricted • Admin Decrypted
             </span>
           </div>
 
           {filteredParticipants.length === 0 ? (
-            <div className="p-8 sm:p-12 text-center text-white/60 text-xs font-dm">
+            <div className="p-8 sm:p-12 text-center text-[#8A7C96] text-xs font-dm">
               No participant registrations recorded yet.
             </div>
           ) : (
@@ -698,20 +698,20 @@ export const AdminHistory: React.FC = () => {
                 {filteredParticipants.map((p) => (
                   <div key={p.id} className="p-4 space-y-2 font-dm hover:bg-nel-purple/10 transition">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="font-bold text-white text-base">{p.nickname}</span>
-                      <span className="px-2 py-0.5 rounded-lg bg-nel-input text-xs font-mono font-bold text-white border border-nel-purple/40">
+                      <span className="font-bold text-[#33224B] text-base">{p.nickname}</span>
+                      <span className="px-2 py-0.5 rounded-lg bg-nel-input text-xs font-mono font-bold text-[#33224B] border border-nel-purple/40">
                         Site {p.site}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <a
                         href={`tel:${p.mobileNumber}`}
-                        className="font-mono text-nel-pink flex items-center gap-1.5 hover:underline min-h-[36px]"
+                        className="font-mono text-[#8649AC] flex items-center gap-1.5 hover:underline min-h-[36px]"
                       >
-                        <Phone className="w-3.5 h-3.5 text-white/50" />
+                        <Phone className="w-3.5 h-3.5 text-[#33224B]/50" />
                         <span>{p.mobileNumber}</span>
                       </a>
-                      <span className="text-white/50 font-mono text-[11px]">
+                      <span className="text-[#33224B]/50 font-mono text-[11px]">
                         {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Recent'}
                       </span>
                     </div>
@@ -721,8 +721,8 @@ export const AdminHistory: React.FC = () => {
 
               {/* Desktop Participant Table (hidden md:block) */}
               <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-left text-sm text-white/90">
-                  <thead className="bg-[#140122] text-[11px] uppercase font-bold text-white/70 border-b border-nel-purple/40 font-dm">
+                <table className="w-full text-left text-sm text-[#3F3153]">
+                  <thead className="bg-[#140122] text-[11px] uppercase font-bold text-[#756782] border-b border-nel-purple/40 font-dm">
                     <tr>
                       <th className="px-6 py-3.5">Registered Nickname</th>
                       <th className="px-6 py-3.5">Singapore Mobile Number</th>
@@ -733,17 +733,17 @@ export const AdminHistory: React.FC = () => {
                   <tbody className="divide-y divide-nel-purple/20">
                     {filteredParticipants.map((p) => (
                       <tr key={p.id} className="hover:bg-nel-purple/15 transition font-dm">
-                        <td className="px-6 py-4 font-bold text-white text-base">{p.nickname}</td>
-                        <td className="px-6 py-4 font-mono text-nel-pink flex items-center gap-1.5">
-                          <Phone className="w-3.5 h-3.5 text-white/40" />
+                        <td className="px-6 py-4 font-bold text-[#33224B] text-base">{p.nickname}</td>
+                        <td className="px-6 py-4 font-mono text-[#8649AC] flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-[#33224B]/40" />
                           <span>{p.mobileNumber}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-2.5 py-1 rounded-lg bg-nel-input text-xs font-mono font-bold text-white border border-nel-purple/40">
+                          <span className="px-2.5 py-1 rounded-lg bg-nel-input text-xs font-mono font-bold text-[#33224B] border border-nel-purple/40">
                             Site {p.site}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-xs text-white/60 font-mono">
+                        <td className="px-6 py-4 text-xs text-[#8A7C96] font-mono">
                           {p.createdAt ? new Date(p.createdAt).toLocaleString() : 'Recent'}
                         </td>
                       </tr>
