@@ -200,3 +200,17 @@
  .nel-kiosk-root .kiosk-start-button{min-height:68px;}
  .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(25dvh,220px);}
 }
+
+/* Official Design Trail information: keep longer copy readable on kiosk sizes. */
+.nel-kiosk-root .kiosk-trail-intro{
+ max-width:48ch;margin:clamp(8px,1.5vw,14px) auto 0;
+ font-size:clamp(12px,1.8vw,16px);line-height:1.45;font-weight:600;
+}
+.nel-kiosk-root .kiosk-trail-disclaimer{
+ max-width:52ch;margin:0 auto;line-height:1.45;
+ text-shadow:0 1px 2px #270342;
+}
+@media(max-width:380px){
+ .nel-kiosk-root .kiosk-trail-intro{font-size:12px;line-height:1.35;}
+ .nel-kiosk-root .kiosk-trail-disclaimer{font-size:11px;}
+}
