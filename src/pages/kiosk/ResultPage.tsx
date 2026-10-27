@@ -8,7 +8,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 export const ResultPage: React.FC = () => {
   const navigate = useNavigate();
   const { session, resetSession } = useKiosk();
-  const [countdown, setCountdown] = useState(45);
+  const [countdown, setCountdown] = useState(180);
   const resetSessionRef = useRef(resetSession);
 
   useEffect(() => {
