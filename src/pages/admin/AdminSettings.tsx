@@ -39,12 +39,12 @@ export const AdminSettings: React.FC = () => {
       <div className="max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Availability Toggle - Obvious LIVE / PAUSED indicator */}
-          <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm">
+          <div className="admin-card p-4 sm:p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Sliders className="w-5 h-5 text-[#8649AC] shrink-0" />
-                  <h3 className="text-base font-nel font-semibold text-[#33224B]">
+                  <h3 className="text-base font-dm font-semibold text-[#33224B]">
                     Public Kiosk Availability
                   </h3>
                   <span
@@ -91,8 +91,8 @@ export const AdminSettings: React.FC = () => {
           </div>
 
           {/* Site and General Information */}
-          <div className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-sm space-y-4 sm:space-y-5">
-            <h3 className="text-base font-nel font-semibold text-[#33224B]">Station Configuration</h3>
+          <div className="admin-card p-4 sm:p-8 shadow-sm space-y-4 sm:space-y-5">
+            <h3 className="text-base font-dm font-semibold text-[#33224B]">Station Configuration</h3>
 
             {/* Station Selector: PDD vs PS */}
             <div className="p-3.5 sm:p-4 rounded-2xl bg-nel-input/60 border border-nel-purple/40 space-y-2">
@@ -195,7 +195,7 @@ export const AdminSettings: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] rounded-2xl bg-nel-pink hover:brightness-105 active:scale-[0.98] text-nel-violet font-nel font-semibold text-sm shadow-sm shadow-nel-purple/40 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-60"
+                className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] rounded-2xl bg-nel-pink hover:brightness-105 active:scale-[0.98] text-nel-violet font-dm font-semibold text-sm shadow-sm shadow-nel-purple/40 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-60"
               >
                 <Save className="w-4 h-4 text-nel-violet" />
                 <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>
