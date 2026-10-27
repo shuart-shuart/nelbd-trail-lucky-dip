@@ -1,0 +1,5 @@
+.nel-kiosk-root,.nel-staff-root{font-family:var(--font-body);}
+.nel-kiosk-root :is(h1),.nel-staff-root :is(h1){font-family:var(--font-display);letter-spacing:-.015em;}
+.nel-kiosk-root :is(h2,h3,h4,h5,h6,p,span,a,button,label,input,textarea,select,th,td,small,svg text),.nel-staff-root :is(h2,h3,h4,h5,h6,p,span,a,button,label,input,textarea,select,th,td,small,svg text){font-family:var(--font-body);}
+.nel-kiosk-root :is(.font-nel,.font-display,.font-heading):not(h1),.nel-staff-root :is(.font-nel,.font-display,.font-heading):not(h1){font-family:var(--font-body);}
+.nel-kiosk-root :is(button,a,input,select,textarea):focus-visible,.nel-staff-root :is(button,a,input,select,textarea):focus-visible{outline:3px solid var(--ui-focus);outline-offset:3px;}
