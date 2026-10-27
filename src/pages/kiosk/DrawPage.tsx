@@ -139,7 +139,7 @@ export const DrawPage: React.FC = () => {
           onClick={handleDraw}
           disabled={isDrawing}
           aria-label={isDrawing ? 'Drawing your prize...' : 'Tap to draw your prize'}
-          className={`relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 aspect-square rounded-full flex flex-col items-center justify-center select-none cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-pink transition-transform duration-200 ${
+          className={`relative w-[min(16rem,72vw,36dvh)] sm:w-[min(18rem,48dvh)] md:w-[min(20rem,50dvh)] aspect-square rounded-full flex flex-col items-center justify-center select-none cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-pink transition-transform duration-200 ${
             isDrawing ? 'scale-95 cursor-wait' : 'hover:scale-[1.02] active:scale-95'
           }`}
         >
@@ -184,7 +184,7 @@ export const DrawPage: React.FC = () => {
                 <span className="font-nel font-semibold text-2xl sm:text-3xl text-nel-violet leading-none tracking-tight">
                   TAP HERE
                 </span>
-                <span className="font-nel font-semibold text-4xl sm:text-5xl text-nel-violet leading-none tracking-tight mt-1 sm:mt-1.5">
+                <span className="font-nel font-semibold text-3xl sm:text-5xl text-nel-violet leading-none tracking-tight mt-1 sm:mt-1.5">
                   TO DRAW
                 </span>
               </>
