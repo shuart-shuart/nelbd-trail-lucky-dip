@@ -160,7 +160,7 @@ export const ResultPage: React.FC = () => {
         */}
         <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-purple/15 border-2 border-nel-purple outline outline-1 outline-offset-[-3px] outline-nel-purple/40 text-center mb-4">
           <p className="font-dm font-semibold text-base sm:text-lg text-nel-violet leading-tight">
-            Show this screen to our booth crew.
+            Show this screen and your Design Trail booklet to our booth crew.
           </p>
           {ticketNumber && (
             <p className="font-mono text-xs font-bold text-nel-purple mt-1 tracking-wide">
@@ -169,6 +169,7 @@ export const ResultPage: React.FC = () => {
           )}
         </div>
 
+        <p className="font-dm text-xs text-nel-violet mt-1">Prizes are subject to availability. Limited to one redemption per person.</p>
         {/* Automatic return to Welcome after three minutes on the result screen */}
         <div className="w-full max-w-sm">
           {/* Automatic Reset Countdown */}
