@@ -106,8 +106,9 @@ postgresAdminRouter.get('/dashboard-stats',async (_req,res)=>{
 postgresAdminRouter.get('/participants',async (req,res)=>{
   try {
     const limit=Math.min(1000,Math.max(1,Number(req.query.limit)||500));
+    const offset=Math.max(0,Math.min(1000000,Number(req.query.offset)||0));
     const {rows}=await getPool().query(`SELECT id,nickname,mobile_number AS "mobileNumber",
-      site,created_at AS "createdAt" FROM participants ORDER BY created_at DESC LIMIT $1`,[limit]);
+      site,created_at AS "createdAt" FROM participants ORDER BY created_at DESC,id DESC LIMIT $1 OFFSET $2`,[limit,offset]);
     return res.json(rows);
   } catch {return res.status(503).json({error:'Participants unavailable'});}
 });
