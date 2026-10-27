@@ -130,7 +130,7 @@ export const DrawPage: React.FC = () => {
 
         {/* Short Supporting Instruction */}
         <p className="font-dm font-semibold text-xl sm:text-2xl text-nel-pink mt-1 sm:mt-1.5 leading-[1.1]">
-          One tap. One surprise.
+          Eight stamps. One lucky dip.
         </p>
       </header>
 

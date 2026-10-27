@@ -104,9 +104,10 @@ export const DetailsPage: React.FC = () => {
 
         {/* Heading in NEL Rounded */}
         <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
-          Let's get your prize.
+          Ready for your Lucky Dip?
         </h1>
 
+        <p className="font-dm text-sm sm:text-base mt-3">Show your Design Trail booklet with at least eight embossed stamps to our booth crew before continuing.</p>
         {/* Booklet Dashed Divider */}
         <div className="w-full border-b-2 sm:border-b-4 border-dashed border-nel-purple/35 my-4" aria-hidden="true" />
 
@@ -210,7 +211,7 @@ export const DetailsPage: React.FC = () => {
           {/* Editorial Acknowledgement Notice */}
           <div className="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
             <p className="text-[11px] sm:text-xs text-nel-violet/90 leading-relaxed font-dm">
-              Your mobile number is used strictly to verify trail completion and check previous redemption (1 entry per participant).
+              Your mobile number is used to check previous Lucky Dip participation. Booklet stamps must be checked by booth crew. Limited to one redemption per person.
             </p>
           </div>
 
