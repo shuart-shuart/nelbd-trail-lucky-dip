@@ -2,3 +2,6 @@
 .nel-kiosk-root .kiosk-panel{background:var(--ui-panel);color:var(--ui-text);border-radius:var(--ui-radius);}
 .nel-kiosk-root .kiosk-accent{color:var(--ui-accent);}
 .nel-kiosk-root .kiosk-muted{color:var(--ui-muted);}
+
+.nel-kiosk-root .kiosk-sign-card{background:var(--nel-pink);color:var(--nel-violet);border-radius:28px;}
+@media(min-width:640px){.nel-kiosk-root .kiosk-sign-card{border-radius:32px;}}
