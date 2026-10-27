@@ -30,7 +30,7 @@ app.get('/api/lucky-dip/status', (req, res) => {
     service: 'NELBD Trail Lucky Dip Secure Server Engine',
     supportedSites: ['PDD', 'PS'],
     tiers: ['STANDARD', 'TOP'],
-    algorithmReady: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON),
+    algorithmReady: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL)),
     singaporeDate: getSingaporeCalendarDate(),
     timestamp: new Date().toISOString(),
   });
@@ -70,7 +70,7 @@ app.post('/api/lucky-dip/validate-participant', (req, res) => {
 // 3. Concurrency-safe atomic server-side draw endpoint
 app.post('/api/lucky-dip/draw', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  if (!process.env.FIREBASE_SERVICE_ACCOUNT_JSON) return res.status(503).json({success:false,error:'Prize draws are not configured. Please ask booth crew for assistance.'});
+  if (!(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL))) return res.status(503).json({success:false,error:'Prize draws are not configured. Please ask booth crew for assistance.'});
   try {
     const token = /^Bearer (.+)$/.exec(req.get('authorization') || '')?.[1] || '';
     await requireStaff(token);
