@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
+    "build:safe-preview": "vite build --config safe-preview.vite.config.ts",
+    "start:safe-preview": "node safe-preview-server.cjs",
     "start": "NODE_ENV=production node server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
