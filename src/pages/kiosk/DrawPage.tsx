@@ -94,30 +94,27 @@ export const DrawPage: React.FC = () => {
 
   return (
     <div className="kiosk-draw w-full min-h-[min(75dvh,780px)] flex flex-col items-center justify-center text-center my-auto py-4">
-      {/* Pink signage module surrounds a separate, accessible dark-violet draw button. */}
-      <div className="relative flex items-center justify-center w-full py-4">
-        <div className="kiosk-draw-module relative flex aspect-square w-[min(92vw,560px,65dvh)] max-w-full items-center justify-center rounded-full bg-nel-pink border-[3px] border-nel-violet shadow-[inset_0_0_0_12px_#FF8DC6,inset_0_0_0_14px_#270342]">
-          <button
-            type="button"
-            onClick={handleDraw}
-            disabled={isDrawing}
-            aria-label={isDrawing ? 'Drawing your prize' : 'Tap here to draw'}
-            aria-busy={isDrawing}
-            className={`kiosk-draw-action relative z-10 flex aspect-square w-[54%] items-center justify-center rounded-full bg-nel-violet border-2 border-nel-violet text-nel-pink shadow-[0_8px_16px_rgba(39,3,66,0.22)] select-none focus-visible:outline focus-visible:outline-[4px] focus-visible:outline-offset-[6px] focus-visible:outline-nel-violet transition-[transform,box-shadow] duration-200 motion-reduce:transition-none ${isDrawing ? 'scale-95 cursor-wait shadow-inner' : 'cursor-pointer hover:scale-[1.035] active:scale-95 active:shadow-inner'}`}
-          >
-            {isDrawing ? (
-              <span className="flex items-center justify-center" role="status" aria-label="Drawing your prize">
-                <span className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-4 border-nel-pink/40 border-t-nel-pink animate-spin motion-reduce:animate-none" aria-hidden="true" />
-                <span className="sr-only">Drawing your prize, please wait</span>
-              </span>
-            ) : (
-              <span style={{ fontFamily: '"NEL Rounded", sans-serif' }} className="font-semibold text-[clamp(0.85rem,3.5vw,1.5rem)] leading-tight tracking-tight px-2 text-center">
-                TAP HERE<br />TO DRAW
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
+      {/* Minimal draw screen: preserve the background stripe from the kiosk layout.
+          The entire pink circle is the touch target, with no extra heading or site pill. */}
+      <button
+        type="button"
+        onClick={handleDraw}
+        disabled={isDrawing}
+        aria-label={isDrawing ? 'Drawing your prize' : 'Tap here to draw'}
+        aria-busy={isDrawing}
+        className="kiosk-draw-module kiosk-draw-action relative flex aspect-square w-[min(88vw,560px,65dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet border-[8px] border-nel-pink shadow-[inset_0_0_0_2px_#270342] cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
+      >
+        {isDrawing ? (
+          <span className="flex items-center justify-center" role="status" aria-label="Drawing your prize">
+            <span className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-4 border-nel-violet/30 border-t-nel-violet animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            <span className="sr-only">Drawing your prize, please wait</span>
+          </span>
+        ) : (
+          <span className="font-dm font-bold text-[clamp(1.3rem,5vw,2.7rem)] leading-tight tracking-tight px-5">
+            TAP HERE<br />TO DRAW
+          </span>
+        )}
+      </button>
 
       {errorMessage && !isDrawing && (
         <div role="alert" className="w-full max-w-sm mt-3 p-4 rounded-2xl bg-nel-pink text-nel-violet border-2 border-nel-violet font-dm text-sm font-bold">
