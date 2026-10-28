@@ -100,7 +100,7 @@ export const DrawPage: React.FC = () => {
         HEADER SECTION
         Reduced excessive top whitespace, keeping heading and circle visually connected.
       */}
-      <header className="kiosk-draw-header mb-3 sm:mb-5">
+    < /* header className="kiosk-draw-header mb-3 sm:mb-5">
         <div className="inline-flex items-center gap-2 mb-1">
           <span className="font-dm font-bold text-[10px] sm:text-xs uppercase tracking-wider text-nel-pink/80">
             Step 2 of 2
@@ -117,10 +117,10 @@ export const DrawPage: React.FC = () => {
         </h1>
 
         {/* Short Supporting Instruction */}
-        <p className="font-dm font-semibold text-xl sm:text-2xl text-nel-pink mt-1 sm:mt-1.5 leading-[1.1]">
+    < /* p className="font-dm font-semibold text-xl sm:text-2xl text-nel-pink mt-1 sm:mt-1.5 leading-[1.1]">
           Eight stamps. One lucky dip.
         </p>
-      </header>
+      </header */ >
 
       {/* 
         CENTRAL INTERACTION:
