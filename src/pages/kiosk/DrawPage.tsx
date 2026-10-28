@@ -102,7 +102,7 @@ export const DrawPage: React.FC = () => {
         disabled={isDrawing}
         aria-label={isDrawing ? 'Drawing your prize' : 'Tap here to draw'}
         aria-busy={isDrawing}
-        className="kiosk-draw-module kiosk-draw-action relative flex aspect-square w-[min(88vw,560px,65dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet border-[8px] border-nel-pink shadow-[inset_0_0_0_2px_#270342] cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
+        className="kiosk-draw-module kiosk-draw-action relative flex aspect-square w-[min(88vw,560px,65dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet border-[8px] border-nel-violet cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
       >
         {isDrawing ? (
           <span className="flex items-center justify-center" role="status" aria-label="Drawing your prize">
