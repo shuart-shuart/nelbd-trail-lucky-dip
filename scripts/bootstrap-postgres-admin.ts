@@ -12,7 +12,7 @@ async function main() {
   }
   const email = (process.env.NELBD_BOOTSTRAP_EMAIL || '').trim().toLowerCase();
   const password = process.env.NELBD_BOOTSTRAP_PASSWORD || '';
-  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) throw new Error('Valid admin email required.');
+  if (!email.includes('@') || email.startsWith('@') || email.endsWith('@') || email.includes(' ')) throw new Error('Valid admin email required.');
   if (password.length < 16 || password.length > 256) throw new Error('Password must be 16–256 characters.');
   const pool = getPool();
   const client = await pool.connect();
