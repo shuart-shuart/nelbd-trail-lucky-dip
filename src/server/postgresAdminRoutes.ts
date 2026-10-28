@@ -123,3 +123,39 @@ postgresAdminRouter.get('/inventory-adjustments',async (req,res)=>{
     return res.json(rows);
   } catch {return res.status(503).json({error:'Inventory audit unavailable'});}
 });
+
+
+postgresAdminRouter.patch('/prizes/:id',async(req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  const {name,description,tier,isActive,imageUrl,icon}=req.body||{};
+  if(name!==undefined&&(typeof name!=='string'||!name.trim()||name.length>120)||
+     description!==undefined&&(typeof description!=='string'||description.length>2000)||
+     tier!==undefined&&!['TOP','STANDARD'].includes(tier)||
+     isActive!==undefined&&typeof isActive!=='boolean'||
+     imageUrl!==undefined&&(typeof imageUrl!=='string'||imageUrl.length>2000000)||
+     icon!==undefined&&(typeof icon!=='string'||icon.length>100))
+    return res.status(400).json({error:'Invalid prize fields'});
+  if(Object.keys(req.body||{}).some(k=>!['name','description','tier','isActive','imageUrl','icon'].includes(k)))
+    return res.status(400).json({error:'Unsupported prize field'});
+  try{
+    const result=await withTransaction(async client=>{
+      const current=await client.query('SELECT * FROM prizes WHERE id=$1 FOR UPDATE',[req.params.id]);
+      if(!current.rowCount)return null;
+      const old=current.rows[0];
+      const nextTier=tier??old.tier;
+      const nextActive=isActive??old.is_active;
+      if(nextTier==='TOP'&&nextActive){
+        const other=await client.query("SELECT id FROM prizes WHERE tier='TOP' AND is_active=true AND id<>$1 LIMIT 1",[req.params.id]);
+        if(other.rowCount)throw new Error('ONLY_ONE_TOP');
+      }
+      const updated=await client.query(`UPDATE prizes SET name=$2,description=$3,tier=$4,is_active=$5,
+        image_url=$6,icon=$7,updated_at=now() WHERE id=$1 RETURNING *`,
+        [req.params.id,name?.trim()??old.name,description??old.description,nextTier,nextActive,imageUrl??old.image_url,icon??old.icon]);
+      return updated.rows[0];
+    });
+    return result?res.json(result):res.status(404).json({error:'Prize not found'});
+  }catch(e){
+    if(e instanceof Error&&e.message==='ONLY_ONE_TOP')return res.status(409).json({error:'Only one active TOP prize is allowed'});
+    return res.status(503).json({error:'Prize update unavailable'});
+  }
+});
