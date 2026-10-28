@@ -99,3 +99,7 @@ export async function getAllPostgresParticipants() {
 export async function getPostgresInventoryAdjustments():Promise<import('../firebase/types').InventoryAdjustment[]> {
   return json('/inventory-adjustments');
 }
+
+export async function updatePostgresPrize(prizeId:string,changes:Partial<Pick<import('../firebase/types').Prize,'name'|'description'|'tier'|'isActive'|'imageUrl'|'icon'>>) {
+  return json<any>('/prizes/'+encodeURIComponent(prizeId),{method:'PATCH',body:JSON.stringify(changes)});
+}
