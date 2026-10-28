@@ -18,6 +18,11 @@ async function main() {
     await run(['scripts/apply-postgres-migrations.ts']);
     console.log('PostgreSQL migration completed. Starting server.');
   }
+  if (process.env.CONFIRM_NELBD_ADMIN_BOOTSTRAP === 'YES') {
+    console.log('One-time PostgreSQL administrator bootstrap requested.');
+    await run(['scripts/bootstrap-postgres-admin.ts']);
+    console.log('Administrator bootstrap completed.');
+  }
   await run(['server.ts']);
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
