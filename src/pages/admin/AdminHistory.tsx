@@ -57,7 +57,8 @@ export const AdminHistory: React.FC = () => {
             getPostgresDrawHistory(200),getPostgresParticipants(),getPostgresDashboardStats(),getPostgresPrizesWithInventory()
           ]);
           if(!active)return;
-          setDraws(latest);setParticipants(people);setTotalDrawsCount(stats.totalDraws);
+          setDraws(prev => prev.length > 200 ? Array.from(new Map([...latest,...prev].map(d=>[d.id,d])).values()).sort((a,b)=>new Date(b.drawnAt).getTime()-new Date(a.drawnAt).getTime()) : latest);
+          setParticipants(people);setTotalDrawsCount(stats.totalDraws);
           setHasMore(stats.totalDraws>latest.length);
           setPrizesMap(Object.fromEntries(catalogue.map(p=>[p.id,p.imageUrl||''])));
         }catch(err){console.error('PostgreSQL history refresh failed',err);}
