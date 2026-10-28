@@ -111,7 +111,7 @@ export const DrawPage: React.FC = () => {
                 <span className="sr-only">Drawing your prize, please wait</span>
               </span>
             ) : (
-              <span className="font-dm font-bold text-[clamp(1rem,3.8vw,1.5rem)] leading-tight tracking-tight px-3">
+              <span style={{ fontFamily: '"NEL Rounded", sans-serif' }} className="font-semibold text-[clamp(0.85rem,3.5vw,1.5rem)] leading-tight tracking-tight px-2 text-center">
                 TAP HERE<br />TO DRAW
               </span>
             )}
