@@ -13,7 +13,7 @@ export const DetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { session, setParticipantDetails, setTicketNumber, resetSession } = useKiosk();
 
-  const [name, setName] = useState(session.name || '');
+  const [name, setName] = useState(session.nickname || '');
   const [mobileNumber, setMobileNumber] = useState(
     session.mobileNumber ? session.mobileNumber.replace('+65', '') : ''
   );
