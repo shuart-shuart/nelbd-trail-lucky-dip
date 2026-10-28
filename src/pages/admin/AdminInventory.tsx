@@ -371,6 +371,12 @@ export const AdminInventory: React.FC = () => {
       setIsSubmittingEdit(true);
       setEditError(null);
       try {
+        if (!Number.isSafeInteger(editPddStarting) || editPddStarting < 0 ||
+            !Number.isSafeInteger(editPsStarting) || editPsStarting < 0)
+          throw new Error('Starting quantities must be nonnegative whole numbers.');
+        if ((editingPrize.pddInventory.claimedQuantity > 0 && editPddStarting !== editingPrize.pddInventory.allocatedQuantity) ||
+            (editingPrize.psInventory.claimedQuantity > 0 && editPsStarting !== editingPrize.psInventory.allocatedQuantity))
+          throw new Error('Starting quantities cannot be edited after claims. Use stock adjustment instead.');
         await updatePostgresPrize(editingPrize.id, {
           name: editName.trim(), tier: editTier, isActive: editIsActive, imageUrl: editImageUrl,
         });
