@@ -104,14 +104,14 @@ export const DetailsPage: React.FC = () => {
         BOOKLET EDITORIAL PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
         Follows the official signage reference with outer bold border and inset double outline.
       */}
-      <div className="kiosk-form-card kiosk-primary-panel w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-6 sm:p-8 border-[8px] border-nel-violet shadow-2xl">
+      <div className="kiosk-form-card kiosk-primary-panel kiosk-inset-frame w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-6 sm:p-8 shadow-2xl">
         
         {/* Step Header */}
         <div className="flex items-center justify-between pb-1">
-          <span className="font-dm font-bold text-[11px] sm:text-xs uppercase tracking-wider text-nel-purple">
+          <span className="font-dm font-bold text-xs sm:text-sm uppercase tracking-wider text-nel-purple">
             Step 1 of 2
           </span>
-          <span className="font-dm font-bold text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full bg-nel-purple text-white uppercase tracking-wider">
+          <span className="font-dm font-bold text-xs sm:text-sm px-2.5 py-0.5 rounded-full bg-nel-purple text-white uppercase tracking-wider">
             {session.site === 'PDD' ? 'Innovation Hub' : 'Impact Hub'}
           </span>
         </div>
@@ -120,7 +120,7 @@ export const DetailsPage: React.FC = () => {
         {/* <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
           Ready for your Lucky Dip?
         </h1> */}
-         <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">
+         <p id="mobile-help" className="mt-1 text-sm font-dm text-nel-purple/80">
                Limited to one redemption per person. 
             </p>
         {/* Form */}
