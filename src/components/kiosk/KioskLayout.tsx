@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PauseCircle } from 'lucide-react';
 import { useKiosk } from '../../context/KioskContext';
 
@@ -9,6 +9,7 @@ interface KioskLayoutProps {
 
 export const KioskLayout: React.FC<KioskLayoutProps> = ({ children }) => {
   const { session, settings, isSettingsLoading } = useKiosk();
+  const location = useLocation();
 
   // If kiosk is explicitly paused by admin
   const isPaused = !isSettingsLoading && settings && settings.kioskActive === false;
@@ -43,7 +44,7 @@ export const KioskLayout: React.FC<KioskLayoutProps> = ({ children }) => {
       </main>
 
       {/* Discreet site indicator in the bottom corner for staff reference (NO public navigation) */}
-      <aside
+      {location.pathname !== '/draw' && <aside
         className="fixed bottom-2 right-3 z-20 pointer-events-auto"
         aria-label="Staff site reference"
       >
@@ -55,7 +56,7 @@ export const KioskLayout: React.FC<KioskLayoutProps> = ({ children }) => {
         >
           {session.site || 'PDD'}
         </Link>
-      </aside>
+      </aside>}
     </div>
   );
 };
