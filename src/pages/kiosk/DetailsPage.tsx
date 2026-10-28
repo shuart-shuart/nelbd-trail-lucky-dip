@@ -221,8 +221,8 @@ export const DetailsPage: React.FC = () => {
           </div>
 
           {/* Editorial Acknowledgement Notice */}
-          <div /* className="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
-          </div>*/
+          {/* <div className="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
+          </div> */}
 
           {/* Signage-style Action Button */}
           <div className="pt-2">
