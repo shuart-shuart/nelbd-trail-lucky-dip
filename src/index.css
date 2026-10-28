@@ -140,7 +140,7 @@ input, textarea {
   content: "";
   position: absolute;
   inset: 8px;
-  border: 8px solid var(--nel-violet);
+  border: 0px solid var(--nel-violet);
   border-radius: max(8px, calc(1.5rem - 8px));
   pointer-events: none;
   z-index: 2;
@@ -149,7 +149,7 @@ input, textarea {
   border-radius: 8px;
 }
 .nel-kiosk-root .kiosk-draw .kiosk-inset-frame::after {
-  border-radius: 50%;
+  border-radius: 0;
 }
 .nel-kiosk-root .kiosk-inset-frame > * {
   position: relative;
