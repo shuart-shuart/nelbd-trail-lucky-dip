@@ -103,9 +103,9 @@ export const DetailsPage: React.FC = () => {
         </div>
 
         {/* Heading in NEL Rounded */}
-        <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
+        <h1 /*className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
           Ready for your Lucky Dip?
-        </h1>
+        </h1>*/
          <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">
                Limited to one redemption per person. 
             </p>
@@ -207,8 +207,8 @@ export const DetailsPage: React.FC = () => {
           </div>
 
           {/* Editorial Acknowledgement Notice */}
-          <div className="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
-          </div>
+          <div /* className="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
+          </div>*/
 
           {/* Signage-style Action Button */}
           <div className="pt-2">
