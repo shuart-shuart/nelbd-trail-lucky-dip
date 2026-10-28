@@ -129,11 +129,39 @@ input, textarea {
   font-family: "DM Sans", sans-serif;
 }
 
-/* Single, consistent 8px signage border on mobile and tablet. */
-.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline {
-  border: 8px solid var(--nel-violet);
+/* Unified inset frame: pink outer rim, one 8px dark-violet inner stroke. */
+.nel-kiosk-root .kiosk-inset-frame {
+  position: relative;
+  isolation: isolate;
+  border: 0;
   box-shadow: none;
 }
-.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline::after {
-  content: none;
+.nel-kiosk-root .kiosk-inset-frame::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 8px solid var(--nel-violet);
+  border-radius: max(8px, calc(1.5rem - 8px));
+  pointer-events: none;
+  z-index: 2;
+}
+.nel-kiosk-root .kiosk-welcome .kiosk-inset-frame::after {
+  border-radius: 8px;
+}
+.nel-kiosk-root .kiosk-draw .kiosk-inset-frame::after {
+  border-radius: 50%;
+}
+.nel-kiosk-root .kiosk-inset-frame > * {
+  position: relative;
+  z-index: 1;
+}
+/* Consistent legibility for participant-facing content on phone and tablet. */
+.nel-kiosk-root .kiosk-trail-intro,
+.nel-kiosk-root .kiosk-result-card > p {
+  font-size: clamp(1rem, 2.6vw, 1.25rem);
+  line-height: 1.45;
+}
+.nel-kiosk-root .kiosk-welcome-title {
+  font-size: clamp(2rem, 5.5vw, 3rem);
+  line-height: 1.1;
 }
