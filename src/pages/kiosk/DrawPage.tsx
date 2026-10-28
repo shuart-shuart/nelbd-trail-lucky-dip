@@ -102,7 +102,7 @@ export const DrawPage: React.FC = () => {
         disabled={isDrawing}
         aria-label={isDrawing ? 'Drawing your prize' : 'Tap here to draw'}
         aria-busy={isDrawing}
-        className="kiosk-draw-module kiosk-draw-action relative flex aspect-square w-[min(88vw,560px,65dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet border-[8px] border-nel-violet cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
+        className="kiosk-draw-module kiosk-draw-action kiosk-inset-frame relative flex aspect-square w-[min(88vw,560px,65dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
       >
         {isDrawing ? (
           <span className="flex items-center justify-center" role="status" aria-label="Drawing your prize">
@@ -110,7 +110,7 @@ export const DrawPage: React.FC = () => {
             <span className="sr-only">Drawing your prize, please wait</span>
           </span>
         ) : (
-          <span className="font-dm font-bold text-[clamp(1.3rem,5vw,2.7rem)] leading-tight tracking-tight px-5">
+          <span className="font-dm font-bold text-[clamp(1.5rem,5vw,2.75rem)] leading-tight tracking-tight px-5">
             TAP HERE<br />TO DRAW
           </span>
         )}
