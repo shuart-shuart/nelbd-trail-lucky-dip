@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
 import { executeServerLuckyDipDraw } from '../../api/luckyDipClient';
 import { DuplicateParticipantView } from '../../components/kiosk/DuplicateParticipantView';
-import { DrawPictogram } from '../../components/kiosk/DrawPictogram';
 
 export const DrawPage: React.FC = () => {
   const navigate = useNavigate();
@@ -94,140 +93,44 @@ export const DrawPage: React.FC = () => {
   }
 
   return (
-    <div className="kiosk-draw w-full flex flex-col items-center justify-between text-center my-auto py-2 sm:py-3">
-      
-      {/* 
-        HEADER SECTION
-        Reduced excessive top whitespace, keeping heading and circle visually connected.
-      */}
-    < /* header className="kiosk-draw-header mb-3 sm:mb-5">
-        <div className="inline-flex items-center gap-2 mb-1">
-          <span className="font-dm font-bold text-[10px] sm:text-xs uppercase tracking-wider text-nel-pink/80">
-            Step 2 of 2
-          </span>
-          <span className="text-nel-pink/40 font-bold">•</span>
-          <span className="font-dm font-bold text-[10px] sm:text-xs uppercase tracking-wider text-nel-pink">
-            Trail Lucky Dip
-          </span>
-        </div>
-
-        {/* Large Personalised Heading */}
-        <h1 className="font-nel font-semibold text-3xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.1]">
-          Ready, {nickname}?
-        </h1>
-
-        {/* Short Supporting Instruction */}
-    < /* p className="font-dm font-semibold text-xl sm:text-2xl text-nel-pink mt-1 sm:mt-1.5 leading-[1.1]">
-          Eight stamps. One lucky dip.
-        </p>
-      </header */ >
-
-      {/* 
-        CENTRAL INTERACTION:
-        CIRCULAR "TAP TO DRAW" SIGNAGE BUTTON
-        - Solid NEL Pink fill (#FF8DC6)
-        - Bold NEL Purple outer border (#7716B5)
-        - Thin inner purple outline (#7716B5) with consistent spacing
-        - Flat colours with no gradients, glow, or shadows
-        - True circular shape (aspect-square, rounded-full) at all screen sizes
-        - Reserved area for official PNG pictogram above the text
-        - Centred NEL Rounded SemiBold typography
-      */}
-      <div className="my-auto py-2 sm:py-4 flex flex-col items-center justify-center w-full">
-        <button
-          type="button"
-          onClick={handleDraw}
-          disabled={isDrawing}
-          aria-label={isDrawing ? 'Drawing your prize...' : 'Tap to draw your prize'}
-          className={`kiosk-draw-action relative w-[min(16rem,72vw,36dvh)] sm:w-[min(18rem,48dvh)] md:w-[min(20rem,50dvh)] aspect-square rounded-full flex flex-col items-center justify-center select-none cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-pink transition-transform duration-200 ${
-            isDrawing ? 'scale-95 cursor-wait' : 'hover:scale-[1.02] active:scale-95'
-          }`}
-        >
-          {/* Double-Outline Signage Circle SVG Background */}
-          <svg
-            viewBox="0 0 280 280"
-            className="absolute inset-0 w-full h-full pointer-events-none"
+    <div className="kiosk-draw w-full min-h-[min(75dvh,780px)] flex flex-col items-center justify-center text-center my-auto py-4">
+      {/* Pink signage module surrounds a separate, accessible dark-violet draw button. */}
+      <div className="relative flex items-center justify-center w-full py-4">
+        <div className="kiosk-draw-module relative flex aspect-square w-[min(92vw,560px,65dvh)] max-w-full items-center justify-center rounded-full bg-nel-pink border-[3px] border-nel-violet shadow-[inset_0_0_0_12px_#FF8DC6,inset_0_0_0_14px_#270342]">
+          <button
+            type="button"
+            onClick={handleDraw}
+            disabled={isDrawing}
+            aria-label={isDrawing ? 'Drawing your prize' : 'Tap here to draw'}
+            aria-busy={isDrawing}
+            className={`kiosk-draw-action relative z-10 flex aspect-square w-[54%] items-center justify-center rounded-full bg-nel-violet border-2 border-nel-violet text-nel-pink shadow-[0_8px_16px_rgba(39,3,66,0.22)] select-none focus-visible:outline focus-visible:outline-[4px] focus-visible:outline-offset-[6px] focus-visible:outline-nel-violet transition-[transform,box-shadow] duration-200 motion-reduce:transition-none ${isDrawing ? 'scale-95 cursor-wait shadow-inner' : 'cursor-pointer hover:scale-[1.035] active:scale-95 active:shadow-inner'}`}
           >
-            {/* Outer Bold Purple Border */}
-            <circle
-              cx="140"
-              cy="140"
-              r="132"
-              fill="#FF8DC6"
-              stroke="#270342"
-              strokeWidth="3"
-            />
-
-            {/* Inset Thin Inner Purple Outline */}
-            <circle
-              cx="140"
-              cy="140"
-              r="120"
-              fill="none"
-              stroke="#270342"
-              strokeWidth="1.5"
-            />
-          </svg>
-
-          {/* Central Signage Content */}
-          <div className="relative z-10 flex flex-col items-center justify-center p-3 text-center">
-            {!isDrawing ? (
-              <>
-                {/* 
-                  Reserved Graphic Area:
-                  Replaceable graphic component that supports transparent PNG.
-                  Left clean until official asset is provided. Dimensions are stable.
-                */}
-                <DrawPictogram />
-
-                {/* Centred Bold "TAP TO DRAW" Typography */}
-                <span className="font-dm font-bold text-2xl sm:text-3xl text-nel-violet leading-none tracking-tight">
-                  TAP HERE
-                </span>
-                <span className="font-dm font-bold text-3xl sm:text-5xl text-nel-violet leading-none tracking-tight mt-1 sm:mt-1.5">
-                  TO DRAW
-                </span>
-              </>
+            {isDrawing ? (
+              <span className="flex items-center justify-center" role="status" aria-label="Drawing your prize">
+                <span className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-4 border-nel-pink/40 border-t-nel-pink animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                <span className="sr-only">Drawing your prize, please wait</span>
+              </span>
             ) : (
-              /* Loading State */
-              <div className="flex flex-col items-center justify-center">
-                <div
-                  className="w-12 h-12 rounded-full border-4 border-nel-violet border-t-transparent animate-spin mb-2"
-                  aria-hidden="true"
-                />
-                <span className="font-dm font-bold text-lg sm:text-xl text-nel-violet tracking-wide">
-                  DRAWING...
-                </span>
-              </div>
+              <span style={{ fontFamily: '"NEL Rounded", sans-serif' }} className="font-semibold text-[clamp(0.85rem,3.5vw,1.5rem)] leading-tight tracking-tight px-2 text-center">
+                TAP HERE<br />TO DRAW
+              </span>
             )}
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
 
-      {/* Error Retry Message in Signage Double-Outline Box */}
       {errorMessage && !isDrawing && (
-        <div className="w-full max-w-sm mt-3 p-3.5 rounded-2xl bg-nel-pink text-nel-violet border-2 border-nel-purple outline outline-1 outline-offset-[-3px] outline-nel-purple/40 font-dm text-xs sm:text-sm font-bold">
+        <div role="alert" className="w-full max-w-sm mt-3 p-4 rounded-2xl bg-nel-pink text-nel-violet border-2 border-nel-violet font-dm text-sm font-bold">
           <p>{errorMessage}</p>
           <button
             type="button"
             onClick={handleDraw}
-            className="mt-2 px-4 py-1.5 rounded-xl bg-nel-violet text-nel-pink font-bold text-xs font-dm uppercase tracking-wider cursor-pointer border border-nel-purple"
+            className="mt-3 px-5 py-2 rounded-xl bg-nel-violet text-nel-pink font-bold text-sm min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-nel-violet"
           >
             Try Again
           </button>
         </div>
       )}
-
-      {/* 
-        DISCREET SITE INDICATOR FOOTER
-        Clean, non-interactive site indicator near bottom edge.
-        Removed repeated event title and horizontal divider as requested.
-      */}
-      <footer className="kiosk-draw-footer w-full mt-3 flex items-center justify-center" aria-hidden="true">
-        <span className="font-dm text-[11px] font-bold text-nel-pink tracking-wider uppercase">
-          {site}
-        </span>
-      </footer>
     </div>
   );
 };
