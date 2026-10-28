@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Save, CheckCircle2, Sliders, MapPin, Radio, PauseCircle, PlayCircle } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { saveKioskSettings, subscribeToKioskSettings } from '../../firebase/firestoreService';
+import { getPostgresSettings, savePostgresSettings } from '../../api/postgresAdminClient';
 import { Setting, DEFAULT_SETTINGS, SiteLocation } from '../../firebase/types';
 
 export const AdminSettings: React.FC = () => {
@@ -10,6 +11,10 @@ export const AdminSettings: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      getPostgresSettings().then(setSettings).catch((err) => console.error('PostgreSQL settings load failed', err));
+      return;
+    }
     const unsub = subscribeToKioskSettings((latest) => {
       setSettings(latest);
     });
@@ -21,7 +26,8 @@ export const AdminSettings: React.FC = () => {
     setIsSaving(true);
     setSaveSuccess(false);
     try {
-      await saveKioskSettings(settings);
+      if (import.meta.env.VITE_DATA_BACKEND === 'postgres') await savePostgresSettings(settings);
+      else await saveKioskSettings(settings);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
@@ -151,11 +157,9 @@ export const AdminSettings: React.FC = () => {
               <input
                 type="number"
                 min="1"
-                max="10"
+                max="1"
                 value={settings.maxDrawsPerParticipant || 1}
-                onChange={(e) =>
-                  setSettings({ ...settings, maxDrawsPerParticipant: parseInt(e.target.value) || 1 })
-                }
+                readOnly
                 className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-nel-purple/60 text-[#33224B] text-base sm:text-sm font-dm font-mono focus:border-nel-pink focus:outline-none"
               />
             </div>
@@ -187,7 +191,7 @@ export const AdminSettings: React.FC = () => {
             {saveSuccess && (
               <div className="p-3.5 rounded-xl bg-[#F0E8F9] border border-nel-pink/60 text-[#8649AC] text-xs flex items-center gap-2 font-dm font-semibold">
                 <CheckCircle2 className="w-4 h-4 text-[#8649AC] shrink-0" />
-                <span>Settings successfully committed to Cloud Firestore!</span>
+                <span>Settings successfully saved!</span>
               </div>
             )}
 

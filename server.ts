@@ -1,4 +1,7 @@
 import express from 'express';
+import { checkPostgres } from './src/server/postgres.ts';
+import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
+import { executePostgresLuckyDipDraw, checkPostgresMobileHasDrawn } from './src/server/postgresDrawEngine.ts';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { executeLuckyDipDraw } from './src/server/drawEngine.ts';
@@ -18,6 +21,11 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 // Enable JSON body parsing for API endpoints
 app.use(express.json());
 
+// PostgreSQL admin API is isolated behind a migration flag until the dashboard is migrated.
+if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
+  app.use('/api/admin', postgresAdminRouter);
+}
+
 // ---------------------------------------------------------------------------
 // LUCKY DIP BACKEND API ROUTES
 // ---------------------------------------------------------------------------
@@ -30,10 +38,23 @@ app.get('/api/lucky-dip/status', (req, res) => {
     service: 'NELBD Trail Lucky Dip Secure Server Engine',
     supportedSites: ['PDD', 'PS'],
     tiers: ['STANDARD', 'TOP'],
-    algorithmReady: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL)),
+    algorithmReady: process.env.DRAW_BACKEND === 'postgres' ? Boolean(process.env.DATABASE_URL) : Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL)),
     singaporeDate: getSingaporeCalendarDate(),
     timestamp: new Date().toISOString(),
   });
+});
+
+// Read-only migration diagnostic. Does not switch the active Firebase draw route.
+app.get('/api/migration/postgres-health', async (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ready: false, reason: 'DATABASE_URL_NOT_SET' });
+  try {
+    const ready = await checkPostgres();
+    return res.status(ready ? 200 : 503).json({ ready, database: 'postgresql' });
+  } catch (err) {
+    console.error('PostgreSQL health check failed:', err instanceof Error ? err.message : 'unknown');
+    return res.status(503).json({ ready: false, reason: 'DATABASE_CONNECTION_FAILED' });
+  }
 });
 
 // 2. Participant validation endpoint
@@ -67,6 +88,16 @@ app.post('/api/lucky-dip/validate-participant', (req, res) => {
   });
 });
 
+// Duplicate check only returns a boolean; never exposes participant PII.
+app.post('/api/lucky-dip/check-mobile', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (process.env.DRAW_BACKEND !== 'postgres') return res.status(404).json({ error: 'Unavailable' });
+  const mobile = req.body?.mobileNumber;
+  if (typeof mobile !== 'string' || mobile.length > 24) return res.status(400).json({error:'Invalid mobile'});
+  try { return res.json({ alreadyDrawn: await checkPostgresMobileHasDrawn(mobile) }); }
+  catch { return res.status(503).json({error:'Duplicate check unavailable'}); }
+});
+
 // Staff-only, read-only diagnostic. Never modifies inventory or participant records.
 app.get('/api/lucky-dip/staff-check', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -93,7 +124,7 @@ const drawAttempts = new Map<string, number[]>();
 // 3. Concurrency-safe atomic server-side draw endpoint
 app.post('/api/lucky-dip/draw', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  if (!(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL))) return res.status(503).json({success:false,error:'Prize draws are not configured. Please ask booth crew for assistance.'});
+  if (process.env.DRAW_BACKEND !== 'postgres' && !(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || (process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && process.env.GCP_SERVICE_ACCOUNT_EMAIL))) return res.status(503).json({success:false,error:'Prize draws are not configured. Please ask booth crew for assistance.'});
   // Staff checks the physical booklet before sharing the kiosk. No additional
   // Google sign-in is required for participants; duplicate and inventory rules
   // remain enforced atomically by executeLuckyDipDraw.
@@ -118,7 +149,7 @@ app.post('/api/lucky-dip/draw', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Invalid participant or ticket details.' });
   }
   try {
-    const result = await executeLuckyDipDraw({
+    const result = await (process.env.DRAW_BACKEND === 'postgres' ? executePostgresLuckyDipDraw : executeLuckyDipDraw)({
       nickname: body.nickname, mobileNumber: body.mobileNumber,
       site: body.site, ticketNumber: body.ticketNumber,
       kioskId: typeof body.kioskId === 'string' ? body.kioskId.slice(0, 64) : undefined,

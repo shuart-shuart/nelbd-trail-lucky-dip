@@ -43,6 +43,7 @@ import {
   InventoryAdjustment,
 } from '../../firebase/types';
 import { useAuth } from '../../context/AuthContext';
+import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining, updatePostgresPrize } from '../../api/postgresAdminClient';
 
 interface ParsedCsvItem {
   rowNumber: number;
@@ -128,6 +129,18 @@ export const AdminInventory: React.FC = () => {
 
   // Subscriptions
   useEffect(() => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      let active=true;
+      const refresh=async()=>{
+        try {
+          const [items,audit]=await Promise.all([getPostgresPrizesWithInventory(),getPostgresInventoryAdjustments()]);
+          if(active){setPrizes(items);setAdjustments(audit);}
+        }catch(err){console.error('PostgreSQL inventory refresh failed',err);}
+      };
+      void refresh();
+      const timer=setInterval(()=>void refresh(),15000);
+      return ()=>{active=false;clearInterval(timer);};
+    }
     const unsubPrizes = subscribeToPrizesWithInventory(setPrizes);
     const unsubAdj = subscribeToInventoryAdjustments(setAdjustments);
 
@@ -261,6 +274,7 @@ export const AdminInventory: React.FC = () => {
   // DIRECT IMAGE UPLOAD HANDLER
   // -------------------------------------------------------------
   const handleDirectImageUpload = async (prize: PrizeWithInventory, file: File) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Image editing is not yet supported on PostgreSQL.', 'error'); return; }
     setIsUploadingImageFor(prize.id);
     try {
       const dataUrl = await processPngUpload(file);
@@ -288,6 +302,7 @@ export const AdminInventory: React.FC = () => {
   };
 
   const handleSaveAddPrize = async (e: React.FormEvent) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize creation is not yet supported on PostgreSQL.', 'error'); return; }
     e.preventDefault();
     setAddError(null);
 
@@ -351,6 +366,33 @@ export const AdminInventory: React.FC = () => {
 
   const handleSaveEditPrize = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      if (!editingPrize) return;
+      setIsSubmittingEdit(true);
+      setEditError(null);
+      try {
+        if (!Number.isSafeInteger(editPddStarting) || editPddStarting < 0 ||
+            !Number.isSafeInteger(editPsStarting) || editPsStarting < 0)
+          throw new Error('Starting quantities must be nonnegative whole numbers.');
+        if ((editingPrize.pddInventory.claimedQuantity > 0 && editPddStarting !== editingPrize.pddInventory.allocatedQuantity) ||
+            (editingPrize.psInventory.claimedQuantity > 0 && editPsStarting !== editingPrize.psInventory.allocatedQuantity))
+          throw new Error('Starting quantities cannot be edited after claims. Use stock adjustment instead.');
+        await updatePostgresPrize(editingPrize.id, {
+          name: editName.trim(), tier: editTier, isActive: editIsActive, imageUrl: editImageUrl,
+        });
+        const updates: Promise<unknown>[] = [];
+        if (editPddStarting !== editingPrize.pddInventory.allocatedQuantity && editingPrize.pddInventory.claimedQuantity === 0)
+          updates.push(updatePostgresRemaining(editingPrize.id,'PDD',editPddStarting));
+        if (editPsStarting !== editingPrize.psInventory.allocatedQuantity && editingPrize.psInventory.claimedQuantity === 0)
+          updates.push(updatePostgresRemaining(editingPrize.id,'PS',editPsStarting));
+        await Promise.all(updates);
+        setPrizes(await getPostgresPrizesWithInventory());
+        setIsEditModalOpen(false);
+        showNotification('Prize updated successfully.');
+      } catch (err: any) { setEditError(err?.message || 'Unable to update prize.'); }
+      finally { setIsSubmittingEdit(false); }
+      return;
+    }
     if (!editingPrize) return;
     setEditError(null);
 
@@ -407,6 +449,7 @@ export const AdminInventory: React.FC = () => {
   };
 
   const handleConfirmDeleteFromEdit = async () => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize deletion is not yet supported on PostgreSQL.', 'error'); return; }
     if (!editingPrize) return;
     setIsDeletingFromEdit(true);
     setEditError(null);
@@ -475,7 +518,11 @@ export const AdminInventory: React.FC = () => {
 
     setIsSubmittingAdjustment(true);
     try {
-      await updateSiteInventoryQuantity({
+      if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+        await updatePostgresRemaining(adjustingPrize.id,adjustSite,calculatedNewRemaining);
+        const [items,audit]=await Promise.all([getPostgresPrizesWithInventory(),getPostgresInventoryAdjustments()]);
+        setPrizes(items);setAdjustments(audit);
+      } else await updateSiteInventoryQuantity({
         prizeId: adjustingPrize.id,
         prizeName: adjustingPrize.name,
         site: adjustSite,
@@ -501,6 +548,7 @@ export const AdminInventory: React.FC = () => {
   // DELETE / DEACTIVATE HANDLER
   // -------------------------------------------------------------
   const handleToggleActive = async (prize: PrizeWithInventory) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize activation is not yet supported on PostgreSQL.', 'error'); return; }
     const nextActive = !prize.isActive;
 
     // Check TOP prize rule when activating
@@ -522,6 +570,7 @@ export const AdminInventory: React.FC = () => {
   };
 
   const handleDeletePrize = async (prize: PrizeWithInventory) => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize deletion is not yet supported on PostgreSQL.', 'error'); return; }
     const drawCount = drawCountsByPrize[prize.id] || 0;
     const adjCount = adjustmentCountsByPrize[prize.id] || 0;
 

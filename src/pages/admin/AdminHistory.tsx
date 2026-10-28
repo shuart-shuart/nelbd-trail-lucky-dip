@@ -27,6 +27,7 @@ import {
   getPrizes,
 } from '../../firebase/firestoreService';
 import { Draw, DrawStatus, Participant, SiteLocation } from '../../firebase/types';
+import { getPostgresDrawHistory, getAllPostgresDrawHistory, getPostgresParticipants, getAllPostgresParticipants, getPostgresDashboardStats, getPostgresPrizesWithInventory } from '../../api/postgresAdminClient';
 
 export const AdminHistory: React.FC = () => {
   const [draws, setDraws] = useState<Draw[]>([]);
@@ -48,6 +49,24 @@ export const AdminHistory: React.FC = () => {
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      let active=true;
+      const refresh=async()=>{
+        try {
+          const [latest,people,stats,catalogue]=await Promise.all([
+            getPostgresDrawHistory(200),getPostgresParticipants(),getPostgresDashboardStats(),getPostgresPrizesWithInventory()
+          ]);
+          if(!active)return;
+          setDraws(prev => prev.length > 200 ? Array.from(new Map([...latest,...prev].map(d=>[d.id,d])).values()).sort((a,b)=>new Date(b.drawnAt).getTime()-new Date(a.drawnAt).getTime()) : latest);
+          setParticipants(people);setTotalDrawsCount(stats.totalDraws);
+          setHasMore(stats.totalDraws>latest.length);
+          setPrizesMap(Object.fromEntries(catalogue.map(p=>[p.id,p.imageUrl||''])));
+        }catch(err){console.error('PostgreSQL history refresh failed',err);}
+      };
+      void refresh();
+      const interval=setInterval(()=>void refresh(),15000);
+      return ()=>{active=false;clearInterval(interval);};
+    }
     // 1. Fetch total historical count via fast server aggregation
     getDrawsCount()
       .then((c) => setTotalDrawsCount(c))
@@ -90,6 +109,7 @@ export const AdminHistory: React.FC = () => {
 
   // Dedicated ticket code search directly against Firestore if not currently in loaded cache
   useEffect(() => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') return;
     const trimmed = searchQuery.trim().toUpperCase();
     if (trimmed.startsWith('NELBD-') && trimmed.length >= 10) {
       const alreadyLoaded = draws.some((d) => d.ticketNumber?.toUpperCase() === trimmed);
@@ -109,6 +129,17 @@ export const AdminHistory: React.FC = () => {
   }, [searchQuery, draws]);
 
   const handleLoadMore = async () => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      if(isLoadingMore||!hasMore)return;
+      setIsLoadingMore(true);
+      try {
+        const page=await getPostgresDrawHistory(200,draws.length);
+        setDraws(prev=>[...prev,...page.filter(d=>!prev.some(x=>x.id===d.id))]);
+        setHasMore(page.length===200);
+      }catch(err){console.error('PostgreSQL history pagination failed',err);}
+      finally{setIsLoadingMore(false);}
+      return;
+    }
     if (!lastVisibleDoc || isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     try {
@@ -134,7 +165,7 @@ export const AdminHistory: React.FC = () => {
     if (isLoadingAll) return;
     setIsLoadingAll(true);
     try {
-      const all = await fetchAllDraws();
+      const all = import.meta.env.VITE_DATA_BACKEND === 'postgres' ? await getAllPostgresDrawHistory() : await fetchAllDraws();
       setDraws(all);
       setHasMore(false);
       setLastVisibleDoc(null);
@@ -197,6 +228,7 @@ export const AdminHistory: React.FC = () => {
   const handleStatusChange = async (draw: Draw, newStatus: DrawStatus) => {
     setProcessingId(draw.id);
     try {
+      if (import.meta.env.VITE_DATA_BACKEND === 'postgres') throw new Error('PostgreSQL draws are immediately claimed and status changes are disabled.');
       await updateDrawStatus(draw.id, newStatus, draw.prizeId, draw.site);
     } catch (err) {
       console.error('Failed to update draw status:', err);
@@ -212,7 +244,7 @@ export const AdminHistory: React.FC = () => {
       try {
         let exportData: Draw[] = draws;
         if (draws.length < totalDrawsCount) {
-          exportData = await fetchAllDraws();
+          exportData = import.meta.env.VITE_DATA_BACKEND === 'postgres' ? await getAllPostgresDrawHistory() : await fetchAllDraws();
         }
         const filteredExport = exportData.filter((draw) => {
           const q = (searchQuery || '').toLowerCase();
@@ -254,7 +286,11 @@ export const AdminHistory: React.FC = () => {
       }
     } else {
       const headers = ['Nickname', 'Mobile Number', 'Registered Site', 'Registration Timestamp'];
-      const rows = filteredParticipants.map((p) => [
+      const participantsForExport = import.meta.env.VITE_DATA_BACKEND === 'postgres' ? await getAllPostgresParticipants() : filteredParticipants;
+      const rows = participantsForExport.filter((p) => {
+        const q=(searchQuery||'').toLowerCase();
+        return ((p.nickname||'').toLowerCase().includes(q)||(p.mobileNumber||'').toLowerCase().includes(q)) && (siteFilter==='all'||p.site===siteFilter);
+      }).map((p) => [
         `"${(p.nickname || '').replace(/"/g, '""')}"`,
         `"${p.mobileNumber || ''}"`,
         `"${p.site || ''}"`,

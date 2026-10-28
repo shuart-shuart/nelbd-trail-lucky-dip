@@ -52,7 +52,17 @@ export const DetailsPage: React.FC = () => {
     try {
       // Check if this mobile has already drawn a prize
       const normalized = normalizeSingaporeMobile(formattedMobile);
-      const alreadyDrawn = await checkMobileHasDrawn(normalized);
+      const alreadyDrawn = import.meta.env.VITE_DATA_BACKEND === 'postgres'
+        ? await (async () => {
+            const response = await fetch('/api/lucky-dip/check-mobile', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mobileNumber: normalized }),
+            });
+            if (!response.ok) throw new Error('Duplicate verification unavailable');
+            const data: { alreadyDrawn: boolean } = await response.json();
+            return data.alreadyDrawn;
+          })()
+        : await checkMobileHasDrawn(normalized);
 
       if (alreadyDrawn) {
         setIsDuplicate(true);
@@ -68,7 +78,11 @@ export const DetailsPage: React.FC = () => {
       navigate('/draw');
     } catch (err) {
       console.error('Mobile check error:', err);
-      // Fallback: proceed to draw where transactional lock verifies it securely
+      if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+        setMobileError('Unable to verify this number. Please try again or ask booth crew for assistance.');
+        return;
+      }
+      // Firebase legacy fallback: the draw engine still verifies duplicates.
       const normalized = normalizeSingaporeMobile(formattedMobile);
       const generatedTicket = `NELBD-${session.site}-${Math.floor(100000 + Math.random() * 900000)}`;
       setParticipantDetails(cleanNick, normalized);

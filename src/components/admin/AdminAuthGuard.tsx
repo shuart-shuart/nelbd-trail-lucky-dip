@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+const postgresMode = import.meta.env.VITE_DATA_BACKEND === 'postgres';
 import { useAuth, BOOTSTRAP_ADMIN_EMAIL } from '../../context/AuthContext';
 import { ShieldAlert, LogIn, Compass, ArrowLeft, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -8,7 +9,9 @@ interface AdminAuthGuardProps {
 }
 
 export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
-  const { user, isAdmin, loading, error, signInWithGoogle, signOut, clearError } = useAuth();
+  const { user, isAdmin, loading, error, signInWithGoogle, signInWithPassword, signOut, clearError } = useAuth();
+  const [email,setEmail]=useState('');
+  const [password,setPassword]=useState('');
 
   if (loading) {
     return (
@@ -37,10 +40,10 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
           </div>
 
           <p className="text-white/80 text-sm mb-6 leading-relaxed font-dm">
-            This protected console is restricted to authorized festival personnel. Sign in with your registered Google account to manage prize inventory, review draw history, and configure kiosk parameters.
+            This protected console is restricted to authorized festival personnel. Sign in with your authorized admin credentials to manage prize inventory, review draw history, and configure kiosk parameters.
           </p>
 
-          <div className="mb-6 p-3.5 rounded-2xl bg-nel-input border border-nel-purple/50 text-xs text-white/80 space-y-1 font-dm">
+          {!postgresMode && <div className="mb-6 p-3.5 rounded-2xl bg-nel-input border border-nel-purple/50 text-xs text-white/80 space-y-1 font-dm">
             <div className="font-bold text-nel-pink flex items-center gap-1.5">
               <span>Authorized Administrator:</span>
             </div>
@@ -50,7 +53,8 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
             <p className="text-[11px] text-white/60 pt-1 font-dm">
               Sign in with this Google account or another assigned festival staff account.
             </p>
-          </div>
+          </div>}
+
 
           {error && (
             <div className="mb-5 p-3 rounded-2xl bg-red-950/80 border border-red-700 text-xs text-red-200 flex items-start gap-2 font-dm">
@@ -67,13 +71,24 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
             </div>
           )}
 
-          <button
+          {postgresMode && <form onSubmit={(event)=>{event.preventDefault();void signInWithPassword(email,password);}} className="space-y-3">
+            <label className="block text-sm text-white/80">Admin email
+              <input type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)}
+                className="mt-1 w-full rounded-xl bg-white text-gray-900 px-3 py-3" />
+            </label>
+            <label className="block text-sm text-white/80">Password
+              <input type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)}
+                className="mt-1 w-full rounded-xl bg-white text-gray-900 px-3 py-3" />
+            </label>
+            <button type="submit" className="w-full py-3.5 rounded-2xl bg-nel-pink text-nel-violet font-semibold">Sign in</button>
+          </form>}
+          {!postgresMode && <button
             onClick={signInWithGoogle}
             className="w-full py-3.5 px-5 rounded-2xl bg-nel-pink hover:brightness-105 text-nel-violet font-nel font-semibold text-sm shadow-xl shadow-nel-purple/40 flex items-center justify-center gap-3 transition-all transform active:scale-98 cursor-pointer"
           >
             <LogIn className="w-5 h-5 text-nel-violet" />
             <span>Sign in with Google</span>
-          </button>
+          </button>}
 
           <div className="mt-6 pt-5 border-t border-nel-purple/30 flex items-center justify-between text-xs text-white/60 font-dm">
             <Link

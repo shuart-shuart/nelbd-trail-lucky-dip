@@ -24,6 +24,7 @@ import {
 } from '../../firebase/firestoreService';
 import { PrizeWithInventory, Draw, Setting, DEFAULT_SETTINGS, Participant } from '../../firebase/types';
 import { checkServerStatus } from '../../api/luckyDipClient';
+import { getPostgresPrizesWithInventory, getPostgresDashboardStats, getPostgresSettings } from '../../api/postgresAdminClient';
 
 export const AdminDashboard: React.FC = () => {
   const [prizes, setPrizes] = useState<PrizeWithInventory[]>([]);
@@ -42,6 +43,29 @@ export const AdminDashboard: React.FC = () => {
   const [seedMessage, setSeedMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      let active=true;
+      const refresh=async()=>{
+        try {
+          const [inventory,stats,config]=await Promise.all([
+            getPostgresPrizesWithInventory(),getPostgresDashboardStats(),getPostgresSettings()
+          ]);
+          if(!active)return;
+          setPrizes(inventory);
+          setTodayDraws(stats.todayDraws);
+          setTotalDrawsCount(stats.totalDraws);
+          setParticipants(Array.from({length:stats.totalParticipants},(_,i)=>({id:String(i),nickname:'',mobileNumber:'',site:'PDD',createdAt:''})));
+        setSettings(config);
+        } catch(err) {console.error('PostgreSQL dashboard refresh failed',err);}
+      };
+      void refresh();
+      const interval=setInterval(()=>void refresh(),15000);
+      checkServerStatus().then(res=>setServerState({
+        status:res.status,service:res.service,algorithmReady:res.algorithmReady,
+        singaporeDate:res.singaporeDate,algorithmStatus:res.algorithmReady?'PostgreSQL draw engine configured':'Draw engine unavailable'
+      })).catch(()=>{});
+      return ()=>{active=false;clearInterval(interval);};
+    }
     const unsubPrizes = subscribeToPrizesWithInventory(setPrizes);
     const unsubTodayDraws = subscribeToTodayDraws(setTodayDraws);
     const unsubSettings = subscribeToKioskSettings(setSettings);
@@ -121,6 +145,10 @@ export const AdminDashboard: React.FC = () => {
   });
 
   const handleSeed = async () => {
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      setSeedMessage('The PostgreSQL catalogue is managed through database migrations.');
+      return;
+    }
     setIsSeeding(true);
     setSeedMessage(null);
     try {
