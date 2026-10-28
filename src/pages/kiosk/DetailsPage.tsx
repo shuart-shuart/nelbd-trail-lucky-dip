@@ -106,6 +106,9 @@ export const DetailsPage: React.FC = () => {
         <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
           Ready for your Lucky Dip?
         </h1>
+         <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">
+               Limited to one redemption per person. 
+            </p>
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate className="w-full space-y-4 sm:space-y-5">
           
@@ -190,7 +193,7 @@ export const DetailsPage: React.FC = () => {
                 className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none font-dm"
               />
             </div>
-            <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">Please enter 8 digits, without spaces.</p>
+            <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">Please enter 8 digits, without spaces. Your mobile number is used to verify for repeated redemption, all information shared will not be held after the event.</p>
             {mobileError && (
               <p
                 id="mobile-error"
@@ -204,10 +207,7 @@ export const DetailsPage: React.FC = () => {
           </div>
 
           {/* Editorial Acknowledgement Notice */}
-          <div className="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
-            <p className="text-[11px] sm:text-xs text-nel-violet/90 leading-relaxed font-dm">
-              Your mobile number is used to check previous Lucky Dip participation, and your information is not held after the event. Limited to one redemption per person.
-            </p>
+          <div c/lassName="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
           </div>
 
           {/* Signage-style Action Button */}
