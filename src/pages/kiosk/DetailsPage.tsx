@@ -104,7 +104,7 @@ export const DetailsPage: React.FC = () => {
         BOOKLET EDITORIAL PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
         Follows the official signage reference with outer bold border and inset double outline.
       */}
-      <div className="kiosk-form-card kiosk-primary-panel w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-6 sm:p-8 border-4 border-nel-purple outline outline-2 outline-offset-[-6px] sm:outline-offset-[-8px] outline-nel-purple/40 shadow-2xl">
+      <div className="kiosk-form-card kiosk-primary-panel w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-6 sm:p-8 border-[8px] border-nel-violet shadow-2xl">
         
         {/* Step Header */}
         <div className="flex items-center justify-between pb-1">
