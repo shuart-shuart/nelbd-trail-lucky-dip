@@ -43,7 +43,7 @@ import {
   InventoryAdjustment,
 } from '../../firebase/types';
 import { useAuth } from '../../context/AuthContext';
-import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining } from '../../api/postgresAdminClient';
+import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining, updatePostgresPrize } from '../../api/postgresAdminClient';
 
 interface ParsedCsvItem {
   rowNumber: number;
@@ -365,8 +365,28 @@ export const AdminInventory: React.FC = () => {
   };
 
   const handleSaveEditPrize = async (e: React.FormEvent) => {
-    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize editing is not yet supported on PostgreSQL.', 'error'); return; }
     e.preventDefault();
+    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+      if (!editingPrize) return;
+      setIsSubmittingEdit(true);
+      setEditError(null);
+      try {
+        await updatePostgresPrize(editingPrize.id, {
+          name: editName.trim(), tier: editTier, isActive: editIsActive, imageUrl: editImageUrl,
+        });
+        const updates: Promise<unknown>[] = [];
+        if (editPddStarting !== editingPrize.pddInventory.allocatedQuantity && editingPrize.pddInventory.claimedQuantity === 0)
+          updates.push(updatePostgresRemaining(editingPrize.id,'PDD',editPddStarting));
+        if (editPsStarting !== editingPrize.psInventory.allocatedQuantity && editingPrize.psInventory.claimedQuantity === 0)
+          updates.push(updatePostgresRemaining(editingPrize.id,'PS',editPsStarting));
+        await Promise.all(updates);
+        setPrizes(await getPostgresPrizesWithInventory());
+        setIsEditModalOpen(false);
+        showNotification('Prize updated successfully.');
+      } catch (err: any) { setEditError(err?.message || 'Unable to update prize.'); }
+      finally { setIsSubmittingEdit(false); }
+      return;
+    }
     if (!editingPrize) return;
     setEditError(null);
 
