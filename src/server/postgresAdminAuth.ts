@@ -55,7 +55,9 @@ export async function logoutAdmin(req: Request,res: Response) {
 export function requireSameOrigin(req: Request,res: Response,next: NextFunction) {
   if (['GET','HEAD','OPTIONS'].includes(req.method)) return next();
   const origin=req.get('origin');
-  const expected=`${req.protocol}://${req.get('host')}`;
+  // Render terminates HTTPS at its reverse proxy, so req.protocol may be http.
+  // Compare the browser Origin against the public HTTPS host in production.
+  const expected=`${process.env.NODE_ENV === 'production' ? 'https' : req.protocol}://${req.get('host')}`;
   // Origin required for browser-originating mutating requests; do not allow blind cross-site posts.
   if (!origin || origin!==expected) return res.status(403).json({error:'Invalid request origin'});
   return next();
