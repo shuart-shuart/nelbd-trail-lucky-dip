@@ -90,7 +90,7 @@ export const ResultPage: React.FC = () => {
         - High-contrast prize name in oversized NEL Rounded SemiBold
         - Integrated pink/purple signage framing (no stark white blocks)
       */}
-      <div className="kiosk-result-card kiosk-primary-panel relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-5 sm:p-7 md:p-8 border-[8px] border-nel-violet shadow-2xl flex flex-col items-center justify-between">
+      <div className="kiosk-result-card kiosk-primary-panel kiosk-inset-frame relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-5 sm:p-7 md:p-8 shadow-2xl flex flex-col items-center justify-between">
         
         {/* Close control: ends this result session and returns to Welcome. */}
         <button
@@ -105,7 +105,7 @@ export const ResultPage: React.FC = () => {
 
         {/* Top Tag & Campaign Header */}
         <div className="w-full flex items-center justify-between pb-2 pr-12">
-          <span className="font-dm font-bold text-[10px] sm:text-xs text-nel-purple uppercase tracking-wider">
+          <span className="font-dm font-bold text-xs sm:text-sm text-nel-purple uppercase tracking-wider">
             New Everyday Life, By Design
           </span>
 
@@ -135,7 +135,7 @@ export const ResultPage: React.FC = () => {
           */}
           {prizeImageUrl && (
             <div className="mb-3 sm:mb-4">
-              <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl bg-nel-pink border-[8px] border-nel-violet p-2.5 sm:p-3 flex items-center justify-center">
+              <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl bg-nel-pink border-2 border-nel-violet p-2.5 sm:p-3 flex items-center justify-center">
                 <img
                   src={prizeImageUrl}
                   alt={prizeName}
@@ -158,18 +158,18 @@ export const ResultPage: React.FC = () => {
           Signage Information Panel: Redemption Instruction
           Uses square with double-outline styling and violet tint.
         */}
-        <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-purple/15 border-[8px] border-nel-violet text-center mb-4">
+        <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-purple/15 border-2 border-nel-violet text-center mb-4">
           <p className="font-dm font-semibold text-base sm:text-lg text-nel-violet leading-tight">
             Show this screen and your Design Trail booklet to our booth crew.
           </p>
           {ticketNumber && (
-            <p className="font-mono text-xs font-bold text-nel-purple mt-1 tracking-wide">
+            <p className="font-mono text-sm font-bold text-nel-purple mt-1 tracking-wide">
               Ticket: {ticketNumber}
             </p>
           )}
         </div>
 
-        <p className="font-dm text-xs text-nel-violet mt-1">Prizes are subject to availability. Limited to one redemption per person.</p>
+        <p className="font-dm text-sm text-nel-violet mt-1">Prizes are subject to availability. Limited to one redemption per person.</p>
         {/* Automatic return to Welcome after three minutes on the result screen */}
         <div className="w-full max-w-sm">
           {/* Automatic Reset Countdown */}
