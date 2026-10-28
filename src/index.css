@@ -128,3 +128,24 @@ input, textarea {
 .nel-kiosk-root :where(svg text) {
   font-family: "DM Sans", sans-serif;
 }
+
+/* Mobile/tablet welcome signage: crisp 8px inner outlines without shrinking touch targets. */
+.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline {
+  position: relative;
+  isolation: isolate;
+}
+.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 8px solid var(--nel-violet);
+  border-radius: 11px;
+  pointer-events: none;
+  z-index: 1;
+}
+@media (min-width: 640px) {
+  .nel-kiosk-root .kiosk-welcome .kiosk-signage-outline::after {
+    inset: 10px;
+    border-radius: 14px;
+  }
+}
