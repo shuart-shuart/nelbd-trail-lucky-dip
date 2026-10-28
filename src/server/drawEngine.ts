@@ -188,7 +188,12 @@ export async function executeLuckyDipDraw(
         }
 
         const existingDrawData = existingDrawSnap.data();
-        if (!existingDrawData) throw new Error('DRAW_NOT_FOUND');
+        if (!existingDrawData) {
+          const error = new Error('DRAW_LOOKUP_FAILED');
+          (error as any).userMessage =
+            'An existing draw record could not be verified for this participant. Please ask our booth crew for assistance.';
+          throw error;
+        }
         const existingTicket = (existingDrawData?.ticketNumber || '').trim().toUpperCase();
 
         // Security check: Only recover if the request ticketNumber explicitly matches the original draw ticket
