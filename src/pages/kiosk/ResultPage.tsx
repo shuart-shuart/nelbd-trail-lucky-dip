@@ -87,20 +87,10 @@ export const ResultPage: React.FC = () => {
           />
         </div>
 
-        {/* Celebration Headline */}
-        <div className="py-1">
-          <h1 className="font-nel font-semibold text-[clamp(2rem,5.8vw,3.4rem)] text-nel-violet tracking-tight uppercase leading-[1.05]">
-            YOU'VE WON!
-          </h1>
-        </div>
-
-        {/* Booklet Dashed Divider Line */}
-        <div className="w-full border-b border-solid border-nel-violet/25 my-2" aria-hidden="true" />
-
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-nel-violet text-nel-pink font-dm font-bold text-xs uppercase tracking-wider mb-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-nel-pink" aria-hidden="true" />
-            <span>Trail Reward Confirmed</span>
-          </div>
+        {/* Single prize announcement; name is part of the headline. */}
+        <h1 className="font-nel font-semibold text-[clamp(1.75rem,5.3vw,3.2rem)] text-nel-violet tracking-tight leading-[1.1] text-center text-balance px-2 py-2">
+          You've won {prizeName}!
+        </h1>
 
         {drawResult?.voucherClaimToken && (
           <form onSubmit={async e=>{
@@ -126,7 +116,7 @@ export const ResultPage: React.FC = () => {
           */}
           {prizeImageUrl && (
             <div className="mb-2">
-              <div className="w-[clamp(125px,23dvh,210px)] h-[clamp(125px,23dvh,210px)] rounded-2xl bg-nel-pink border-[3px] border-nel-violet p-2.5 sm:p-3 flex items-center justify-center">
+              <div className="w-[clamp(190px,34dvh,320px)] h-[clamp(190px,34dvh,320px)] rounded-2xl bg-nel-pink border-[3px] border-nel-violet p-2 sm:p-3 flex items-center justify-center">
                 <img
                   src={prizeImageUrl}
                   alt={prizeName}
@@ -136,10 +126,6 @@ export const ResultPage: React.FC = () => {
             </div>
           )}
 
-          {/* Actual Prize Name in Oversized NEL Rounded Typography */}
-          <div className="font-dm font-bold text-[clamp(1.55rem,4.4vw,2.55rem)] text-nel-violet leading-[1.08] tracking-tight px-2 break-words max-w-md">
-            {prizeName}
-          </div>
         </section>
 
         {/* Booklet Dashed Divider Line */}
@@ -150,11 +136,11 @@ export const ResultPage: React.FC = () => {
           Uses square with double-outline styling and violet tint.
         */}
         <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-violet/10 border-2 border-nel-violet text-center mb-2">
-          <p className="font-dm font-semibold text-sm sm:text-base text-nel-violet leading-tight">
+          <p className="font-dm font-normal text-xs sm:text-sm text-nel-violet leading-snug">
             Show this screen and your Design Trail booklet to our booth crew.
           </p>
           {ticketNumber && (
-            <p className="font-mono text-sm font-bold text-nel-violet/80 mt-1 tracking-wide">
+            <p className="font-dm text-xs font-medium text-nel-violet/80 mt-1">
               Ticket: {ticketNumber}
             </p>
           )}
