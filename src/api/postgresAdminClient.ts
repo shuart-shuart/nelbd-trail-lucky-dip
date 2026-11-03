@@ -62,7 +62,7 @@ export async function getPostgresPrizesWithInventory(): Promise<PrizeWithInvento
   for(const row of rows) {
     const prize=grouped.get(row.id)||{
       id:row.id,name:row.name,description:row.description,tier:row.tier,
-      icon:row.icon,imageUrl:row.imageUrl,isActive:row.isActive,
+      icon:row.icon,imageUrl:row.imageUrl,isActive:row.isActive,probability:row.probability||'normal',
       createdAt:'',updatedAt:''
     };
     const inv:SiteInventory={
@@ -100,7 +100,7 @@ export async function getPostgresInventoryAdjustments():Promise<import('../fireb
   return json('/inventory-adjustments');
 }
 
-export async function updatePostgresPrize(prizeId:string,changes:Partial<Pick<import('../firebase/types').Prize,'name'|'description'|'tier'|'isActive'|'imageUrl'|'icon'>>) {
+export async function updatePostgresPrize(prizeId:string,changes:Partial<Pick<import('../firebase/types').Prize,'name'|'description'|'tier'|'isActive'|'imageUrl'|'icon'|'probability'>>) {
   return json<any>('/prizes/'+encodeURIComponent(prizeId),{method:'PATCH',body:JSON.stringify(changes)});
 }
 
