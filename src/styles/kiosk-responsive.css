@@ -1,183 +1,334 @@
+/* NEL public kiosk — consolidated, mobile-first styles.
+   Palette: white, violet and pink. Single borders only; focus indicators remain.
+   Scope: .nel-kiosk-root (does not affect the staff portal). */
 
-/* Staff portal — white, violet and pink */
-.nel-staff-root {
-  /* Brand palette */
-  --staff-white: #fff;
-  --staff-ink: #302047;
-  --staff-violet: #7716b5;
-  --staff-accent: #e93e91;
-
-  /* Violet-derived neutrals */
-  --staff-muted: #62536f;
-  --staff-border: color-mix(in srgb, var(--staff-violet) 32%, white);
-  --staff-surface: color-mix(in srgb, var(--staff-violet) 5%, white);
-  --staff-hover: color-mix(in srgb, var(--staff-violet) 10%, white);
-
-  color: var(--staff-ink);
-  line-height: 1.5;
+/* 1. Design tokens and baseline */
+.nel-kiosk-root {
+  --kiosk-white: #fff;
+  --kiosk-violet: #270342;
+  --kiosk-pink: #ff8dc6;
+  --kiosk-violet-soft: color-mix(in srgb, var(--kiosk-violet) 9%, white);
+  --kiosk-violet-hover: color-mix(in srgb, var(--kiosk-violet) 13%, white);
+  --kiosk-violet-rule: color-mix(in srgb, var(--kiosk-violet) 30%, white);
+  font-family: "DM Sans", sans-serif;
+  color: var(--kiosk-violet);
+  min-height: 100dvh;
+  overflow-x: clip;
 }
 
-/* Accessibility */
-.nel-staff-root :is(button, a, input, select, textarea):focus-visible {
-  outline: 3px solid var(--staff-violet);
-  outline-offset: 2px;
+.nel-kiosk-root h1 {
+  font-family: "NEL Rounded", "NELRounded", sans-serif;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
-.nel-staff-root :is(button, a) {
-  touch-action: manipulation;
+.nel-kiosk-root :is(h2, h3, h4, h5, h6, p, span, label, button, input, textarea, select, a, small) {
+  font-family: "DM Sans", sans-serif;
 }
 
-.nel-staff-root :is(input, select, textarea) {
-  font-size: 16px;
+.nel-kiosk-root :is(input, select, textarea) { font-size: 16px; }
+.nel-kiosk-root :is(button, input) { touch-action: manipulation; }
+.nel-kiosk-root button { -webkit-tap-highlight-color: transparent; }
+
+/* An accessible focus indicator is not a decorative double outline. */
+.nel-kiosk-root :is(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid var(--kiosk-violet);
+  outline-offset: 3px;
+}
+.nel-kiosk-root :is(.kiosk-primary-action, .kiosk-venue-selected):focus-visible,
+.nel-kiosk-root .kiosk-draw-action:focus-visible {
+  outline-color: var(--kiosk-pink);
 }
 
-.nel-staff-root :is(input, textarea)::placeholder {
-  color: var(--staff-muted);
-  opacity: 1;
+/* 2. Page structure and connected trail */
+.nel-kiosk-root .kiosk-main {
+  width: 100%;
+  max-width: 720px;
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  padding-block: max(20px, env(safe-area-inset-top)) max(28px, env(safe-area-inset-bottom));
 }
 
-/* Form controls */
-.nel-staff-root :is(input, textarea, select).bg-nel-input {
-  background: var(--staff-white);
-  color: var(--staff-ink);
-  border-color: var(--staff-border);
+.nel-kiosk-root.kiosk-connected-trail { isolation: isolate; }
+.nel-kiosk-root .kiosk-trail-spine {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(38px, 11%, 72px);
+  background: var(--kiosk-violet-soft);
+}
+.nel-kiosk-root .kiosk-trail-content {
+  position: relative;
+  z-index: 1;
+  justify-content: flex-start;
+  min-height: 100dvh;
+}
+.nel-kiosk-root :is(.kiosk-welcome, .kiosk-details, .kiosk-draw, .kiosk-result) {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+}
+.nel-kiosk-root :is(.kiosk-details, .kiosk-draw, .kiosk-result) { margin-block: auto; }
+
+/* 3. Shared cards — a single visible border, no inset outlines */
+.nel-kiosk-root :is(.kiosk-signage-outline, .kiosk-form-card, .kiosk-result-card) {
+  border: 3px solid var(--kiosk-violet);
+  box-shadow: none;
+}
+.nel-kiosk-root .kiosk-signage-outline { position: relative; }
+.nel-kiosk-root :is(.kiosk-form-card, .kiosk-result-card) {
+  padding: clamp(18px, 4vw, 32px);
+  border-radius: 18px;
 }
 
-.nel-staff-root :is(input, textarea, select).bg-nel-input:focus {
-  border-color: var(--staff-violet);
+/* 4. Welcome screen */
+.nel-kiosk-root .kiosk-welcome {
+  max-width: 620px;
+  gap: clamp(14px, 2.5vw, 22px);
 }
-
-/* Input-style panels */
-.nel-staff-root div.bg-nel-input {
-  background: var(--staff-surface);
-  border-color: var(--staff-border);
-  color: var(--staff-ink);
+.nel-kiosk-root .kiosk-welcome-hero { padding: clamp(18px, 3vw, 28px); }
+.nel-kiosk-root .kiosk-welcome-header {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(12px, 3vw, 24px);
 }
-
-.nel-staff-root div.bg-nel-input button {
-  color: var(--staff-ink);
-}
-
-.nel-staff-root div.bg-nel-input button:hover {
-  color: var(--staff-violet);
-  background: var(--staff-hover);
-}
-
-/* Neutralise legacy button colour variants */
-.nel-staff-root div.bg-nel-input button:is(
-  [class*="bg-emerald"],
-  [class*="bg-amber"],
-  [class*="bg-[#F1EAF9]"]
-) {
-  background: var(--staff-white);
-  color: var(--staff-violet);
-  border: 1px solid var(--staff-border);
-  box-shadow: 0 1px 3px rgb(48 32 71 / 10%);
-}
-
-/* Secondary text */
-.nel-staff-root [class*="text-[#8A7C96]"],
-.nel-staff-root [class*="text-[#756784]"] {
-  color: var(--staff-muted);
-}
-
-/* Text wrapping */
-.nel-staff-root :is(p, span, label, th, td) {
-  overflow-wrap: break-word;
-}
-
-/* Tables */
-.nel-staff-root table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.nel-staff-root table thead {
-  background: var(--staff-ink);
-  color: var(--staff-white);
-}
-
-.nel-staff-root table thead th {
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.02em;
-  color: var(--staff-white);
+.nel-kiosk-root .kiosk-welcome-header p {
   white-space: normal;
+  overflow-wrap: normal;
+  line-height: 1.35;
+}
+.nel-kiosk-root .kiosk-welcome-header img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.nel-kiosk-root :is(.kiosk-brand-image, .kiosk-date-image) {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+}
+.nel-kiosk-root .kiosk-brand-image { justify-content: flex-start; }
+.nel-kiosk-root .kiosk-date-image { justify-content: flex-end; }
+.nel-kiosk-root .kiosk-brand-image img {
+  max-height: clamp(54px, 11vw, 110px);
+  object-position: left center;
+}
+.nel-kiosk-root .kiosk-date-image img {
+  max-height: clamp(48px, 10vw, 100px);
+  object-position: right top;
+}
+/* Preserve the latest intentional 40%-width date-art treatment. */
+.nel-kiosk-root .kiosk-welcome .kiosk-date-image {
+  justify-content: flex-start;
+  align-items: center;
+}
+.nel-kiosk-root .kiosk-welcome .kiosk-date-image img {
+  width: 40%;
+  max-width: 40%;
+  max-height: none;
+  object-position: left center;
+}
+.nel-kiosk-root .kiosk-welcome-hero > img {
+  max-height: min(33dvh, 330px);
+  margin: clamp(6px, 1.5vw, 14px) auto 0;
+}
+.nel-kiosk-root .kiosk-welcome-title {
+  margin: clamp(4px, 1vw, 10px) 0 0;
+  font-size: clamp(1.5rem, 4.6vw, 2.45rem);
+  line-height: 1.12;
+  letter-spacing: -.025em;
+}
+.nel-kiosk-root .kiosk-start-button {
+  min-width: 0;
+  min-height: clamp(72px, 11vw, 104px);
+  padding: 12px 18px;
+  gap: 12px;
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(18px, 4vw, 30px);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  box-shadow: none;
+}
+.nel-kiosk-root .kiosk-start-button > span:first-child {
+  width: clamp(52px, 8vw, 66px);
+  height: clamp(52px, 8vw, 66px);
+}
+.nel-kiosk-root .kiosk-start-button > span:last-child {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.nel-kiosk-root .kiosk-venue-card {
+  padding: clamp(6px, 1.3vw, 9px);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+}
+.nel-kiosk-root .kiosk-venue-track {
+  gap: clamp(5px, 1.2vw, 10px);
+  align-items: stretch;
+  overflow: visible;
+}
+.nel-kiosk-root .kiosk-venue-button {
+  min-width: 0;
+  min-height: 52px;
+  padding: 8px 6px;
+  border: 2px solid var(--kiosk-violet);
+  border-radius: 999px;
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(14px, 2.3vw, 17px);
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: normal;
+  text-wrap: balance;
+  transition: background-color .15s ease, color .15s ease;
+}
+.nel-kiosk-root .kiosk-venue-selected {
+  background: var(--kiosk-violet);
+  color: var(--kiosk-white);
+  border-color: var(--kiosk-violet);
+}
+.nel-kiosk-root .kiosk-venue-unselected {
+  background: transparent;
+  color: var(--kiosk-violet);
+}
+.nel-kiosk-root .kiosk-venue-unselected:hover { background: var(--kiosk-violet-hover); }
+
+/* 5. Details / forms */
+.nel-kiosk-root .kiosk-details form :is(input, button) { min-height: 52px; }
+.nel-kiosk-root .kiosk-form-card :is(input, .kiosk-primary-action) { min-height: 56px; }
+.nel-kiosk-root .kiosk-form-card input { border-color: var(--kiosk-violet); }
+.nel-kiosk-root .kiosk-primary-action {
+  background: var(--kiosk-violet);
+  color: var(--kiosk-white);
+  border-color: var(--kiosk-violet);
+  box-shadow: none;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
 }
 
-.nel-staff-root table tbody {
-  color: var(--staff-ink);
+/* 6. Draw screen */
+.nel-kiosk-root .kiosk-draw { gap: clamp(18px, 3dvh, 30px); }
+.nel-kiosk-root .kiosk-draw-header {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 620px;
+  padding: clamp(14px, 3vw, 24px);
+  background: var(--kiosk-violet);
+  border-radius: 18px;
+}
+.nel-kiosk-root .kiosk-draw-header :is(h1, p) {
+  color: var(--kiosk-white);
+  overflow-wrap: anywhere;
+}
+.nel-kiosk-root .kiosk-draw-action {
+  flex-shrink: 0;
+  width: min(82vw, 420px, 58dvh);
+  max-width: 100%;
+  box-shadow: none;
+}
+.nel-kiosk-root .kiosk-draw-action svg circle { vector-effect: non-scaling-stroke; }
+.nel-kiosk-root .kiosk-draw-action circle[stroke="#270342"] { stroke: var(--kiosk-violet); }
+.nel-kiosk-root .kiosk-draw-footer { position: relative; z-index: 1; }
+.nel-kiosk-root .kiosk-draw-footer span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: var(--kiosk-violet);
+  color: var(--kiosk-white);
 }
 
-.nel-staff-root table tbody tr:nth-child(even) {
-  background: var(--staff-surface);
+/* 7. Results and shared copy */
+.nel-kiosk-root .kiosk-result-card img { max-width: 100%; height: auto; }
+.nel-kiosk-root .kiosk-result-card section > div { overflow-wrap: anywhere; }
+.nel-kiosk-root .kiosk-result-card .border-dashed {
+  border-style: solid;
+  border-color: var(--kiosk-violet-rule);
 }
-
-.nel-staff-root table tbody tr:hover {
-  background: var(--staff-hover);
+.nel-kiosk-root .kiosk-result-card .font-nel:not(h1) { font-family: "DM Sans", sans-serif; }
+.nel-kiosk-root .kiosk-result-card .border-nel-purple { border-color: var(--kiosk-violet); }
+.nel-kiosk-root .kiosk-trail-intro {
+  max-width: 48ch;
+  margin: 12px auto 0;
+  font-size: clamp(14px, 1.8vw, 16px);
+  line-height: 1.45;
+  font-weight: 600;
 }
-
-.nel-staff-root table td {
-  line-height: 1.5;
-}
-
-.nel-staff-root table :is(td.font-mono, tbody.font-mono) {
-  font-variant-numeric: tabular-nums;
-}
-
-.nel-staff-root table tbody.font-mono td {
+.nel-kiosk-root .kiosk-trail-disclaimer {
+  max-width: 52ch;
+  margin: 0 auto;
   font-size: 13px;
+  line-height: 1.45;
 }
 
-.nel-staff-root table :is(th, td) {
-  vertical-align: middle;
+/* 8. Responsive refinements */
+@media (max-width: 380px) {
+  .nel-kiosk-root .kiosk-main { padding-inline: 12px; }
+  .nel-kiosk-root .kiosk-trail-spine { width: 38px; }
+  .nel-kiosk-root .kiosk-welcome-header { gap: 8px; }
+  .nel-kiosk-root .kiosk-welcome-header p { font-size: 14px; }
+  .nel-kiosk-root .kiosk-welcome-hero { padding: 14px; }
+  .nel-kiosk-root .kiosk-welcome-hero > img { max-height: min(29dvh, 220px); }
+  .nel-kiosk-root .kiosk-brand-image img { max-height: 66px; }
+  .nel-kiosk-root .kiosk-date-image img { max-height: 60px; }
+  .nel-kiosk-root .kiosk-welcome-title { font-size: clamp(1.35rem, 6vw, 1.65rem); }
+  .nel-kiosk-root .kiosk-start-button { min-height: 72px; gap: 10px; font-size: 18px; }
+  .nel-kiosk-root .kiosk-venue-track { gap: 4px; }
+  .nel-kiosk-root .kiosk-venue-card { padding: 6px; }
+  .nel-kiosk-root .kiosk-venue-button { min-height: 48px; padding-inline: 4px; font-size: 14px; }
+  .nel-kiosk-root .kiosk-venue-button svg { width: 14px; height: 14px; }
+  .nel-kiosk-root :is(.kiosk-form-card, .kiosk-result-card) { padding: 16px; }
 }
 
-/* Scrollable tables */
-.nel-staff-root .overflow-x-auto {
-  scrollbar-width: thin;
-  scrollbar-color: var(--staff-border) var(--staff-surface);
-}
-
-/* Tablet */
-@media (max-width: 1023px) {
-  .nel-staff-root table {
-    min-width: 680px;
-  }
-
-  .nel-staff-root main {
-    min-width: 0;
-  }
-}
-
-/* Mobile */
-@media (max-width: 767px) {
-  .nel-staff-root main {
-    padding-inline: 16px;
-  }
-
-  .nel-staff-root section {
-    min-width: 0;
-  }
-
-  .nel-staff-root button {
-    min-height: 40px;
-  }
-
-  .nel-staff-root .overflow-x-auto {
-    max-width: 100%;
+@media (min-width: 768px) {
+  .nel-kiosk-root .kiosk-main { max-width: 780px; padding-inline: 32px; padding-block: 28px 40px; }
+  .nel-kiosk-root .kiosk-welcome { max-width: 650px; }
+  .nel-kiosk-root .kiosk-brand-image img { max-height: 116px; }
+  .nel-kiosk-root .kiosk-date-image img { max-height: 104px; }
+  .nel-kiosk-root .kiosk-welcome-hero > img { max-height: min(38dvh, 400px); }
+  .nel-kiosk-root .kiosk-venue-button { min-height: 58px; }
+  .nel-kiosk-root :is(.kiosk-details, .kiosk-draw, .kiosk-result) {
+    max-width: 650px;
+    margin-inline: auto;
   }
 }
 
-/* Reduced motion */
+@media (max-height: 720px) {
+  .nel-kiosk-root .kiosk-welcome { gap: 10px; padding-block: 0; }
+  .nel-kiosk-root .kiosk-welcome-hero > img { max-height: min(25dvh, 220px); }
+  .nel-kiosk-root .kiosk-start-button { min-height: 64px; }
+  .nel-kiosk-root .kiosk-draw { gap: 10px; }
+  .nel-kiosk-root .kiosk-draw-header { padding: 10px 12px; }
+  .nel-kiosk-root .kiosk-draw-action { width: min(74vw, 35dvh); }
+}
+
+@media (max-height: 720px) and (orientation: landscape) {
+  .nel-kiosk-root .kiosk-main { justify-content: flex-start; padding-block: 12px 24px; }
+  .nel-kiosk-root .kiosk-welcome-hero > img { max-height: 24dvh; }
+  .nel-kiosk-root .kiosk-start-button { min-height: 60px; }
+  .nel-kiosk-root .kiosk-venue-button { min-height: 44px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .nel-staff-root *,
-  .nel-staff-root *::before,
-  .nel-staff-root *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  .nel-kiosk-root *,
+  .nel-kiosk-root *::before,
+  .nel-kiosk-root *::after {
     scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
   }
 }
