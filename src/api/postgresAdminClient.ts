@@ -56,6 +56,12 @@ export async function updatePostgresRemaining(prizeId:string,site:'PDD'|'PS',rem
   });
 }
 
+export async function updatePostgresStarting(prizeId:string,site:'PDD'|'PS',startingQuantity:number) {
+  return json<any>('/inventory/'+encodeURIComponent(prizeId)+'/'+site+'/starting',{
+    method:'POST',body:JSON.stringify({startingQuantity}),
+  });
+}
+
 export async function getPostgresPrizesWithInventory(): Promise<PrizeWithInventory[]> {
   const rows=await getPostgresInventory();
   const grouped=new Map<string,any>();
