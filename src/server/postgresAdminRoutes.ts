@@ -131,6 +131,44 @@ postgresAdminRouter.get('/grab-vouchers/summary',async (_req,res)=>{
     res.json({...raw,early_test_remaining:earlyTestRemaining});
   }catch {res.status(503).json({error:'Voucher summary unavailable'});}
 });
+/** Read-only delivery diagnostics. No tokens, voucher codes, URLs or recipient addresses returned. */
+postgresAdminRouter.get('/grab-vouchers/delivery-diagnostics',async (_req,res)=>{
+  if(res.locals.admin.role!=='super_admin') return res.status(403).json({error:'Super admin required'});
+  res.setHeader('Cache-Control','no-store');
+  const triggerUrl=process.env.NELBD_POWER_AUTOMATE_TRIGGER_URL||'';
+  let triggerHttps=false;
+  try {triggerHttps=new URL(triggerUrl).protocol==='https:';}catch {}
+  const configuration={
+    drawBackendPostgres:process.env.DRAW_BACKEND==='postgres',
+    fulfilmentEnabled:process.env.NELBD_GRAB_FULFILMENT_ENABLED==='YES',
+    automationEnabled:process.env.NELBD_POWER_AUTOMATE_ENABLED==='YES',
+    triggerConfigured:triggerHttps,
+    callbackKeyConfigured:(process.env.NELBD_POWER_AUTOMATE_CALLBACK_KEY||'').length>=32,
+    earlyTestEnabled:process.env.NELBD_GRAB_EARLY_TEST_20==='YES'
+  };
+  try {
+    const {rows}=await getPool().query(`SELECT
+      count(*) FILTER(WHERE c.status='awaiting_email')::int AS "awaitingEmail",
+      count(*) FILTER(WHERE c.status='queued')::int AS queued,
+      count(*) FILTER(WHERE c.status='processing')::int AS processing,
+      count(*) FILTER(WHERE c.status='sent')::int AS sent,
+      count(*) FILTER(WHERE c.status='failed')::int AS failed,
+      count(*) FILTER(WHERE c.status='queued' AND c.recipient_email IS NOT NULL
+        AND v.expires_at>now() AND (v.starts_at<=now() OR (
+          $1::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
+          AND v.starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
+          AND v.assigned_at IS NOT NULL AND v.assigned_at<v.starts_at)))::int AS "readyToDispatch",
+      min(c.updated_at) FILTER(WHERE c.status='queued') AS "oldestQueuedAt",
+      max(c.delivery_started_at) AS "mostRecentDispatchAt"
+      FROM grab_voucher_claim_sessions c
+      JOIN grab_voucher_codes v ON v.id=c.voucher_id
+    `,[configuration.earlyTestEnabled]);
+    return res.json({configuration,queue:rows[0]});
+  }catch{
+    return res.status(503).json({configuration,error:'Delivery queue diagnostics unavailable'});
+  }
+});
+
 /** Explicitly gated, authenticated and batched. Never returns plaintext codes or links. */
 postgresAdminRouter.post('/grab-vouchers/import-batch',async (req,res)=>{
   if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
