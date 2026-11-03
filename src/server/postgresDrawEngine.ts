@@ -56,12 +56,20 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
     const settings = await client.query('SELECT kiosk_active FROM kiosk_settings WHERE id=1');
     if (settings.rows[0]?.kiosk_active !== true) return failure('Lucky Dip is temporarily unavailable.');
     const top = await client.query('SELECT 1 FROM daily_top_awards WHERE singapore_date=$1', [singaporeDate]);
+    const throttlingEnabled = process.env.NELBD_PRIZE_THROTTLING_ENABLED === 'YES';
     const inventory = await client.query(
       `SELECT p.id,p.name,p.description,p.tier,p.image_url,i.remaining_quantity
        FROM prizes p JOIN site_inventory i ON i.prize_id=p.id
        WHERE p.is_active=true AND i.site=$1 AND i.remaining_quantity>0
          AND (p.tier<>'TOP' OR $2::boolean=false)
-       ORDER BY p.id FOR UPDATE OF i`, [site, Boolean(top.rowCount)]);
+         AND ($3::boolean=false OR NOT EXISTS (
+           SELECT 1 FROM prize_site_limits lim WHERE lim.prize_id=p.id AND lim.site=i.site
+           AND (lim.paused OR (lim.daily_cap IS NOT NULL AND
+             (SELECT count(*) FROM draws d WHERE d.prize_id=p.id AND d.site=i.site
+               AND (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date =
+                   (now() AT TIME ZONE 'Asia/Singapore')::date) >= lim.daily_cap))
+         ))
+       ORDER BY p.id FOR UPDATE OF i`, [site, Boolean(top.rowCount), throttlingEnabled]);
     const total = inventory.rows.reduce((sum, row) => sum + Number(row.remaining_quantity), 0);
     if (!total) return failure('No prize inventory is available at this hub. Please ask booth crew for assistance.');
     const pick = crypto.randomInt(total);
