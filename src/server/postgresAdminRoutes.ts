@@ -14,6 +14,38 @@ postgresAdminRouter.post('/logout', async (req,res) => {
   try { await logoutAdmin(req,res); } catch { res.status(503).json({error:'Logout unavailable'}); }
 });
 postgresAdminRouter.get('/me',(req,res)=>res.json(res.locals.admin));
+
+/** Prize-site throttles. NULL daily_cap means unlimited; zero means no awards. */
+postgresAdminRouter.get('/prize-limits',async (_req,res)=>{
+  try {
+    const {rows}=await getPool().query(`SELECT l.prize_id AS "prizeId",l.site,l.daily_cap AS "dailyCap",l.paused,
+      i.allocated_quantity AS "allocatedQuantity",i.remaining_quantity AS "remainingQuantity",
+      i.claimed_quantity AS "claimedQuantity",
+      (SELECT count(*)::int FROM draws d WHERE d.prize_id=l.prize_id AND d.site=l.site
+       AND (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date =
+       (now() AT TIME ZONE 'Asia/Singapore')::date) AS "awardedToday"
+      FROM prize_site_limits l JOIN site_inventory i ON i.prize_id=l.prize_id AND i.site=l.site
+      ORDER BY l.prize_id,l.site`);
+    res.json(rows);
+  } catch(e) {console.error('Prize limits read failed',e);res.status(503).json({error:'Prize limits unavailable'});}
+});
+postgresAdminRouter.put('/prize-limits/:prizeId/:site',async (req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  const {prizeId,site}=req.params;
+  const {dailyCap,paused}=req.body||{};
+  if(!['PDD','PS'].includes(site)||typeof paused!=='boolean'||
+     !(dailyCap===null||(Number.isSafeInteger(dailyCap)&&dailyCap>=0&&dailyCap<=1000000)))
+    return res.status(400).json({error:'Invalid daily cap or pause setting'});
+  try {
+    const {rows}=await getPool().query(`UPDATE prize_site_limits
+      SET daily_cap=$3,paused=$4,updated_at=now()
+      WHERE prize_id=$1 AND site=$2 RETURNING prize_id AS "prizeId",site,daily_cap AS "dailyCap",paused`,
+      [prizeId,site,dailyCap,paused]);
+    if(!rows.length)return res.status(404).json({error:'Prize-site allocation not found'});
+    res.json(rows[0]);
+  }catch(e){console.error('Prize limit update failed',e);res.status(503).json({error:'Prize limit update unavailable'});}
+});
+
 postgresAdminRouter.get('/inventory',async (_req,res)=>{
   try {
     const {rows}=await getPool().query(`SELECT p.id,p.name,p.description,p.tier,p.icon,p.image_url AS "imageUrl",
