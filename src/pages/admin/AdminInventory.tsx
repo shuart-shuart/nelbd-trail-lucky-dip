@@ -1235,7 +1235,9 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                               <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
                               <div>
                                 <button type="button" onClick={() => handleOpenAdjust(prize,'PDD')} className="font-black text-[#8649AC] text-base underline decoration-dotted" aria-label={`Edit PDD remaining stock for ${prize.name}`}>{pddRem}</button>
-                                <span className="text-[#33224B]/50 text-xs"> / {pddStart}</span>
+                                <button type="button" onClick={() => handleOpenAdjust(prize,'PDD','starting')}
+                                  aria-label={`Edit PDD starting stock for ${prize.name}`}
+                                  className="text-[#33224B]/50 text-xs underline decoration-dotted"> / {pddStart}</button>
                               </div>
                             </div>
                           </div>
@@ -1253,7 +1255,9 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                               <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
                               <div>
                                 <button type="button" onClick={() => handleOpenAdjust(prize,'PS')} className="font-black text-sky-300 text-base underline decoration-dotted" aria-label={`Edit PS remaining stock for ${prize.name}`}>{psRem}</button>
-                                <span className="text-[#33224B]/50 text-xs"> / {psStart}</span>
+                                <button type="button" onClick={() => handleOpenAdjust(prize,'PS','starting')}
+                                  aria-label={`Edit PS starting stock for ${prize.name}`}
+                                  className="text-[#33224B]/50 text-xs underline decoration-dotted"> / {psStart}</button>
                               </div>
                             </div>
                           </div>
@@ -1347,9 +1351,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </td>
 
                             {/* PDD Starting Quantity */}
-                            <td className="px-4 py-4 text-center font-bold text-[#645574]">
-                              {pddStart}
-                            </td>
+                            <td className="px-4 py-4 text-center font-bold text-[#645574] cursor-pointer hover:bg-[#EEE4FA] underline decoration-dotted underline-offset-4"
+                              role="button" tabIndex={0}
+                              onDoubleClick={() => handleOpenAdjust(prize,'PDD','starting')}
+                              onKeyDown={e => {if(e.key==='Enter'||e.key===' '){e.preventDefault();handleOpenAdjust(prize,'PDD','starting');}}}
+                              aria-label={`Double-click to edit PDD starting stock for ${prize.name}`}
+                              title="Double-click to edit PDD starting stock">{pddStart}</td>
 
                             {/* PDD Remaining Quantity */}
                             <td className="px-4 py-4 text-center font-black text-[#8649AC] cursor-pointer hover:bg-[#EEE4FA] underline decoration-dotted underline-offset-4"
@@ -1361,9 +1368,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PDD')}</td>
 
                             {/* PS Starting Quantity */}
-                            <td className="px-4 py-4 text-center font-bold text-[#645574]">
-                              {psStart}
-                            </td>
+                            <td className="px-4 py-4 text-center font-bold text-[#645574] cursor-pointer hover:bg-[#EEE4FA] underline decoration-dotted underline-offset-4"
+                              role="button" tabIndex={0}
+                              onDoubleClick={() => handleOpenAdjust(prize,'PS','starting')}
+                              onKeyDown={e => {if(e.key==='Enter'||e.key===' '){e.preventDefault();handleOpenAdjust(prize,'PS','starting');}}}
+                              aria-label={`Double-click to edit PS starting stock for ${prize.name}`}
+                              title="Double-click to edit PS starting stock">{psStart}</td>
 
                             {/* PS Remaining Quantity */}
                             <td className="px-4 py-4 text-center font-black text-sky-300 cursor-pointer hover:bg-[#EEE4FA] underline decoration-dotted underline-offset-4"
