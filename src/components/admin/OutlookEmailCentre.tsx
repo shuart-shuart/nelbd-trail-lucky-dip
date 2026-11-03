@@ -1,4 +1,5 @@
 import React,{useEffect,useState} from 'react';
+import {GrabCsvImporter} from './GrabCsvImporter';
 import {getGrabVoucherSummary,type GrabVoucherSummary} from '../../api/postgresAdminClient';
 type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string};
 type Draft={to:string;subject:string;body:string;status:string;ticketNumber:string};
@@ -46,6 +47,7 @@ export function OutlookEmailCentre(){
   <p className="text-sm mb-4">Manual sending only from nelbd@designsingapore.org. Review the recipient, copy the prepared message, send using that Outlook mailbox, then mark as sent. This dashboard does not send emails.</p>
   {error&&<p role="status" className="text-sm mb-3 text-[#7F003D]">{error}</p>}
   <p className="text-sm mb-3 rounded-lg bg-[#F6F0FB] p-3">Grab voucher codes: {stock?.total??'—'} imported · {stock?.unassigned??'—'} unassigned · {stock?.currently_eligible??'—'} eligible today · {stock?.assigned??'—'} assigned. Real voucher import remains disabled pending security approval.</p>
+  <GrabCsvImporter onImported={()=>void refresh()}/>
   <div className="overflow-x-auto">
    <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
    <tbody>{rows.map(row=><tr key={row.drawId} className="border-t">
