@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useKiosk } from '../../context/KioskContext';
 import {
   isValidSingaporeMobile,
@@ -100,32 +100,22 @@ export const DetailsPage: React.FC = () => {
 
   return (
     <div className="kiosk-details w-full flex flex-col justify-center my-auto py-1">
-      {/* 
-        BOOKLET EDITORIAL PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
-        Follows the official signage reference with outer bold border and inset double outline.
-      */}
       <div className="kiosk-form-card kiosk-primary-panel w-full bg-nel-pink text-nel-violet rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-none">
-        
-        {/* Step Header */}
-        <div className="flex items-center justify-between pb-1">
+        <div className="flex items-center justify-between gap-3">
           <span className="font-dm font-bold text-xs sm:text-sm uppercase tracking-wider text-nel-violet">
             Step 1 of 2
           </span>
-          <span className="font-dm font-bold text-xs sm:text-sm px-2.5 py-0.5 rounded-full bg-nel-pink text-nel-violet border-2 border-nel-violet uppercase tracking-wider">
+          <span className="font-dm font-semibold text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-nel-pink text-nel-violet border border-nel-violet uppercase tracking-wide whitespace-nowrap">
             {session.site === 'PDD' ? 'Innovation Hub' : 'Impact Hub'}
           </span>
         </div>
-
-        {/* Heading in NEL Rounded */}
-        {/* <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
-          Ready for your Lucky Dip?
-        </h1> */}
-         <p id="mobile-help" className="mt-1 text-sm font-dm text-nel-violet/85">
-               Limited to one redemption per person. 
-            </p>
-        {/* Form */}
+        <h1 className="font-nel font-semibold text-[clamp(1.75rem,5vw,2rem)] text-nel-violet leading-tight mt-2">
+          Your details
+        </h1>
+        <p className="mt-1 mb-3 text-sm font-dm text-nel-violet">
+          One redemption per person.
+        </p>
         <form onSubmit={handleSubmit} noValidate className="w-full space-y-3 sm:space-y-4">
-          
           {/* Name Field */}
           <div>
             <label
@@ -192,7 +182,7 @@ export const DetailsPage: React.FC = () => {
                 type="tel"
                 inputMode="numeric"
                 aria-invalid={!!mobileError}
-                aria-describedby={mobileError ? "mobile-error" : "mobile-help"}
+                aria-describedby={mobileError ? "mobile-error mobile-help" : "mobile-help"}
                 pattern="[0-9]*"
                 autoComplete="tel-national"
                 required
@@ -207,7 +197,7 @@ export const DetailsPage: React.FC = () => {
                 className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none font-dm"
               />
             </div>
-            <p id="mobile-help" className="mt-1 text-xs font-dm text-nel-violet">Please enter 8 digits, without spaces. Your mobile number is used to verify for repeated redemption, all information shared will not be held after the event.</p>
+            <p id="mobile-help" className="mt-1 text-xs font-dm text-nel-violet">8 digits, no spaces.</p>
             {mobileError && (
               <p
                 id="mobile-error"
@@ -220,22 +210,18 @@ export const DetailsPage: React.FC = () => {
             )}
           </div>
 
-          {/* Editorial Acknowledgement Notice */}
-          {/* <div className="p-3 rounded-xl bg-nel-purple/10 border border-nel-violet">
-          </div> */}
-
           {/* Signage-style Action Button */}
           <div className="pt-2">
             <button
               type="submit"
               disabled={isChecking}
-              className="kiosk-primary-action w-full min-h-[52px] py-3 px-6 rounded-2xl bg-nel-violet text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-0 shadow-none flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="kiosk-primary-action w-full min-h-[48px] py-2.5 px-6 rounded-2xl bg-nel-violet text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-0 shadow-none flex items-center justify-center cursor-pointer disabled:opacity-60 focus-visible:outline-none"
             >
               <span>{isChecking ? 'VERIFYING...' : 'CONTINUE'}</span>
-              {!isChecking && <ArrowRight className="w-6 h-6 text-nel-pink stroke-[2.5]" aria-hidden="true" />}
             </button>
           </div>
         </form>
+        <p className="mt-3 text-xs font-dm text-nel-violet/85 text-center leading-snug">Your number is used to prevent repeat redemptions. Information shared will not be held after the event.</p>
       </div>
     </div>
   );
