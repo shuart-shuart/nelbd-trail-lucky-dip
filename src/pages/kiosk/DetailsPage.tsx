@@ -108,10 +108,10 @@ export const DetailsPage: React.FC = () => {
         
         {/* Step Header */}
         <div className="flex items-center justify-between pb-1">
-          <span className="font-dm font-bold text-xs sm:text-sm uppercase tracking-wider text-nel-purple">
+          <span className="font-dm font-bold text-xs sm:text-sm uppercase tracking-wider text-nel-violet">
             Step 1 of 2
           </span>
-          <span className="font-dm font-bold text-xs sm:text-sm px-2.5 py-0.5 rounded-full bg-nel-purple text-white uppercase tracking-wider">
+          <span className="font-dm font-bold text-xs sm:text-sm px-2.5 py-0.5 rounded-full bg-nel-pink text-nel-violet border-2 border-nel-violet uppercase tracking-wider">
             {session.site === 'PDD' ? 'Innovation Hub' : 'Impact Hub'}
           </span>
         </div>
@@ -151,16 +151,16 @@ export const DetailsPage: React.FC = () => {
               className={`w-full min-h-[50px] px-4 py-3 rounded-xl bg-nel-pink border-2 text-base sm:text-lg font-dm font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none focus:ring-4 transition-all ${
                 nameError
                   ? 'border-red-600 focus:ring-red-300'
-                  : 'border-nel-purple/80 focus:border-nel-violet focus:ring-nel-purple/20'
+                  : 'border-nel-violet focus:border-nel-violet focus:ring-nel-violet/20'
               }`}
             />
             {nameError && (
               <p
                 id="name-error"
                 role="alert"
-                className="mt-1.5 text-xs sm:text-sm font-bold text-nel-purple flex items-center gap-1 font-dm"
+                className="mt-1.5 text-xs sm:text-sm font-bold text-nel-violet flex items-center gap-1 font-dm"
               >
-                <AlertCircle className="w-4 h-4 text-nel-purple shrink-0" aria-hidden="true" />
+                <AlertCircle className="w-4 h-4 text-nel-violet shrink-0" aria-hidden="true" />
                 <span>{nameError}</span>
               </p>
             )}
@@ -178,11 +178,11 @@ export const DetailsPage: React.FC = () => {
               className={`flex items-center min-h-[50px] rounded-xl bg-nel-pink border-2 overflow-hidden focus-within:ring-4 transition-all ${
                 mobileError
                   ? 'border-red-600 focus-within:ring-red-300'
-                  : 'border-nel-purple/80 focus-within:border-nel-violet focus-within:ring-nel-purple/20'
+                  : 'border-nel-violet focus-within:border-nel-violet focus-within:ring-nel-violet/20'
               }`}
             >
               <span
-                className="pl-4 pr-3 py-3 text-base sm:text-lg font-bold text-nel-purple border-r-2 border-nel-purple/25 select-none font-dm"
+                className="pl-4 pr-3 py-3 text-base sm:text-lg font-bold text-nel-violet border-r-2 border-nel-violet select-none font-dm"
                 aria-hidden="true"
               >
                 +65
@@ -207,21 +207,21 @@ export const DetailsPage: React.FC = () => {
                 className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none font-dm"
               />
             </div>
-            <p id="mobile-help" className="mt-1 text-xs font-dm text-nel-purple/80">Please enter 8 digits, without spaces. Your mobile number is used to verify for repeated redemption, all information shared will not be held after the event.</p>
+            <p id="mobile-help" className="mt-1 text-xs font-dm text-nel-violet">Please enter 8 digits, without spaces. Your mobile number is used to verify for repeated redemption, all information shared will not be held after the event.</p>
             {mobileError && (
               <p
                 id="mobile-error"
                 role="alert"
-                className="mt-1.5 text-xs sm:text-sm font-bold text-nel-purple flex items-center gap-1 font-dm"
+                className="mt-1.5 text-xs sm:text-sm font-bold text-nel-violet flex items-center gap-1 font-dm"
               >
-                <AlertCircle className="w-4 h-4 text-nel-purple shrink-0" aria-hidden="true" />
+                <AlertCircle className="w-4 h-4 text-nel-violet shrink-0" aria-hidden="true" />
                 <span>{mobileError}</span>
               </p>
             )}
           </div>
 
           {/* Editorial Acknowledgement Notice */}
-          {/* <div className="p-3 rounded-xl bg-nel-purple/10 border border-nel-purple/25">
+          {/* <div className="p-3 rounded-xl bg-nel-purple/10 border border-nel-violet">
           </div> */}
 
           {/* Signage-style Action Button */}
@@ -229,7 +229,7 @@ export const DetailsPage: React.FC = () => {
             <button
               type="submit"
               disabled={isChecking}
-              className="kiosk-primary-action w-full min-h-[52px] py-3 px-6 rounded-2xl bg-nel-violet hover:bg-[#340557] active:scale-[0.98] text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-purple/50 shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-purple"
+              className="kiosk-primary-action w-full min-h-[52px] py-3 px-6 rounded-2xl bg-nel-violet hover:bg-[#340557] active:scale-[0.98] text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-violet shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-violet"
             >
               <span>{isChecking ? 'VERIFYING...' : 'CONTINUE'}</span>
               {!isChecking && <ArrowRight className="w-6 h-6 text-nel-pink stroke-[2.5]" aria-hidden="true" />}
