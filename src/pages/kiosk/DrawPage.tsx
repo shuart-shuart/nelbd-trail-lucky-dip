@@ -125,7 +125,7 @@ export const DrawPage: React.FC = () => {
            <span className="font-dm font-normal text-nel-violet text-xs">
               Drawing your prize…
             </span>
-          </span>
+          </div>
         ) : (
           <span className="font-dm font-bold text-[clamp(1.5rem,5vw,2.75rem)] leading-tight tracking-tight px-5">
             TAP HERE<br />TO DRAW
