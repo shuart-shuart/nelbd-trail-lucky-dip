@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
 import { executeServerLuckyDipDraw } from '../../api/luckyDipClient';
 import { DuplicateParticipantView } from '../../components/kiosk/DuplicateParticipantView';
+import drawStepsGif from '../../assets/img/steps.gif';
 
 export const DrawPage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export const DrawPage: React.FC = () => {
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const revealTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const drawStartedAtRef = useRef<number>(0);
 
   useEffect(() => {
     return () => {
@@ -34,6 +36,7 @@ export const DrawPage: React.FC = () => {
     // Prevent multiple concurrent taps
     if (isDrawing) return;
     setIsDrawing(true);
+    drawStartedAtRef.current = Date.now();
     setErrorMessage(null);
 
     try {
@@ -76,10 +79,12 @@ export const DrawPage: React.FC = () => {
 
       setDrawResult(response);
 
-      // Short pause for tactile reveal
+      // Allow the branded animation to run for at least two seconds, without
+      // delaying the draw request itself or revealing an unconfirmed prize.
+      const remaining = Math.max(0, 2000 - (Date.now() - drawStartedAtRef.current));
       revealTimerRef.current = setTimeout(() => {
         navigate('/result');
-      }, 700);
+      }, remaining);
     } catch (err: any) {
       console.error('Server draw error:', err);
       setErrorMessage("We're having trouble connecting. Please ask our booth crew for assistance.");
@@ -105,9 +110,16 @@ export const DrawPage: React.FC = () => {
         className="kiosk-draw-module kiosk-draw-action kiosk-inset-frame relative flex aspect-square w-[min(84vw,480px,58dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
       >
         {isDrawing ? (
-          <span className="flex items-center justify-center" role="status" aria-label="Drawing your prize">
-            <span className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-4 border-nel-violet/30 border-t-nel-violet animate-spin motion-reduce:animate-none" aria-hidden="true" />
-            <span className="sr-only">Drawing your prize, please wait</span>
+          <span className="flex flex-col items-center justify-center gap-3 px-6" role="status" aria-label="Drawing your prize">
+            <img
+              src={drawStepsGif}
+              alt=""
+              aria-hidden="true"
+              className="block w-[min(48vw,260px,32dvh)] aspect-square object-contain rounded-2xl"
+            />
+            <span className="font-dm font-semibold text-nel-violet text-[clamp(.8rem,2.5vw,1rem)]">
+              Drawing your prize…
+            </span>
           </span>
         ) : (
           <span className="font-dm font-bold text-[clamp(1.5rem,5vw,2.75rem)] leading-tight tracking-tight px-5">
