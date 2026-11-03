@@ -122,3 +122,15 @@ export function savePrizeSiteLimit(prizeId:string,site:string,dailyCap:number|nu
     method:'PUT',body:JSON.stringify({dailyCap,paused})
   });
 }
+
+export interface GrabVoucherSummary {
+  total:number;
+  unassigned:number;
+  assigned:number;
+  currently_eligible:number;
+  earliest_start:string|null;
+  latest_expiry:string|null;
+}
+export function getGrabVoucherSummary() {
+  return json<GrabVoucherSummary>('/grab-vouchers/summary');
+}
