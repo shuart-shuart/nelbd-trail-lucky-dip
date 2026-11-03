@@ -1340,12 +1340,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </td>
 
                             {/* PDD Remaining Quantity */}
-                            <td className="px-4 py-4 text-center font-black text-[#8649AC] cursor-pointer hover:bg-[#EEE4FA]"
+                            <td className="px-4 py-4 text-center font-black text-[#8649AC] cursor-pointer hover:bg-[#EEE4FA] underline decoration-dotted underline-offset-4"
+                              role="button" tabIndex={0}
                               onDoubleClick={() => handleOpenAdjust(prize,'PDD')}
-                              title="Double-click to edit PDD remaining stock">
-                              <button type="button" onClick={() => handleOpenAdjust(prize,'PDD')}
-                                aria-label={`Edit PDD remaining stock for ${prize.name}`} className="underline decoration-dotted underline-offset-4">{pddRem}</button>
-                            </td>
+                              onKeyDown={e => { if (e.key==='Enter' || e.key===' ') {e.preventDefault();handleOpenAdjust(prize,'PDD');} }}
+                              aria-label={`Double-click to edit PDD remaining stock for ${prize.name}`}
+                              title="Double-click to edit PDD remaining stock">{pddRem}</td>
                             <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PDD')}</td>
 
                             {/* PS Starting Quantity */}
@@ -1354,12 +1354,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </td>
 
                             {/* PS Remaining Quantity */}
-                            <td className="px-4 py-4 text-center font-black text-sky-300 cursor-pointer hover:bg-[#EEE4FA]"
+                            <td className="px-4 py-4 text-center font-black text-sky-300 cursor-pointer hover:bg-[#EEE4FA] underline decoration-dotted underline-offset-4"
+                              role="button" tabIndex={0}
                               onDoubleClick={() => handleOpenAdjust(prize,'PS')}
-                              title="Double-click to edit PS remaining stock">
-                              <button type="button" onClick={() => handleOpenAdjust(prize,'PS')}
-                                aria-label={`Edit PS remaining stock for ${prize.name}`} className="underline decoration-dotted underline-offset-4">{psRem}</button>
-                            </td>
+                              onKeyDown={e => { if (e.key==='Enter' || e.key===' ') {e.preventDefault();handleOpenAdjust(prize,'PS');} }}
+                              aria-label={`Double-click to edit PS remaining stock for ${prize.name}`}
+                              title="Double-click to edit PS remaining stock">{psRem}</td>
                             <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PS')}</td>
 
                             {/* Total Starting Quantity */}
