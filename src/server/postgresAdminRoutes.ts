@@ -174,7 +174,7 @@ postgresAdminRouter.post('/grab-vouchers/import-batch',async (req,res)=>{
 postgresAdminRouter.get('/inventory',async (_req,res)=>{
   try {
     const {rows}=await getPool().query(`SELECT p.id,p.name,p.description,p.tier,p.icon,p.image_url AS "imageUrl",
-      p.is_active AS "isActive",i.site,i.allocated_quantity AS "allocatedQuantity",
+      p.is_active AS "isActive",p.probability,i.site,i.allocated_quantity AS "allocatedQuantity",
       i.remaining_quantity AS "remainingQuantity",i.claimed_quantity AS "claimedQuantity"
       FROM prizes p JOIN site_inventory i ON i.prize_id=p.id ORDER BY p.name,i.site`);
     res.json(rows);
@@ -315,15 +315,16 @@ postgresAdminRouter.get('/inventory-adjustments',async (req,res)=>{
 
 postgresAdminRouter.patch('/prizes/:id',async(req,res)=>{
   if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
-  const {name,description,tier,isActive,imageUrl,icon}=req.body||{};
+  const {name,description,tier,isActive,imageUrl,icon,probability}=req.body||{};
   if(name!==undefined&&(typeof name!=='string'||!name.trim()||name.length>120)||
      description!==undefined&&(typeof description!=='string'||description.length>2000)||
      tier!==undefined&&!['TOP','STANDARD'].includes(tier)||
+     probability!==undefined&&!['low','normal','high'].includes(probability)||
      isActive!==undefined&&typeof isActive!=='boolean'||
      imageUrl!==undefined&&(typeof imageUrl!=='string'||imageUrl.length>2000000)||
      icon!==undefined&&(typeof icon!=='string'||icon.length>100))
     return res.status(400).json({error:'Invalid prize fields'});
-  if(Object.keys(req.body||{}).some(k=>!['name','description','tier','isActive','imageUrl','icon'].includes(k)))
+  if(Object.keys(req.body||{}).some(k=>!['name','description','tier','isActive','imageUrl','icon','probability'].includes(k)))
     return res.status(400).json({error:'Unsupported prize field'});
   try{
     const result=await withTransaction(async client=>{
@@ -337,8 +338,8 @@ postgresAdminRouter.patch('/prizes/:id',async(req,res)=>{
         if(other.rowCount)throw new Error('ONLY_ONE_TOP');
       }
       const updated=await client.query(`UPDATE prizes SET name=$2,description=$3,tier=$4,is_active=$5,
-        image_url=$6,icon=$7,updated_at=now() WHERE id=$1 RETURNING *`,
-        [req.params.id,name?.trim()??old.name,description??old.description,nextTier,nextActive,imageUrl??old.image_url,icon??old.icon]);
+        image_url=$6,icon=$7,probability=$8,updated_at=now() WHERE id=$1 RETURNING *`,
+        [req.params.id,name?.trim()??old.name,description??old.description,nextTier,nextActive,imageUrl??old.image_url,icon??old.icon,probability??old.probability]);
       return updated.rows[0];
     });
     return result?res.json(result):res.status(404).json({error:'Prize not found'});

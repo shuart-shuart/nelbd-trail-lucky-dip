@@ -58,7 +58,7 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
     const top = await client.query('SELECT 1 FROM daily_top_awards WHERE singapore_date=$1', [singaporeDate]);
     const throttlingEnabled = process.env.NELBD_PRIZE_THROTTLING_ENABLED === 'YES';
     const inventory = await client.query(
-      `SELECT p.id,p.name,p.description,p.tier,p.image_url,i.remaining_quantity
+      `SELECT p.id,p.name,p.description,p.tier,p.image_url,p.probability,i.remaining_quantity
        FROM prizes p JOIN site_inventory i ON i.prize_id=p.id
        WHERE p.is_active=true AND i.site=$1 AND i.remaining_quantity>0
          AND (p.tier<>'TOP' OR $2::boolean=false)
@@ -73,11 +73,15 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
                    (now() AT TIME ZONE 'Asia/Singapore')::date) >= lim.daily_cap))
          ))
        ORDER BY p.id FOR UPDATE OF i`, [site, Boolean(top.rowCount), throttlingEnabled, process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES']);
-    const total = inventory.rows.reduce((sum, row) => sum + Number(row.remaining_quantity), 0);
+    // Draw probability adjusts stock-weighted selection, without changing stock totals.
+    // normal = current odds; low = half of normal; high = twice normal.
+    const weight = (row: {probability:string;remaining_quantity:number}) =>
+      Number(row.remaining_quantity) * (row.probability === 'low' ? 1 : row.probability === 'high' ? 4 : 2);
+    const total = inventory.rows.reduce((sum, row) => sum + weight(row), 0);
     if (!total) return failure('No prize inventory is available at this hub. Please ask booth crew for assistance.');
     const pick = crypto.randomInt(total);
     let running = 0;
-    const chosen = inventory.rows.find((row) => (running += Number(row.remaining_quantity)) > pick)!;
+    const chosen = inventory.rows.find((row) => (running += weight(row)) > pick)!;
     const participant = await client.query(
       'INSERT INTO participants(nickname,mobile_number,site) VALUES($1,$2,$3) RETURNING id',
       [nickname,mobile,site]);

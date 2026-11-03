@@ -103,6 +103,7 @@ export const AdminInventory: React.FC = () => {
   const [editingPrize, setEditingPrize] = useState<PrizeWithInventory | null>(null);
   const [editName, setEditName] = useState('');
   const [editTier, setEditTier] = useState<PrizeTier>('STANDARD');
+  const [editProbability,setEditProbability]=useState<'low'|'normal'|'high'>('normal');
   const [editPddStarting, setEditPddStarting] = useState<number>(0);
   const [editPsStarting, setEditPsStarting] = useState<number>(0);
   const [editIsActive, setEditIsActive] = useState(true);
@@ -368,6 +369,7 @@ export const AdminInventory: React.FC = () => {
     setEditingPrize(prize);
     setEditName(prize.name);
     setEditTier(prize.tier);
+    setEditProbability(prize.probability||'normal');
     setEditPddStarting(prize.pddInventory.allocatedQuantity);
     setEditPsStarting(prize.psInventory.allocatedQuantity);
     setEditIsActive(prize.isActive);
@@ -392,7 +394,7 @@ export const AdminInventory: React.FC = () => {
             (editingPrize.psInventory.claimedQuantity > 0 && editPsStarting !== editingPrize.psInventory.allocatedQuantity))
           throw new Error('Starting quantities cannot be edited after claims. Use stock adjustment instead.');
         await updatePostgresPrize(editingPrize.id, {
-          name: editName.trim(), tier: editTier, isActive: editIsActive, imageUrl: editImageUrl,
+          name: editName.trim(), probability: editProbability, isActive: editIsActive, imageUrl: editImageUrl,
         });
         const updates: Promise<unknown>[] = [];
         if (editPddStarting !== editingPrize.pddInventory.allocatedQuantity && editingPrize.pddInventory.claimedQuantity === 0)
@@ -490,7 +492,7 @@ export const AdminInventory: React.FC = () => {
   const handleOpenAdjust = (prize: PrizeWithInventory, site: SiteLocation = 'PDD') => {
     setAdjustingPrize(prize);
     setAdjustSite(site);
-    setAdjustmentValue('0');
+    setAdjustmentValue(String(site==='PDD'?prize.pddInventory.remainingQuantity:prize.psInventory.remainingQuantity));
     setAdjustReason('');
     setAdjustError(null);
     setIsAdjustModalOpen(true);
@@ -503,30 +505,19 @@ export const AdminInventory: React.FC = () => {
       : adjustingPrize.psInventory.remainingQuantity;
   }, [adjustingPrize, adjustSite]);
 
-  const parsedAdjustment = parseInt(adjustmentValue) || 0;
-  const calculatedNewRemaining = currentRemainingForAdjust + parsedAdjustment;
+  const calculatedNewRemaining = Number(adjustmentValue);
 
   const handleSaveStockAdjustment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!adjustingPrize) return;
     setAdjustError(null);
 
-    const reason = adjustReason.trim();
-    if (!reason) {
-      setAdjustError('Reason is required for auditing inventory adjustments.');
+    if (!Number.isSafeInteger(calculatedNewRemaining) || calculatedNewRemaining < 0 || calculatedNewRemaining > 1000000) {
+      setAdjustError('Enter a valid nonnegative whole number, up to 1,000,000.');
       return;
     }
-
-    if (parsedAdjustment === 0) {
-      setAdjustError('Please specify a non-zero adjustment quantity (e.g. +20 or -5).');
-      return;
-    }
-
-    // Rule: "Do not allow an adjustment that would cause remaining inventory to fall below zero."
-    if (calculatedNewRemaining < 0) {
-      setAdjustError(
-        `Adjustment would cause remaining inventory to fall below zero (New remaining: ${calculatedNewRemaining}). Maximum deduction allowed is -${currentRemainingForAdjust}.`
-      );
+    if (calculatedNewRemaining === currentRemainingForAdjust) {
+      setIsAdjustModalOpen(false);
       return;
     }
 
@@ -547,7 +538,7 @@ export const AdminInventory: React.FC = () => {
       });
 
       showNotification(
-        `Stock adjusted for "${adjustingPrize.name}" at Station ${adjustSite} (${parsedAdjustment > 0 ? `+${parsedAdjustment}` : parsedAdjustment} units).`
+        `Remaining stock for "${adjustingPrize.name}" at ${adjustSite} updated to ${calculatedNewRemaining}.`
       );
       setIsAdjustModalOpen(false);
     } catch (err: any) {
@@ -1061,25 +1052,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial justify-between sm:justify-start">
-                <span className="text-[11px] font-bold text-[#8A7C96] px-2 uppercase">Tier:</span>
-                {(['ALL', 'TOP', 'STANDARD'] as const).map((tier) => (
-                  <button
-                    key={tier}
-                    onClick={() => setTierFilter(tier)}
-                    className={`px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-bold transition cursor-pointer flex-1 sm:flex-initial text-center ${
-                      tierFilter === tier
-                        ? tier === 'TOP'
-                          ? 'bg-amber-500/30 text-amber-300 border border-amber-500/50'
-                          : 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/50'
-                        : 'text-[#8A7C96] hover:text-[#33224B]'
-                    }`}
-                  >
-                    {tier}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial justify-between sm:justify-start">
                 <span className="text-[11px] font-bold text-[#8A7C96] px-2 uppercase">Status:</span>
                 {(['ALL', 'ACTIVE', 'INACTIVE'] as const).map((status) => (
                   <button
@@ -1110,7 +1082,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 </span>
               </div>
               <span className="text-[11px] text-[#8A7C96]">
-                Totals auto-calculated: PDD + PS
+                Double-click a remaining quantity to edit · Click a prize name for probability · PDD + PS totals
               </span>
             </div>
 
@@ -1184,16 +1156,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <span
-                                className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
-                                  prize.tier === 'TOP'
-                                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                    : 'bg-emerald-500/20 text-[#8649AC] border-nel-pink/40'
-                                }`}
-                              >
-                                {prize.tier === 'TOP' && <Trophy className="w-3 h-3 text-amber-400" />}
-                                <span>{prize.tier}</span>
-                              </span>
+
                               <span
                                 className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${
                                   prize.isActive
@@ -1204,9 +1167,9 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 {prize.isActive ? 'Active' : 'Inactive'}
                               </span>
                             </div>
-                            <h4 className="font-bold text-[#33224B] text-base leading-snug break-words font-sans">
-                              {prize.name}
-                            </h4>
+                            <button type="button" onClick={() => handleOpenEdit(prize)}
+                              className="font-bold text-[#33224B] text-base leading-snug break-words font-sans text-left underline-offset-2 hover:underline"
+                              title="Edit prize and probability">{prize.name}</button>
                             {prize.description && (
                               <p className="text-xs text-[#8A7C96] line-clamp-2 mt-0.5 font-normal">
                                 {prize.description}
@@ -1259,7 +1222,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             <div className="flex items-baseline justify-between mt-1">
                               <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
                               <div>
-                                <span className="font-black text-[#8649AC] text-base">{pddRem}</span>
+                                <button type="button" onClick={() => handleOpenAdjust(prize,'PDD')} className="font-black text-[#8649AC] text-base underline decoration-dotted" aria-label={`Edit PDD remaining stock for ${prize.name}`}>{pddRem}</button>
                                 <span className="text-[#33224B]/50 text-xs"> / {pddStart}</span>
                               </div>
                             </div>
@@ -1277,7 +1240,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             <div className="flex items-baseline justify-between mt-1">
                               <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
                               <div>
-                                <span className="font-black text-sky-300 text-base">{psRem}</span>
+                                <button type="button" onClick={() => handleOpenAdjust(prize,'PS')} className="font-black text-sky-300 text-base underline decoration-dotted" aria-label={`Edit PS remaining stock for ${prize.name}`}>{psRem}</button>
                                 <span className="text-[#33224B]/50 text-xs"> / {psStart}</span>
                               </div>
                             </div>
@@ -1295,7 +1258,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                     <thead className="bg-nel-input/80 text-[11px] uppercase font-bold text-[#8A7C96] border-b border-nel-purple/40">
                       <tr>
                         <th className="px-5 py-3.5">Prize Name</th>
-                        <th className="px-4 py-3.5">Tier</th>
                         <th className="px-4 py-3.5 text-center">PDD Starting</th>
                         <th className="px-4 py-3.5 text-center">PDD Remaining</th>
                         <th className="px-4 py-3.5 text-center">PDD Daily Cap</th>
@@ -1360,9 +1322,9 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 </div>
 
                                 <div className="min-w-0">
-                                  <div className="font-bold text-[#33224B] text-sm leading-snug">
-                                    {prize.name}
-                                  </div>
+                                  <button type="button" onClick={() => handleOpenEdit(prize)}
+                                    className="font-bold text-[#33224B] text-sm leading-snug text-left underline-offset-2 hover:underline"
+                                    title="Edit prize and probability">{prize.name}</button>
                                   {prize.description && (
                                     <div className="text-[11px] text-[#8A7C96] line-clamp-1 max-w-xs mt-0.5 font-normal">
                                       {prize.description}
@@ -1372,29 +1334,18 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                               </div>
                             </td>
 
-                            {/* Tier */}
-                            <td className="px-4 py-4 font-sans">
-                              <span
-                                className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
-                                  prize.tier === 'TOP'
-                                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                    : 'bg-emerald-500/20 text-[#8649AC] border-nel-pink/40'
-                                }`}
-                              >
-                                {prize.tier === 'TOP' && <Trophy className="w-3 h-3 text-amber-400" />}
-                                <span>{prize.tier}</span>
-                              </span>
-                            </td>
-
                             {/* PDD Starting Quantity */}
                             <td className="px-4 py-4 text-center font-bold text-[#645574]">
                               {pddStart}
                             </td>
 
                             {/* PDD Remaining Quantity */}
-                            <td className="px-4 py-4 text-center font-black text-[#8649AC]">
-                              {pddRem}
-                            </td>
+                            <td className="px-4 py-4 text-center font-black text-[#8649AC] cursor-pointer hover:bg-[#EEE4FA] underline decoration-dotted underline-offset-4"
+                              role="button" tabIndex={0}
+                              onDoubleClick={() => handleOpenAdjust(prize,'PDD')}
+                              onKeyDown={e => { if (e.key==='Enter' || e.key===' ') {e.preventDefault();handleOpenAdjust(prize,'PDD');} }}
+                              aria-label={`Double-click to edit PDD remaining stock for ${prize.name}`}
+                              title="Double-click to edit PDD remaining stock">{pddRem}</td>
                             <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PDD')}</td>
 
                             {/* PS Starting Quantity */}
@@ -1403,9 +1354,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </td>
 
                             {/* PS Remaining Quantity */}
-                            <td className="px-4 py-4 text-center font-black text-sky-300">
-                              {psRem}
-                            </td>
+                            <td className="px-4 py-4 text-center font-black text-sky-300 cursor-pointer hover:bg-[#EEE4FA] underline decoration-dotted underline-offset-4"
+                              role="button" tabIndex={0}
+                              onDoubleClick={() => handleOpenAdjust(prize,'PS')}
+                              onKeyDown={e => { if (e.key==='Enter' || e.key===' ') {e.preventDefault();handleOpenAdjust(prize,'PS');} }}
+                              aria-label={`Double-click to edit PS remaining stock for ${prize.name}`}
+                              title="Double-click to edit PS remaining stock">{psRem}</td>
                             <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PS')}</td>
 
                             {/* Total Starting Quantity */}
@@ -1700,20 +1654,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
-                    Tier *
-                  </label>
-                  <select
-                    value={addTier}
-                    onChange={(e) => setAddTier(e.target.value as PrizeTier)}
-                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm focus:border-nel-pink focus:outline-none font-bold"
-                  >
-                    <option value="STANDARD">STANDARD</option>
-                    <option value="TOP">TOP</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                     Active Status
                   </label>
                   <label className="flex items-center space-x-2.5 min-h-[44px] px-3.5 rounded-xl bg-nel-input border border-[#E8DEF1] cursor-pointer">
@@ -1904,16 +1844,19 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
-                    Tier *
+                    Draw Probability
                   </label>
                   <select
-                    value={editTier}
-                    onChange={(e) => setEditTier(e.target.value as PrizeTier)}
-                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm focus:border-nel-pink focus:outline-none font-bold"
+                    value={editProbability}
+                    onChange={(e) => setEditProbability(e.target.value as 'low'|'normal'|'high')}
+                    disabled={import.meta.env.VITE_DATA_BACKEND !== 'postgres'}
+                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm font-bold"
                   >
-                    <option value="STANDARD">STANDARD</option>
-                    <option value="TOP">TOP</option>
+                    <option value="low">Low · ½ normal odds</option>
+                    <option value="normal">Normal · current odds</option>
+                    <option value="high">High · 2× normal odds</option>
                   </select>
+                  <p className="text-[11px] text-[#8A7C96] mt-1">Weighted by remaining stock; limits and eligibility still apply.</p>
                 </div>
 
                 <div>
@@ -2014,8 +1957,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       Draws have been recorded for this prize ({drawCountsByPrize[editingPrize.id]} draws).
                     </p>
                     <p className="text-[#8A7C96] text-[11px] leading-relaxed">
-                      Starting quantities cannot be directly overwritten once draws have occurred. Use{' '}
-                      <strong className="text-[#8649AC]">Adjust Stock</strong> to modify current physical inventory.
+                      Starting quantities cannot be directly overwritten once draws have occurred. Double-click the remaining quantity in the inventory table to modify current physical inventory.
                     </p>
                     <div className="grid grid-cols-2 gap-2 pt-2 text-xs font-mono">
                       <div>PDD Starting: {editPddStarting}</div>
@@ -2155,144 +2097,27 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* MODAL: ADJUST STOCK */}
+      {/* MODAL: EDIT REMAINING STOCK — Enter or Save confirms */}
       {/* ------------------------------------------------------------- */}
       {isAdjustModalOpen && adjustingPrize && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl relative">
-            <button
-              onClick={() => setIsAdjustModalOpen(false)}
-              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-[#8A7C96] hover:text-[#33224B] p-2 rounded-xl hover:bg-[#F1EAF9] transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label="Close Adjust Stock Modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="text-lg sm:text-xl font-bold text-[#33224B] mb-1">Adjust Stock</h3>
-            <p className="text-xs text-[#8A7C96] mb-4">
-              Modify physical remaining inventory for <strong className="text-[#8649AC]">{adjustingPrize.name}</strong>.
-            </p>
-
-            {adjustError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-950/80 border border-red-500 text-xs text-red-200 font-semibold flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                <span>{adjustError}</span>
-              </div>
-            )}
-
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4" role="presentation">
+          <div role="dialog" aria-modal="true" aria-label="Edit remaining stock" className="bg-white border border-[#DDD2E8] rounded-2xl max-w-md w-full p-6 text-[#33224B] shadow-xl">
+            <h3 className="text-xl font-bold mb-1">Edit Remaining Stock</h3>
+            <p className="text-sm text-[#645574] mb-4">{adjustingPrize.name} · {adjustSite}</p>
+            {adjustError && <p role="alert" className="text-red-700 text-sm mb-3">{adjustError}</p>}
             <form onSubmit={handleSaveStockAdjustment} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
-                  Site *
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setAdjustSite('PDD')}
-                    className={`py-2.5 px-3 min-h-[44px] rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center ${
-                      adjustSite === 'PDD'
-                        ? 'bg-teal-500/20 text-[#8649AC] border-teal-500 shadow'
-                        : 'bg-nel-input text-[#8A7C96] border-[#E8DEF1] hover:text-[#33224B]'
-                    }`}
-                  >
-                    Station PDD
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAdjustSite('PS')}
-                    className={`py-2.5 px-3 min-h-[44px] rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center ${
-                      adjustSite === 'PS'
-                        ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow'
-                        : 'bg-nel-input text-[#8A7C96] border-[#E8DEF1] hover:text-[#33224B]'
-                    }`}
-                  >
-                    Station PS
-                  </button>
-                </div>
-              </div>
-
-              {/* Adjustment Calculation Box */}
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-nel-input border border-nel-purple/40 space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#8A7C96]">Current Remaining:</span>
-                  <span className="font-mono font-bold text-[#33224B] text-base">
-                    {currentRemainingForAdjust} units
-                  </span>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-[#645574] mb-1">
-                    Adjustment (+ / - integer) *
-                  </label>
-                  <input
-                    type="number"
-                    step="1"
-                    required
-                    value={adjustmentValue}
-                    onChange={(e) => setAdjustmentValue(e.target.value)}
-                    placeholder="e.g. 20 or -5"
-                    className="w-full px-3.5 py-2.5 min-h-[48px] rounded-xl bg-white border border-[#E8DEF1] text-[#33224B] font-mono text-lg sm:text-base focus:border-teal-500 focus:outline-none"
-                  />
-                  <span className="text-[11px] text-[#33224B]/40 mt-1 block">
-                    Use positive number to add stock (+20), negative number to deduct (-5).
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center text-xs pt-2 border-t border-nel-purple/40">
-                  <span className="text-[#8A7C96] font-semibold">New Remaining:</span>
-                  <span
-                    className={`font-mono font-black text-lg ${
-                      calculatedNewRemaining < 0
-                        ? 'text-red-400'
-                        : calculatedNewRemaining !== currentRemainingForAdjust
-                        ? 'text-[#8649AC]'
-                        : 'text-[#33224B]'
-                    }`}
-                  >
-                    {calculatedNewRemaining} units
-                  </span>
-                </div>
-
-                {calculatedNewRemaining < 0 && (
-                  <p className="text-[11px] text-red-400 font-medium">
-                    Remaining inventory cannot fall below zero.
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
-                  Reason *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={adjustReason}
-                  onChange={(e) => setAdjustReason(e.target.value)}
-                  placeholder="e.g. Additional stock delivered from central store"
-                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-xs focus:border-teal-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="text-[11px] text-[#8A7C96] bg-nel-input p-2.5 rounded-xl border border-nel-purple/40 leading-relaxed">
-                This adjustment will be recorded in <code className="text-[#8649AC]">inventoryAdjustments</code> without modifying historical draw records.
-              </div>
-
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsAdjustModalOpen(false)}
-                  className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 text-[#645574] text-xs font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingAdjustment || calculatedNewRemaining < 0}
-                  className="w-full sm:w-auto px-5 py-3 min-h-[48px] rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 disabled:opacity-50 text-slate-950 font-black text-xs shadow transition cursor-pointer flex items-center justify-center"
-                >
-                  {isSubmittingAdjustment ? 'Recording...' : 'Confirm Stock Adjustment'}
-                </button>
+              <label className="block text-sm font-semibold">New remaining quantity
+                <input autoFocus type="number" min="0" max="1000000" step="1" required
+                  value={adjustmentValue}
+                  onChange={e => setAdjustmentValue(e.target.value)}
+                  className="block mt-2 w-full border border-[#CCC0D8] rounded-xl px-4 py-3 text-lg font-mono bg-white text-[#33224B]" />
+              </label>
+              <p className="text-xs text-[#756782]">Previously: {currentRemainingForAdjust}. This adjustment is audited and will update the site's allocated stock total without changing past draws.</p>
+              <div className="flex justify-end gap-2">
+                <button type="button" disabled={isSubmittingAdjustment} onClick={() => setIsAdjustModalOpen(false)}
+                  className="rounded-xl border px-4 py-2 text-sm">Cancel</button>
+                <button type="submit" disabled={isSubmittingAdjustment || !Number.isSafeInteger(calculatedNewRemaining) || calculatedNewRemaining<0}
+                  className="rounded-xl bg-[#270342] text-white px-5 py-2 text-sm font-semibold disabled:opacity-50">{isSubmittingAdjustment?'Saving…':'Save (Enter)'}</button>
               </div>
             </form>
           </div>
@@ -2471,7 +2296,6 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                       <tr>
                         <th className="px-3 py-2">Row</th>
                         <th className="px-3 py-2">Prize Name</th>
-                        <th className="px-3 py-2">Tier</th>
                         <th className="px-3 py-2">PDD</th>
                         <th className="px-3 py-2">PS</th>
                         <th className="px-3 py-2">Total</th>
@@ -2494,17 +2318,7 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                               </span>
                             )}
                           </td>
-                          <td className="px-3 py-2">
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                item.tier === 'TOP'
-                                  ? 'bg-amber-500/20 text-amber-300'
-                                  : 'bg-emerald-500/20 text-[#8649AC]'
-                              }`}
-                            >
-                              {item.tier}
-                            </span>
-                          </td>
+
                           <td className="px-3 py-2 text-[#8649AC]">{item.pdd_quantity}</td>
                           <td className="px-3 py-2 text-sky-300">{item.ps_quantity}</td>
                           <td className="px-3 py-2 font-bold text-[#33224B]">{item.total_quantity}</td>

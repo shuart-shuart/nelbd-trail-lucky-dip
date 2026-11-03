@@ -34,6 +34,7 @@ export interface Prize {
   description: string;
   tier: PrizeTier;
   isActive: boolean;
+  probability?: 'low'|'normal'|'high';
   icon?: string;
   imageUrl?: string;
   createdAt: string;
