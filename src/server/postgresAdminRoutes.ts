@@ -184,12 +184,43 @@ postgresAdminRouter.get('/draws',async (req,res)=>{
     const {rows}=await getPool().query(`SELECT d.id,d.ticket_number AS "ticketNumber",
       p.nickname AS "participantNickname",d.prize_id AS "prizeId",d.prize_name AS "prizeName",
       d.prize_tier AS "prizeTier",d.site,d.status,d.kiosk_id AS "kioskId",
-      d.drawn_at AS "drawnAt",d.claimed_at AS "claimedAt"
+      d.drawn_at AS "drawnAt",d.claimed_at AS "claimedAt",
+      rev.classification AS "reviewLabel",rev.note AS "reviewNote"
       FROM draws d JOIN participants p ON p.id=d.participant_id
+      LEFT JOIN draw_review_labels rev ON rev.draw_id=d.id
       ORDER BY d.drawn_at DESC,d.id DESC LIMIT $1 OFFSET $2`,[limit,offset]);
     res.json(rows);
   } catch {res.status(503).json({error:'Draw history unavailable'});}
 });
+
+/** Annotate draw history only; never undo awarded inventory, eligibility or voucher allocation. */
+postgresAdminRouter.put('/draws/:id/review',async(req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  const {id}=req.params,{classification,note}=req.body||{};
+  if(!/^[0-9a-f-]{36}$/i.test(id)||
+    !(classification===null||classification==='test'||classification==='error')||
+    typeof note!=='string'||note.length>500)
+    return res.status(400).json({error:'Invalid draw review label'});
+  try {
+    const result=await withTransaction(async client=>{
+      const existing=await client.query('SELECT id FROM draws WHERE id=$1',[id]);
+      if(!existing.rowCount)return null;
+      if(classification===null){
+        await client.query('DELETE FROM draw_review_labels WHERE draw_id=$1',[id]);
+      }else{
+        await client.query(`INSERT INTO draw_review_labels(draw_id,classification,note,updated_by)
+          VALUES($1,$2,$3,$4)
+          ON CONFLICT(draw_id) DO UPDATE SET classification=EXCLUDED.classification,
+            note=EXCLUDED.note,updated_by=EXCLUDED.updated_by,updated_at=now()`,
+          [id,classification,note,res.locals.admin.email||'admin']);
+      }
+      return {id,classification,note:classification===null?'':note};
+    });
+    if(!result)return res.status(404).json({error:'Draw not found'});
+    return res.json(result);
+  }catch{return res.status(503).json({error:'Unable to update review label'});}
+});
+
 postgresAdminRouter.get('/settings',async (_req,res)=>{
   try {const {rows}=await getPool().query('SELECT * FROM kiosk_settings WHERE id=1');res.json(rows[0]||null);}
   catch {res.status(503).json({error:'Settings unavailable'});}
