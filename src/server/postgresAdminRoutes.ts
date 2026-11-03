@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {encryptVoucher,fingerprint} from './grabVoucherCrypto.ts';
+import {decryptGrabCredential} from './grabVoucherDecrypt.ts';
 import { getPool, withTransaction } from './postgres.ts';
 import { loginAdmin, logoutAdmin, requireAdmin, requireSameOrigin } from './postgresAdminAuth.ts';
 
@@ -49,6 +50,62 @@ postgresAdminRouter.put('/prize-limits/:prizeId/:site',async (req,res)=>{
 
 
 /** Grab voucher credentials are never returned by inventory endpoints. */
+
+/** Outlook Email Centre: draft-only, manually sent by authorized staff. */
+postgresAdminRouter.get('/outlook-centre',async (_req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  try {
+    const {rows}=await getPool().query(`SELECT c.draw_id AS "drawId",
+      d.ticket_number AS "ticketNumber",d.site,c.recipient_email AS "recipientEmail",
+      c.status,c.created_at AS "createdAt",c.updated_at AS "updatedAt"
+      FROM grab_voucher_claim_sessions c JOIN draws d ON d.id=c.draw_id
+      ORDER BY c.created_at DESC LIMIT 200`);
+    res.setHeader('Cache-Control','no-store');
+    res.json(rows);
+  }catch {res.status(503).json({error:'Outlook draft queue unavailable; check database migration'});}
+});
+postgresAdminRouter.get('/outlook-centre/:drawId/draft',async (req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  if(!/^[0-9a-f-]{36}$/i.test(req.params.drawId))return res.status(400).json({error:'Invalid draw'});
+  try {
+    const {rows}=await getPool().query(`SELECT c.recipient_email,c.status,d.ticket_number,
+      v.code_ciphertext,v.url_ciphertext,v.expires_at
+      FROM grab_voucher_claim_sessions c
+      JOIN draws d ON d.id=c.draw_id
+      JOIN grab_voucher_codes v ON v.id=c.voucher_id AND v.assigned_draw_id=c.draw_id
+      WHERE c.draw_id=$1`,[req.params.drawId]);
+    if(!rows.length)return res.status(404).json({error:'Draft not found'});
+    const row=rows[0];
+    if(!row.recipient_email)return res.status(409).json({error:'Winner has not submitted an email'});
+    const code=decryptGrabCredential(row.code_ciphertext);
+    const link=decryptGrabCredential(row.url_ciphertext);
+    const expires=new Intl.DateTimeFormat('en-SG',{timeZone:'Asia/Singapore',dateStyle:'long'}).format(new Date(row.expires_at));
+    res.setHeader('Cache-Control','no-store, private');
+    return res.json({to:row.recipient_email,subject:'Your NELBD S$5 Grab voucher',
+      body:`Congratulations on winning a S$5 Grab voucher at NELBD Trail Lucky Dip!
+
+Your Grab gift code: ${code}
+Your official Grab gift link: ${link}
+
+Open the link or redeem the code using the Grab app.
+Voucher expires: ${expires} (Singapore time).
+Please keep this email private. Terms and conditions apply.`,
+      status:row.status,ticketNumber:row.ticket_number});
+  }catch {res.status(503).json({error:'Unable to prepare draft'});}
+});
+postgresAdminRouter.post('/outlook-centre/:drawId/mark-sent',async(req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  if(!/^[0-9a-f-]{36}$/i.test(req.params.drawId)||req.body?.confirmed!==true)
+    return res.status(400).json({error:'Explicit confirmation required'});
+  try {
+    const {rows}=await getPool().query(`UPDATE grab_voucher_claim_sessions
+      SET status='sent',updated_at=now() WHERE draw_id=$1 AND status IN ('queued','failed')
+      RETURNING draw_id`,[req.params.drawId]);
+    if(!rows.length)return res.status(409).json({error:'Draft is not ready or already marked sent'});
+    res.json({markedSent:true,deliveryVerification:'manual_confirmation_only'});
+  }catch {res.status(503).json({error:'Unable to update draft status'});}
+});
+
 postgresAdminRouter.get('/grab-vouchers/summary',async (_req,res)=>{
   try {
     const {rows}=await getPool().query(`SELECT count(*)::int AS total,
