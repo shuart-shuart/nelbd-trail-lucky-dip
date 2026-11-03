@@ -14,7 +14,7 @@ async function main() {
   try {
     const identity = await pool.query('SELECT current_database() AS name, current_user AS username');
     console.log('Applying NELBD migrations to database:', identity.rows[0].name);
-    for (const file of ['001_inventory_catalog.sql','002_core_tables.sql','003_daily_top_awards.sql','004_prize_throttling_vouchers.sql','005_grab_claim_sessions.sql']) {
+    for (const file of ['001_inventory_catalog.sql','002_core_tables.sql','003_daily_top_awards.sql','004_prize_throttling_vouchers.sql','005_grab_claim_sessions.sql','006_draw_review_labels.sql']) {
       const sql = readFileSync(resolve(process.cwd(), 'migrations', file), 'utf8');
       await pool.query(sql);
       console.log('Applied:', file);
