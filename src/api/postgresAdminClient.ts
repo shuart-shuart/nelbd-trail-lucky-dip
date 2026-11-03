@@ -103,3 +103,22 @@ export async function getPostgresInventoryAdjustments():Promise<import('../fireb
 export async function updatePostgresPrize(prizeId:string,changes:Partial<Pick<import('../firebase/types').Prize,'name'|'description'|'tier'|'isActive'|'imageUrl'|'icon'>>) {
   return json<any>('/prizes/'+encodeURIComponent(prizeId),{method:'PATCH',body:JSON.stringify(changes)});
 }
+
+export interface PrizeSiteLimit {
+  prizeId:string;
+  site:'PDD'|'PS';
+  dailyCap:number|null;
+  paused:boolean;
+  allocatedQuantity:number;
+  remainingQuantity:number;
+  claimedQuantity:number;
+  awardedToday:number;
+}
+export function getPrizeSiteLimits():Promise<PrizeSiteLimit[]> {
+  return json<PrizeSiteLimit[]>('/prize-limits');
+}
+export function savePrizeSiteLimit(prizeId:string,site:string,dailyCap:number|null,paused:boolean) {
+  return json<PrizeSiteLimit>('/prize-limits/'+encodeURIComponent(prizeId)+'/'+encodeURIComponent(site),{
+    method:'PUT',body:JSON.stringify({dailyCap,paused})
+  });
+}
