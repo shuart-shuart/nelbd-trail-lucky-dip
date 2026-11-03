@@ -14,7 +14,6 @@ export const DrawPage: React.FC = () => {
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const revealTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const drawStartedAtRef = useRef<number>(0);
 
   useEffect(() => {
     return () => {
@@ -37,7 +36,6 @@ export const DrawPage: React.FC = () => {
     // Prevent multiple concurrent taps
     if (isDrawing) return;
     setIsDrawing(true);
-    drawStartedAtRef.current = Date.now();
     setErrorMessage(null);
 
     try {
@@ -52,6 +50,7 @@ export const DrawPage: React.FC = () => {
 
       if (!response.success) {
         const errorText = response.error || '';
+
         // If error indicates duplicate mobile/redemption, show friendly standalone state
         if (
           errorText.toLowerCase().includes('already drawn') ||
@@ -80,12 +79,12 @@ export const DrawPage: React.FC = () => {
 
       setDrawResult(response);
 
-      // Allow the branded animation to run for at least two seconds, without
-      // delaying the draw request itself or revealing an unconfirmed prize.
-      const remaining = Math.max(0, 2000 - (Date.now() - drawStartedAtRef.current));
+      // Keep the animation visible for 2 seconds
+      // AFTER the server confirms a successful draw.
       revealTimerRef.current = setTimeout(() => {
         navigate('/result');
-      }, remaining);
+      }, 2000);
+
     } catch (err: any) {
       console.error('Server draw error:', err);
       setErrorMessage("We're having trouble connecting. Please ask our booth crew for assistance.");
@@ -116,7 +115,7 @@ export const DrawPage: React.FC = () => {
             role="status"
             aria-label="Drawing your prize"
           >
-            <div className="w-full max-w-[300px] flex flex-col items-center justify-center p-4 rounded-2xl bg-nel-pink/10">
+            <div className="w-full max-w-[300px] flex flex-col items-center justify-center gap-4 p-4 rounded-2xl bg-nel-pink/10">
               <img
                 src={drawStepsGif}
                 alt=""
@@ -136,7 +135,10 @@ export const DrawPage: React.FC = () => {
       </button>
 
       {errorMessage && !isDrawing && (
-        <div role="alert" className="w-full max-w-sm mt-3 p-4 rounded-2xl bg-nel-pink text-nel-violet border-2 border-nel-violet font-dm text-sm font-bold">
+        <div
+          role="alert"
+          className="w-full max-w-sm mt-3 p-4 rounded-2xl bg-nel-pink text-nel-violet border-2 border-nel-violet font-dm text-sm font-bold"
+        >
           <p>{errorMessage}</p>
           <button
             type="button"
