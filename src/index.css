@@ -365,7 +365,9 @@ input, textarea {
   aspect-ratio: 1;
   flex: 0 0 auto;
 }
-.nel-kiosk-root .kiosk-prize-art {
+.nel-kiosk-root .kiosk-result-prize .kiosk-prize-art {
+  height: 100%;
+  max-height: none; /* override the older short-screen section-image cap */
   transform: scale(1.12);
   transform-origin: center;
   object-position: center;
