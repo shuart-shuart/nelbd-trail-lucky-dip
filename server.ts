@@ -19,7 +19,7 @@ const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Enable JSON body parsing for API endpoints
-app.use(express.json());
+app.use(express.json({limit:'3mb'}));
 
 // PostgreSQL admin API is isolated behind a migration flag until the dashboard is migrated.
 if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
