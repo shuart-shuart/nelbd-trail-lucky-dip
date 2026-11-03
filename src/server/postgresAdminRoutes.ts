@@ -130,7 +130,7 @@ postgresAdminRouter.post('/grab-vouchers/import-batch',async (req,res)=>{
   if(typeof batch!=='string'||!/^[-_a-zA-Z0-9.]{1,100}$/.test(batch)||
      !Array.isArray(rows)||rows.length<1||rows.length>100)
     return res.status(400).json({error:'Invalid import batch'});
-  const normalized=[];
+  const normalized: Array<{code:string;url:string;codeHash:string;urlHash:string;from:Date;to:Date}>=[];
   const seenCodes=new Set<string>(),seenUrls=new Set<string>();
   for(const row of rows) {
     const code=row?.code,url=row?.url,start=row?.startsAt,expiry=row?.expiresAt;
