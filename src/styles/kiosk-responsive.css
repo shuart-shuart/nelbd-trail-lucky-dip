@@ -1,232 +1,183 @@
-/* Mobile-first kiosk refinements. All overrides are scoped to the public kiosk. */
-.nel-kiosk-root{font-family:"DM Sans",sans-serif;min-height:100dvh;overflow-x:clip;}
-.nel-kiosk-root h1{font-family:"NEL Rounded",sans-serif;font-weight:600;overflow-wrap:anywhere;text-wrap:balance;}
-.nel-kiosk-root :is(h2,h3,h4,h5,h6,p,span,label,button,input,textarea,select,a,small){font-family:"DM Sans",sans-serif;}
-.nel-kiosk-root :is(button,input,select,textarea){font-size:max(16px,1rem);}
-.nel-kiosk-root button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-.nel-kiosk-root :is(button,a,input):focus-visible{outline:3px solid #fff;outline-offset:3px;}
-.nel-kiosk-root .kiosk-main{width:100%;max-width:720px;min-width:0;margin-inline:auto;padding-inline:max(16px,env(safe-area-inset-left)) max(16px,env(safe-area-inset-right));padding-block:max(20px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-bottom));}
-.nel-kiosk-root .kiosk-welcome{width:100%;max-width:620px;gap:clamp(12px,2.5vw,20px);}
-.nel-kiosk-root .kiosk-welcome-hero{padding:clamp(16px,3.5vw,30px);}
-.nel-kiosk-root .kiosk-welcome-header{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;}
-.nel-kiosk-root .kiosk-welcome-header p{white-space:normal;overflow-wrap:normal;line-height:1.25;}
-.nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(40dvh,400px);}
-.nel-kiosk-root .kiosk-start-button{min-height:76px;padding:14px 18px;gap:12px;font-size:clamp(20px,4.7vw,34px);line-height:1.1;}
-.nel-kiosk-root .kiosk-start-button>span:last-child{min-width:0;text-wrap:balance;}
-.nel-kiosk-root .kiosk-venue-button{min-height:52px;padding:8px 6px;font-size:clamp(13px,2.3vw,17px);line-height:1.2;}
-.nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{padding:clamp(18px,4vw,32px);}
-.nel-kiosk-root .kiosk-details form :is(input,button){min-height:52px;}
-.nel-kiosk-root .kiosk-details input{font-size:16px;}
-.nel-kiosk-root .kiosk-result-card img{max-width:100%;height:auto;}
-.nel-kiosk-root .kiosk-result-card section>div{overflow-wrap:anywhere;}
-.nel-kiosk-root .kiosk-draw,.nel-kiosk-root .kiosk-result,.nel-kiosk-root .kiosk-details{width:100%;min-width:0;}
-@media(max-width:380px){
- .nel-kiosk-root .kiosk-main{padding-inline:12px;}
- .nel-kiosk-root .kiosk-welcome-hero{padding:14px;}
- .nel-kiosk-root .kiosk-welcome-header{gap:8px;}
- .nel-kiosk-root .kiosk-welcome-header p{font-size:clamp(10px,3vw,13px);}
- .nel-kiosk-root .kiosk-start-button{min-height:68px;gap:10px;font-size:19px;}
- .nel-kiosk-root .kiosk-venue-button{font-size:12px;gap:4px;}
- .nel-kiosk-root .kiosk-venue-button svg{width:14px;height:14px;}
- .nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{padding:16px;}
-}
-@media(min-width:768px){
- .nel-kiosk-root .kiosk-main{max-width:780px;padding-inline:32px;padding-block:28px 40px;}
- .nel-kiosk-root .kiosk-welcome{max-width:650px;}
- .nel-kiosk-root .kiosk-start-button{min-height:104px;}
- .nel-kiosk-root .kiosk-venue-button{min-height:58px;}
- .nel-kiosk-root .kiosk-details,.nel-kiosk-root .kiosk-draw,.nel-kiosk-root .kiosk-result{max-width:650px;margin-inline:auto;}
-}
-@media(max-height:720px) and (orientation:landscape){
- .nel-kiosk-root .kiosk-main{justify-content:flex-start;padding-block:12px 24px;}
- .nel-kiosk-root .kiosk-welcome{gap:10px;padding-block:0;}
- .nel-kiosk-root .kiosk-welcome-hero>img{max-height:24dvh;}
- .nel-kiosk-root .kiosk-start-button{min-height:60px;}
- .nel-kiosk-root .kiosk-venue-button{min-height:44px;}
-}
-@media(prefers-reduced-motion:reduce){.nel-kiosk-root *, .nel-kiosk-root *::before,.nel-kiosk-root *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important;}}
 
-/* Welcome signage: subtle inset double stroke without altering module geometry. */
-.nel-kiosk-root .kiosk-signage-outline{position:relative;border:2px solid var(--nel-purple,#7716B5);box-shadow:inset 0 0 0 5px #FF8DC6,inset 0 0 0 6px rgba(119,22,181,.48);}
-.nel-kiosk-root .kiosk-venue-card{padding:clamp(7px,1.7vw,11px);border-radius:999px;}
-.nel-kiosk-root .kiosk-venue-track{gap:clamp(5px,1.2vw,10px);align-items:stretch;overflow:visible;}
-.nel-kiosk-root .kiosk-venue-button{border-radius:999px;min-width:0;min-height:52px;border:2px solid var(--nel-purple,#7716B5);font-family:"DM Sans",sans-serif;font-weight:700;transition:background-color .15s ease,color .15s ease;}
-.nel-kiosk-root .kiosk-venue-selected{background:var(--nel-violet,#270342);color:var(--nel-pink,#FF8DC6);border-color:var(--nel-violet,#270342);}
-.nel-kiosk-root .kiosk-venue-unselected{background:transparent;color:var(--nel-violet,#270342);}
-.nel-kiosk-root .kiosk-venue-unselected:hover{background:rgba(39,3,66,.08);}
-.nel-kiosk-root .kiosk-welcome-header img{display:block;width:100%;height:auto;max-height:112px;object-fit:contain;}
-@media(max-width:380px){.nel-kiosk-root .kiosk-venue-track{gap:4px;}.nel-kiosk-root .kiosk-venue-card{padding:6px;}.nel-kiosk-root .kiosk-venue-button{min-height:48px;padding-inline:4px;font-size:12px;}}
+/* Staff portal — white, violet and pink */
+.nel-staff-root {
+  /* Brand palette */
+  --staff-white: #fff;
+  --staff-ink: #302047;
+  --staff-violet: #7716b5;
+  --staff-accent: #e93e91;
 
-/* Welcome mobile/tablet polish: adjustable artwork proportions and clear hierarchy. */
-.nel-kiosk-root .kiosk-welcome{--welcome-stroke:2px;--welcome-inner-stroke:1px;--welcome-stroke-gap:6px;}
-.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline{
- border:var(--welcome-stroke) solid var(--nel-purple,#7716B5);
- box-shadow:inset 0 0 0 var(--welcome-stroke-gap) var(--nel-pink,#FF8DC6),inset 0 0 0 calc(var(--welcome-stroke-gap) + var(--welcome-inner-stroke)) rgba(119,22,181,.55);
-}
-.nel-kiosk-root .kiosk-welcome-header{align-items:center;gap:clamp(12px,3vw,24px);}
-.nel-kiosk-root .kiosk-brand-image,.nel-kiosk-root .kiosk-date-image{display:flex;align-items:center;min-width:0;}
-.nel-kiosk-root .kiosk-brand-image{justify-content:flex-start;}
-.nel-kiosk-root .kiosk-date-image{justify-content:flex-end;}
-.nel-kiosk-root .kiosk-brand-image img{width:100%;height:auto;max-height:clamp(54px,11vw,110px);object-position:left center;}
-.nel-kiosk-root .kiosk-date-image img{width:100%;height:auto;max-height:clamp(48px,10vw,100px);object-position:right center;}
-.nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(34dvh,320px);margin-inline:auto;}
-.nel-kiosk-root .kiosk-start-button{font-weight:800;min-height:clamp(76px,12vw,112px);box-shadow:inset 0 0 0 6px #FF8DC6,inset 0 0 0 7px rgba(119,22,181,.55),0 7px 0 rgba(39,3,66,.25);}
-.nel-kiosk-root .kiosk-start-button>span:first-child{width:clamp(44px,7vw,58px);height:clamp(44px,7vw,58px);}
-.nel-kiosk-root .kiosk-venue-button{line-height:1.2;white-space:normal;text-wrap:balance;}
-@media(max-width:380px){
- .nel-kiosk-root .kiosk-welcome{--welcome-stroke-gap:4px;}
- .nel-kiosk-root .kiosk-welcome-header{gap:8px;}
- .nel-kiosk-root .kiosk-brand-image img{max-height:66px;}
- .nel-kiosk-root .kiosk-date-image img{max-height:60px;}
- .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(31dvh,220px);}
- .nel-kiosk-root .kiosk-start-button{min-height:72px;font-size:clamp(18px,5.4vw,21px);}
-}
-@media(min-width:768px){
- .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(38dvh,400px);}
- .nel-kiosk-root .kiosk-brand-image img{max-height:116px;}
- .nel-kiosk-root .kiosk-date-image img{max-height:104px;}
-}
-@media(max-height:720px){
- .nel-kiosk-root .kiosk-welcome{gap:10px;padding-block:0;}
- .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(26dvh,230px);}
- .nel-kiosk-root .kiosk-start-button{min-height:64px;}
+  /* Violet-derived neutrals */
+  --staff-muted: #62536f;
+  --staff-border: color-mix(in srgb, var(--staff-violet) 32%, white);
+  --staff-surface: color-mix(in srgb, var(--staff-violet) 5%, white);
+  --staff-hover: color-mix(in srgb, var(--staff-violet) 10%, white);
+
+  color: var(--staff-ink);
+  line-height: 1.5;
 }
 
-/* Signage iteration: first two modules only; clean third pill without outer stroke. */
-.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline{
- border-width:3px;
- box-shadow:inset 0 0 0 7px #FF8DC6,inset 0 0 0 9px rgba(119,22,181,.72);
-}
-.nel-kiosk-root .kiosk-welcome .kiosk-venue-card{
- border:0;
- box-shadow:none;
-}
-.nel-kiosk-root .kiosk-welcome .kiosk-date-image{justify-content:flex-start;align-items:center;}
-.nel-kiosk-root .kiosk-welcome .kiosk-date-image img{
- width:40%;max-width:40%;height:auto;max-height:none;object-position:left center;
-}
-.nel-kiosk-root .kiosk-welcome-title{
- margin:clamp(8px,1.8vw,16px) 0 0;
- font-size:clamp(1.5rem,4.6vw,2.45rem);
- line-height:1.12;
- letter-spacing:-.025em;
-}
-@media(max-width:380px){
- .nel-kiosk-root .kiosk-welcome .kiosk-signage-outline{border-width:2px;box-shadow:inset 0 0 0 5px #FF8DC6,inset 0 0 0 7px rgba(119,22,181,.72);}
- .nel-kiosk-root .kiosk-welcome-title{font-size:clamp(1.35rem,6vw,1.65rem);}
+/* Accessibility */
+.nel-staff-root :is(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid var(--staff-violet);
+  outline-offset: 2px;
 }
 
-/* One vertical trail through every kiosk route, behind pink interactive panels. */
-.nel-kiosk-root.kiosk-connected-trail{isolation:isolate;overflow-x:clip;}
-.nel-kiosk-root .kiosk-trail-spine{
- position:absolute;z-index:0;pointer-events:none;
- top:0;bottom:0;left:50%;transform:translateX(-50%);
- width:clamp(44px,15%,92px);background:#D9D9D9;
-}
-.nel-kiosk-root .kiosk-trail-content{position:relative;z-index:1;justify-content:flex-start;min-height:100dvh;}
-.nel-kiosk-root .kiosk-details,.nel-kiosk-root .kiosk-draw,.nel-kiosk-root .kiosk-result{
- position:relative;z-index:1;width:100%;margin-block:auto;
-}
-.nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{
- border:3px solid #7716B5;
- outline:none;
- box-shadow:inset 0 0 0 7px #FF8DC6,inset 0 0 0 9px rgba(119,22,181,.72);
-}
-.nel-kiosk-root .kiosk-welcome{position:relative;z-index:1;}
-.nel-kiosk-root .kiosk-venue-card{box-shadow:none;border:0;}
-@media(max-width:380px){
- .nel-kiosk-root .kiosk-trail-spine{width:44px;}
- .nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{
- border-width:2px;box-shadow:inset 0 0 0 5px #FF8DC6,inset 0 0 0 7px rgba(119,22,181,.72);
- }
+.nel-staff-root :is(button, a) {
+  touch-action: manipulation;
 }
 
-/* Kiosk signage design system — palette and hierarchy shared across all steps.
-   NEL Rounded is reserved for H1; DM Sans for controls, labels and supporting text. */
-.nel-kiosk-root{
- --signage-ink:#270342;
- --signage-pink:#FF8DC6;
- --signage-art:#7716B5;
- --signage-spine:#D9D9D9;
- --signage-outer:8px;
- --signage-inner:1px;
- --signage-inset:8px;
-}
-.nel-kiosk-root .kiosk-trail-spine{width:clamp(38px,11%,72px);background:var(--signage-spine);}
-.nel-kiosk-root .kiosk-welcome{gap:clamp(14px,2.5vw,22px);}
-.nel-kiosk-root .kiosk-welcome-hero{padding:clamp(18px,3vw,28px);}
-.nel-kiosk-root .kiosk-welcome-header{align-items:start;}
-.nel-kiosk-root .kiosk-date-image{justify-content:flex-end;align-items:flex-start;}
-.nel-kiosk-root .kiosk-date-image img{object-position:right top;}
-.nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(33dvh,330px);margin-top:clamp(6px,1.5vw,14px);}
-.nel-kiosk-root .kiosk-welcome-title{margin-top:clamp(4px,1vw,10px);}
-.nel-kiosk-root .kiosk-welcome .kiosk-signage-outline,
-.nel-kiosk-root .kiosk-form-card,
-.nel-kiosk-root .kiosk-result-card{
- border:var(--signage-outer) solid var(--signage-ink);
- outline:none;
- box-shadow:inset 0 0 0 var(--signage-inset) var(--signage-pink),
- inset 0 0 0 calc(var(--signage-inset) + var(--signage-inner)) var(--signage-ink);
-}
-.nel-kiosk-root .kiosk-venue-card{border:0;box-shadow:none;padding:clamp(6px,1.3vw,9px);}
-.nel-kiosk-root .kiosk-venue-button{border-color:var(--signage-ink);color:var(--signage-ink);font-family:"DM Sans",sans-serif;}
-.nel-kiosk-root .kiosk-venue-selected{background:var(--signage-ink);color:var(--signage-pink);border-color:var(--signage-ink);}
-.nel-kiosk-root .kiosk-venue-unselected{background:transparent;color:var(--signage-ink);border-color:var(--signage-ink);}
-.nel-kiosk-root .kiosk-start-button{min-height:clamp(88px,13vw,128px);font-family:"DM Sans",sans-serif;font-weight:800;box-shadow:inset 0 0 0 8px var(--signage-pink),inset 0 0 0 9px var(--signage-ink);}
-.nel-kiosk-root .kiosk-start-button>span:first-child{width:clamp(52px,8vw,66px);height:clamp(52px,8vw,66px);}
-.nel-kiosk-root :is(.kiosk-details,.kiosk-draw,.kiosk-result) :is(p,span,label,input,button):not(.font-mono){font-family:"DM Sans",sans-serif;}
-.nel-kiosk-root :is(.kiosk-details,.kiosk-draw,.kiosk-result) h1,
-.nel-kiosk-root .kiosk-welcome h1{font-family:"NEL Rounded","NELRounded",sans-serif;}
-.nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{border-radius:18px;box-shadow:inset 0 0 0 8px var(--signage-pink),inset 0 0 0 9px var(--signage-ink);}
-.nel-kiosk-root .kiosk-form-card :is(input,.kiosk-primary-action){min-height:56px;}
-.nel-kiosk-root .kiosk-form-card input{border-color:var(--signage-ink);}
-.nel-kiosk-root .kiosk-form-card input:focus-visible{outline:2px solid var(--signage-ink);outline-offset:2px;}
-.nel-kiosk-root .kiosk-primary-action{background:var(--signage-ink);color:var(--signage-pink);border-color:var(--signage-ink);box-shadow:none;font-family:"DM Sans",sans-serif;font-weight:800;}
-.nel-kiosk-root .kiosk-draw-action circle[stroke="#270342"]{stroke:var(--signage-ink);}
-.nel-kiosk-root .kiosk-result-card :is(.border-dashed){border-style:solid;border-color:rgba(39,3,66,.3);}
-.nel-kiosk-root .kiosk-result-card .font-nel:not(h1){font-family:"DM Sans",sans-serif;}
-.nel-kiosk-root .kiosk-result-card .border-nel-purple{border-color:var(--signage-ink);}
-.nel-kiosk-root :is(button,input){touch-action:manipulation;}
-@media(max-width:380px){
- .nel-kiosk-root .kiosk-trail-spine{width:38px;}
- .nel-kiosk-root .kiosk-start-button{min-height:78px;}
- .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(29dvh,220px);}
- .nel-kiosk-root .kiosk-welcome .kiosk-signage-outline,
- .nel-kiosk-root .kiosk-form-card,.nel-kiosk-root .kiosk-result-card{
- box-shadow:inset 0 0 0 6px var(--signage-pink),inset 0 0 0 7px var(--signage-ink);
- }
-}
-@media(max-height:720px){
- .nel-kiosk-root .kiosk-start-button{min-height:68px;}
- .nel-kiosk-root .kiosk-welcome-hero>img{max-height:min(25dvh,220px);}
+.nel-staff-root :is(input, select, textarea) {
+  font-size: 16px;
 }
 
-/* Draw readability: the grey spine stays visible, but never crosses text. */
-.nel-kiosk-root .kiosk-draw{gap:clamp(18px,3dvh,30px);}
-.nel-kiosk-root .kiosk-draw-header{
- position:relative;z-index:1;
- width:100%;max-width:620px;
- padding:clamp(14px,3vw,24px) clamp(12px,3vw,24px);
- background:#270342;
- border-radius:18px;
-}
-.nel-kiosk-root .kiosk-draw-header h1{color:#FF8DC6;overflow-wrap:anywhere;}
-.nel-kiosk-root .kiosk-draw-header p{color:#FF8DC6;}
-.nel-kiosk-root .kiosk-draw-action{flex-shrink:0;max-width:min(82vw,420px);width:min(82vw,420px,46dvh);}
-.nel-kiosk-root .kiosk-draw-action svg circle{vector-effect:non-scaling-stroke;}
-.nel-kiosk-root .kiosk-draw-footer{position:relative;z-index:1;}
-.nel-kiosk-root .kiosk-draw-footer span{
- display:inline-flex;align-items:center;justify-content:center;
- min-height:32px;padding:6px 18px;border-radius:999px;
- background:#270342;color:#FF8DC6;
- font-family:"DM Sans",sans-serif;
-}
-@media(max-height:720px){
- .nel-kiosk-root .kiosk-draw{gap:10px;}
- .nel-kiosk-root .kiosk-draw-header{padding:10px 12px;}
- .nel-kiosk-root .kiosk-draw-action{width:min(74vw,35dvh);}
+.nel-staff-root :is(input, textarea)::placeholder {
+  color: var(--staff-muted);
+  opacity: 1;
 }
 
-.nel-kiosk-root .kiosk-trail-intro{max-width:48ch;margin:12px auto 0;font-size:clamp(12px,1.8vw,16px);line-height:1.45;font-weight:600;}
-.nel-kiosk-root .kiosk-trail-disclaimer{max-width:52ch;margin:0 auto;line-height:1.45;}
-@media(max-width:380px){.nel-kiosk-root .kiosk-trail-intro{font-size:12px;line-height:1.35;}.nel-kiosk-root .kiosk-trail-disclaimer{font-size:11px;}}
+/* Form controls */
+.nel-staff-root :is(input, textarea, select).bg-nel-input {
+  background: var(--staff-white);
+  color: var(--staff-ink);
+  border-color: var(--staff-border);
+}
+
+.nel-staff-root :is(input, textarea, select).bg-nel-input:focus {
+  border-color: var(--staff-violet);
+}
+
+/* Input-style panels */
+.nel-staff-root div.bg-nel-input {
+  background: var(--staff-surface);
+  border-color: var(--staff-border);
+  color: var(--staff-ink);
+}
+
+.nel-staff-root div.bg-nel-input button {
+  color: var(--staff-ink);
+}
+
+.nel-staff-root div.bg-nel-input button:hover {
+  color: var(--staff-violet);
+  background: var(--staff-hover);
+}
+
+/* Neutralise legacy button colour variants */
+.nel-staff-root div.bg-nel-input button:is(
+  [class*="bg-emerald"],
+  [class*="bg-amber"],
+  [class*="bg-[#F1EAF9]"]
+) {
+  background: var(--staff-white);
+  color: var(--staff-violet);
+  border: 1px solid var(--staff-border);
+  box-shadow: 0 1px 3px rgb(48 32 71 / 10%);
+}
+
+/* Secondary text */
+.nel-staff-root [class*="text-[#8A7C96]"],
+.nel-staff-root [class*="text-[#756784]"] {
+  color: var(--staff-muted);
+}
+
+/* Text wrapping */
+.nel-staff-root :is(p, span, label, th, td) {
+  overflow-wrap: break-word;
+}
+
+/* Tables */
+.nel-staff-root table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.nel-staff-root table thead {
+  background: var(--staff-ink);
+  color: var(--staff-white);
+}
+
+.nel-staff-root table thead th {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--staff-white);
+  white-space: normal;
+}
+
+.nel-staff-root table tbody {
+  color: var(--staff-ink);
+}
+
+.nel-staff-root table tbody tr:nth-child(even) {
+  background: var(--staff-surface);
+}
+
+.nel-staff-root table tbody tr:hover {
+  background: var(--staff-hover);
+}
+
+.nel-staff-root table td {
+  line-height: 1.5;
+}
+
+.nel-staff-root table :is(td.font-mono, tbody.font-mono) {
+  font-variant-numeric: tabular-nums;
+}
+
+.nel-staff-root table tbody.font-mono td {
+  font-size: 13px;
+}
+
+.nel-staff-root table :is(th, td) {
+  vertical-align: middle;
+}
+
+/* Scrollable tables */
+.nel-staff-root .overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: var(--staff-border) var(--staff-surface);
+}
+
+/* Tablet */
+@media (max-width: 1023px) {
+  .nel-staff-root table {
+    min-width: 680px;
+  }
+
+  .nel-staff-root main {
+    min-width: 0;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .nel-staff-root main {
+    padding-inline: 16px;
+  }
+
+  .nel-staff-root section {
+    min-width: 0;
+  }
+
+  .nel-staff-root button {
+    min-height: 40px;
+  }
+
+  .nel-staff-root .overflow-x-auto {
+    max-width: 100%;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .nel-staff-root *,
+  .nel-staff-root *::before,
+  .nel-staff-root *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
