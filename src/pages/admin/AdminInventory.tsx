@@ -1082,7 +1082,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 </span>
               </div>
               <span className="text-[11px] text-[#8A7C96]">
-                Totals auto-calculated: PDD + PS
+                Double-click a remaining quantity to edit · Click a prize name for probability · PDD + PS totals
               </span>
             </div>
 
@@ -1652,20 +1652,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
-                    Tier *
-                  </label>
-                  <select
-                    value={addTier}
-                    onChange={(e) => setAddTier(e.target.value as PrizeTier)}
-                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm focus:border-nel-pink focus:outline-none font-bold"
-                  >
-                    <option value="STANDARD">STANDARD</option>
-                    <option value="TOP">TOP</option>
-                  </select>
-                </div>
-
                 <div>
                   <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                     Active Status
@@ -2310,7 +2296,6 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                       <tr>
                         <th className="px-3 py-2">Row</th>
                         <th className="px-3 py-2">Prize Name</th>
-                        <th className="px-3 py-2">Tier</th>
                         <th className="px-3 py-2">PDD</th>
                         <th className="px-3 py-2">PS</th>
                         <th className="px-3 py-2">Total</th>
@@ -2333,17 +2318,7 @@ NELBD Trail 2026 Commemorative Enamel Pin,STANDARD,400,400,true"
                               </span>
                             )}
                           </td>
-                          <td className="px-3 py-2">
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                item.tier === 'TOP'
-                                  ? 'bg-amber-500/20 text-amber-300'
-                                  : 'bg-emerald-500/20 text-[#8649AC]'
-                              }`}
-                            >
-                              {item.tier}
-                            </span>
-                          </td>
+
                           <td className="px-3 py-2 text-[#8649AC]">{item.pdd_quantity}</td>
                           <td className="px-3 py-2 text-sky-300">{item.ps_quantity}</td>
                           <td className="px-3 py-2 font-bold text-[#33224B]">{item.total_quantity}</td>
