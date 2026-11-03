@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { processPngUpload } from '../../utils/imageUpload';
 import { AdminLayout } from '../../components/admin/AdminLayout';
+import { PrizeThrottlingPanel } from '../../components/admin/PrizeThrottlingPanel';
 import {
   subscribeToPrizesWithInventory,
   subscribeToInventoryAdjustments,
@@ -874,6 +875,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
       }
     >
+      {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <PrizeThrottlingPanel />}
       {/* Toast Notification Banner */}
       {feedbackMessage && (
         <div
