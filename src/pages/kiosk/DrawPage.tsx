@@ -93,7 +93,7 @@ export const DrawPage: React.FC = () => {
   }
 
   return (
-    <div className="kiosk-draw w-full min-h-[min(75dvh,780px)] flex flex-col items-center justify-center text-center my-auto py-4">
+    <div className="kiosk-draw w-full min-h-0 flex-1 flex flex-col items-center justify-center text-center my-auto py-4">
       {/* Minimal draw screen: preserve the background stripe from the kiosk layout.
           The entire pink circle is the touch target, with no extra heading or site pill. */}
       <button
@@ -102,7 +102,7 @@ export const DrawPage: React.FC = () => {
         disabled={isDrawing}
         aria-label={isDrawing ? 'Drawing your prize' : 'Tap here to draw'}
         aria-busy={isDrawing}
-        className="kiosk-draw-module kiosk-draw-action kiosk-inset-frame relative flex aspect-square w-[min(88vw,560px,65dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
+        className="kiosk-draw-module kiosk-draw-action kiosk-inset-frame relative flex aspect-square w-[min(84vw,480px,58dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
       >
         {isDrawing ? (
           <span className="flex items-center justify-center" role="status" aria-label="Drawing your prize">
