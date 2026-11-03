@@ -38,7 +38,7 @@ export const WelcomePage: React.FC = () => {
           Win exclusive NELBD merchandise or Grab vouchers!
         </p>
         <div className="kiosk-welcome-header w-full flex items-center justify-center mt-1">
-          <img src={dateImage} alt="14 November to 6 December 2026" className="block w-auto max-w-[72%] max-h-[clamp(22px,5dvh,44px)] object-contain object-center mx-auto" />
+          <img src={dateImage} alt="14 November to 6 December 2026" className="block w-auto max-w-[57.6%] max-h-[clamp(18px,4dvh,35px)] object-contain object-center mx-auto" />
         </div>
       </section>
 
@@ -46,7 +46,7 @@ export const WelcomePage: React.FC = () => {
       <button
         type="button"
         onClick={() => navigate('/details')}
-        className="kiosk-start-button w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[60px] sm:min-h-[76px] px-5 sm:px-8 flex items-center justify-center gap-3 sm:gap-5 font-dm font-bold text-[clamp(1.2rem,4vw,2rem)] tracking-tight transition-colors hover:bg-[#ffc0de] active:bg-[#f7a7d1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
+        className="kiosk-start-button w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[60px] sm:min-h-[76px] px-5 sm:px-8 flex items-center justify-center gap-3 sm:gap-5 font-dm font-bold text-[clamp(1.2rem,4vw,2rem)] tracking-tight  focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
         aria-label="Press to start the trail lucky dip"
       >
         <span className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-nel-violet text-nel-pink shrink-0 flex items-center justify-center" aria-hidden="true">
