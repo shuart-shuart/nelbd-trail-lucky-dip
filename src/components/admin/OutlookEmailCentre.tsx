@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {GrabCsvImporter} from './GrabCsvImporter';
-import {getGrabVoucherSummary,type GrabVoucherSummary} from '../../api/postgresAdminClient';
+import {getGrabVoucherSummary,getGrabDeliveryDiagnostics,type GrabVoucherSummary,type GrabDeliveryDiagnostics} from '../../api/postgresAdminClient';
 type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string};
 type Draft={to:string;subject:string;body:string;status:string;ticketNumber:string};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
@@ -14,11 +14,28 @@ async function api<T>(path:string,init?:RequestInit):Promise<T>{
 export function OutlookEmailCentre(){
  const [rows,setRows]=useState<QueueRow[]>([]);
  const [stock,setStock]=useState<GrabVoucherSummary|null>(null);
+ const [diagnostics,setDiagnostics]=useState<GrabDeliveryDiagnostics|null>(null);
+ const [diagnosticsError,setDiagnosticsError]=useState('');
  const [draft,setDraft]=useState<Draft|null>(null);
  const [selected,setSelected]=useState('');
  const [error,setError]=useState('');
  const [busy,setBusy]=useState(false);
- const refresh=async()=>{try{const [queue,summary]=await Promise.all([api<QueueRow[]>(''),getGrabVoucherSummary()]);setRows(queue);setStock(summary);setError('');}catch(e){setError(e instanceof Error?e.message:'Unable to load queue');}};
+ const refresh=async()=>{
+  const [queueResult,summaryResult,diagnosticsResult]=await Promise.allSettled([
+    api<QueueRow[]>(''),getGrabVoucherSummary(),getGrabDeliveryDiagnostics()
+  ]);
+  if(queueResult.status==='fulfilled')setRows(queueResult.value);
+  if(summaryResult.status==='fulfilled')setStock(summaryResult.value);
+  setError(queueResult.status==='rejected'||summaryResult.status==='rejected'
+    ? 'Unable to refresh some voucher data. Check your admin session.' : '');
+  if(diagnosticsResult.status==='fulfilled') {
+    setDiagnostics(diagnosticsResult.value);
+    setDiagnosticsError('');
+  } else {
+    setDiagnostics(null);
+    setDiagnosticsError('Delivery diagnostics unavailable.');
+  }
+ };
  useEffect(()=>{void refresh();},[]);
  const openDraft=async(id:string)=>{
   setBusy(true);setDraft(null);setSelected(id);
@@ -47,6 +64,51 @@ export function OutlookEmailCentre(){
   <p className="text-sm mb-4">Voucher stock and winner email statuses. The current Outlook draft fallback is manual; automatic Power Automate dispatch is not enabled by this screen. Do not manually send any processing or sent item.</p>
   {error&&<p role="status" className="text-sm mb-3 text-[#7F003D]">{error}</p>}
   <p className="text-sm mb-3 rounded-lg bg-[#F6F0FB] p-3">Grab voucher codes: {stock?.total??'—'} imported · {stock?.unassigned??'—'} unassigned · {stock?.currently_eligible??'—'} redeemable today · {stock?.early_test_remaining??0} early-test allocations available (not redeemable until 14 Nov) · {stock?.assigned??'—'} assigned. Real voucher import remains disabled pending security approval.</p>
+  <div className="mb-4 rounded-xl border border-[#DDD2E8] p-3 sm:p-4">
+    <h3 className="font-bold mb-2">Automatic email delivery diagnostics</h3>
+    {diagnostics ? <>
+      <div className="flex flex-wrap gap-2 mb-3 text-xs">
+        {([
+          ['PostgreSQL draw',diagnostics.configuration.drawBackendPostgres],
+          ['Grab fulfilment',diagnostics.configuration.fulfilmentEnabled],
+          ['Power Automate',diagnostics.configuration.automationEnabled],
+          ['HTTPS trigger URL',diagnostics.configuration.triggerConfigured],
+          ['Callback key',diagnostics.configuration.callbackKeyConfigured],
+          ['Early voucher test',diagnostics.configuration.earlyTestEnabled]
+        ] as [string,boolean][]).map(([label,ok])=><span key={label}
+          className={`px-2 py-1 rounded-md border ${ok?'bg-emerald-50 text-emerald-900 border-emerald-300':'bg-amber-50 text-amber-900 border-amber-300'}`}>
+          {label}: {ok?'YES':'NO'}
+        </span>)}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm mb-3">
+        {([
+          ['Awaiting email',diagnostics.queue.awaitingEmail],
+          ['Queued',diagnostics.queue.queued],
+          ['Ready to dispatch',diagnostics.queue.readyToDispatch],
+          ['Processing',diagnostics.queue.processing],
+          ['Sent',diagnostics.queue.sent],
+          ['Failed',diagnostics.queue.failed]
+        ] as [string,number][]).map(([label,count])=><div key={label} className="rounded-lg bg-[#F6F0FB] p-2">
+          <span className="block text-xs">{label}</span><strong>{count}</strong>
+        </div>)}
+      </div>
+      <p className="text-xs leading-relaxed">
+        {(!diagnostics.configuration.drawBackendPostgres||!diagnostics.configuration.fulfilmentEnabled||
+          !diagnostics.configuration.automationEnabled||!diagnostics.configuration.triggerConfigured||
+          !diagnostics.configuration.callbackKeyConfigured)
+          ? 'A required server setting is missing. Automatic dispatch cannot run until all five delivery settings show YES.'
+          : diagnostics.queue.readyToDispatch>0
+          ? 'Eligible emails remain queued. The worker may not be running or could be failing before dispatch.'
+          : diagnostics.queue.processing>0
+          ? 'At least one job was claimed for delivery. Check Power Automate run history and the Outlook action before attempting any retry.'
+          : diagnostics.queue.sent>0
+          ? 'At least one delivery has been acknowledged as sent. This does not prove inbox receipt.'
+          : 'No currently eligible queued delivery is waiting. Check the winner email queue and voucher validity.'}
+      </p>
+      {diagnostics.queue.mostRecentDispatchAt&&<p className="text-xs mt-1">Most recent dispatch attempt: {new Date(diagnostics.queue.mostRecentDispatchAt).toLocaleString()}</p>}
+      <p className="text-xs mt-2 text-[#645574]">Read-only. No codes, email addresses, callback secrets or trigger URLs are displayed here. Refresh to update.</p>
+    </> : <p className="text-sm">{diagnosticsError||'Loading delivery diagnostics…'}</p>}
+  </div>
   <GrabCsvImporter onImported={()=>void refresh()}/>
   <div className="overflow-x-auto">
    <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
