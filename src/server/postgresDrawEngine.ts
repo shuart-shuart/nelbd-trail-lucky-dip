@@ -62,6 +62,9 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
        FROM prizes p JOIN site_inventory i ON i.prize_id=p.id
        WHERE p.is_active=true AND i.site=$1 AND i.remaining_quantity>0
          AND (p.tier<>'TOP' OR $2::boolean=false)
+         AND (p.id<>'grab-voucher' OR $4::boolean=false OR EXISTS (
+           SELECT 1 FROM grab_voucher_codes v WHERE v.assigned_draw_id IS NULL
+             AND v.starts_at<=now() AND v.expires_at>now()))
          AND ($3::boolean=false OR NOT EXISTS (
            SELECT 1 FROM prize_site_limits lim WHERE lim.prize_id=p.id AND lim.site=i.site
            AND (lim.paused OR (lim.daily_cap IS NOT NULL AND
@@ -69,7 +72,7 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
                AND (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date =
                    (now() AT TIME ZONE 'Asia/Singapore')::date) >= lim.daily_cap))
          ))
-       ORDER BY p.id FOR UPDATE OF i`, [site, Boolean(top.rowCount), throttlingEnabled]);
+       ORDER BY p.id FOR UPDATE OF i`, [site, Boolean(top.rowCount), throttlingEnabled, process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES']);
     const total = inventory.rows.reduce((sum, row) => sum + Number(row.remaining_quantity), 0);
     if (!total) return failure('No prize inventory is available at this hub. Please ask booth crew for assistance.');
     const pick = crypto.randomInt(total);
