@@ -152,7 +152,6 @@
   padding: 12px 18px;
   gap: 12px;
   font-family: "DM Sans", sans-serif;
-  font-size: clamp(18px, 4vw, 30px);
   font-weight: 700;
   line-height: 1.15;
   text-align: center;
