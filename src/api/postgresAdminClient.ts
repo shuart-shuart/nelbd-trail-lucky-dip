@@ -128,6 +128,7 @@ export interface GrabVoucherSummary {
   unassigned:number;
   assigned:number;
   currently_eligible:number;
+  early_test_remaining?:number;
   earliest_start:string|null;
   latest_expiry:string|null;
 }
