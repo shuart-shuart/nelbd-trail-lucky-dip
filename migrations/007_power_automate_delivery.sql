@@ -10,6 +10,9 @@ ALTER TABLE grab_voucher_claim_sessions
   ADD COLUMN IF NOT EXISTS delivery_started_at timestamptz,
   ADD COLUMN IF NOT EXISTS provider_message_id text,
   ADD COLUMN IF NOT EXISTS delivery_error_code text;
+CREATE UNIQUE INDEX IF NOT EXISTS grab_voucher_delivery_attempt_unique_idx
+  ON grab_voucher_claim_sessions(delivery_attempt_id)
+  WHERE delivery_attempt_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS grab_voucher_delivery_pending_idx
   ON grab_voucher_claim_sessions(created_at)
   WHERE status='queued';
