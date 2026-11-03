@@ -55,7 +55,12 @@ export async function dispatchNextGrabVoucher(): Promise<void> {
     if (target.protocol !== 'https:') return;
     const delivery = await withTransaction(async client => {
       const r = await client.query(
-        "SELECT c.draw_id,c.recipient_email,v.code_ciphertext,v.url_ciphertext,d.ticket_number FROM grab_voucher_claim_sessions c JOIN grab_voucher_codes v ON v.id=c.voucher_id AND v.assigned_draw_id=c.draw_id JOIN draws d ON d.id=c.draw_id WHERE c.status='queued' AND c.recipient_email IS NOT NULL AND v.starts_at<=now() AND v.expires_at>now() ORDER BY c.created_at LIMIT 1 FOR UPDATE OF c SKIP LOCKED"
+        "SELECT c.draw_id,c.recipient_email,v.code_ciphertext,v.url_ciphertext,d.ticket_number FROM grab_voucher_claim_sessions c JOIN grab_voucher_codes v ON v.id=c.voucher_id AND v.assigned_draw_id=c.draw_id JOIN draws d ON d.id=c.draw_id WHERE c.status='queued' AND c.recipient_email IS NOT NULL AND v.expires_at>now() AND (v.starts_at<=now() OR (
+          $1::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
+          AND v.starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
+          AND v.assigned_at IS NOT NULL AND v.assigned_at<v.starts_at))
+        ORDER BY c.created_at LIMIT 1 FOR UPDATE OF c SKIP LOCKED",
+        [process.env.NELBD_GRAB_EARLY_TEST_20 === 'YES']
       );
       if (!r.rows.length) return null;
       const item = r.rows[0];
