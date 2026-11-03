@@ -195,7 +195,7 @@
 }
 .nel-kiosk-root .kiosk-venue-selected {
   background: var(--kiosk-violet);
-  color: var(--kiosk-white);
+  color: var(--kiosk-pink);
   border-color: var(--kiosk-violet);
 }
 .nel-kiosk-root .kiosk-venue-unselected {
@@ -210,7 +210,7 @@
 .nel-kiosk-root .kiosk-form-card input { border-color: var(--kiosk-violet); }
 .nel-kiosk-root .kiosk-primary-action {
   background: var(--kiosk-violet);
-  color: var(--kiosk-white);
+  color: var(--kiosk-pink);
   border-color: var(--kiosk-violet);
   box-shadow: none;
   font-family: "DM Sans", sans-serif;
