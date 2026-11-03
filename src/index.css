@@ -257,3 +257,28 @@ input, textarea {
 @media (max-height: 560px) {
   .nel-kiosk-root .kiosk-welcome-art { max-height: 16dvh; }
 }
+
+/* Uniform field treatment across kiosk and staff screens.
+   Hover and focus do not change field border, colour, shadow or scale. */
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), textarea, select) {
+  border: 3px solid var(--nel-violet) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: none !important;
+}
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), textarea, select):is(:hover, :focus, :focus-visible, :active) {
+  border: 3px solid var(--nel-violet) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+}
+:where(input, textarea, select, button):focus,
+:where(input, textarea, select, button):focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+:where(button):focus-visible {
+  /* Keyboard-only affordance without changing the control itself. */
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
