@@ -35,6 +35,30 @@ export async function savePostgresSettings(settings:Setting):Promise<Setting> {
     welcomeMessage:row.welcome_message,termsSummary:row.terms_summary,
     maxDrawsPerParticipant:row.max_draws_per_participant,updatedAt:row.updated_at};
 }
+export interface GrabDeliveryDiagnostics {
+  configuration:{
+    drawBackendPostgres:boolean;
+    fulfilmentEnabled:boolean;
+    automationEnabled:boolean;
+    triggerConfigured:boolean;
+    callbackKeyConfigured:boolean;
+    earlyTestEnabled:boolean;
+  };
+  queue:{
+    awaitingEmail:number;
+    queued:number;
+    readyToDispatch:number;
+    processing:number;
+    sent:number;
+    failed:number;
+    oldestQueuedAt:string|null;
+    mostRecentDispatchAt:string|null;
+  };
+}
+export function getGrabDeliveryDiagnostics():Promise<GrabDeliveryDiagnostics> {
+  return json('/grab-vouchers/delivery-diagnostics');
+}
+
 export async function getPostgresInventory() {
   return json<any[]>('/inventory');
 }
