@@ -46,9 +46,15 @@ export const WelcomePage: React.FC = () => {
         className="kiosk-start-button w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[52px] sm:min-h-[62px] px-3 sm:px-6 py-2 flex items-center justify-center font-dm font-bold text-[clamp(0.9rem,2.5vw,1.6rem)] leading-tight tracking-tight text-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
         aria-label="Tap here to win your exclusive NELBD merchandise and vouchers"
       >
-        <span className="max-w-full whitespace-normal break-words">
-          Tap here to win your exclusive NELBD merchandise and vouchers!
-        </span>
+        <div className="flex flex-col items-center justify-center w-full max-w-full gap-1 text-center px-2">
+          <span className="block font-dm font-bold !text-[clamp(1.25rem,4vw,2rem)] leading-tight text-nel-violet">
+            Tap here
+          </span>
+        
+          <span className="block font-dm font-normal !text-[clamp(0.7rem,2vw,0.95rem)] leading-snug text-nel-violet whitespace-normal break-words">
+            to win your exclusive NELBD merchandise and vouchers!
+          </span>
+        </div>
       </button>
       
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
