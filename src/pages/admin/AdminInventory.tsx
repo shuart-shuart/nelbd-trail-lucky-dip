@@ -103,6 +103,7 @@ export const AdminInventory: React.FC = () => {
   const [editingPrize, setEditingPrize] = useState<PrizeWithInventory | null>(null);
   const [editName, setEditName] = useState('');
   const [editTier, setEditTier] = useState<PrizeTier>('STANDARD');
+  const [editProbability,setEditProbability]=useState<'low'|'normal'|'high'>('normal');
   const [editPddStarting, setEditPddStarting] = useState<number>(0);
   const [editPsStarting, setEditPsStarting] = useState<number>(0);
   const [editIsActive, setEditIsActive] = useState(true);
@@ -368,6 +369,7 @@ export const AdminInventory: React.FC = () => {
     setEditingPrize(prize);
     setEditName(prize.name);
     setEditTier(prize.tier);
+    setEditProbability(prize.probability||'normal');
     setEditPddStarting(prize.pddInventory.allocatedQuantity);
     setEditPsStarting(prize.psInventory.allocatedQuantity);
     setEditIsActive(prize.isActive);
@@ -392,7 +394,7 @@ export const AdminInventory: React.FC = () => {
             (editingPrize.psInventory.claimedQuantity > 0 && editPsStarting !== editingPrize.psInventory.allocatedQuantity))
           throw new Error('Starting quantities cannot be edited after claims. Use stock adjustment instead.');
         await updatePostgresPrize(editingPrize.id, {
-          name: editName.trim(), tier: editTier, isActive: editIsActive, imageUrl: editImageUrl,
+          name: editName.trim(), probability: editProbability, isActive: editIsActive, imageUrl: editImageUrl,
         });
         const updates: Promise<unknown>[] = [];
         if (editPddStarting !== editingPrize.pddInventory.allocatedQuantity && editingPrize.pddInventory.claimedQuantity === 0)
@@ -1061,25 +1063,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial justify-between sm:justify-start">
-                <span className="text-[11px] font-bold text-[#8A7C96] px-2 uppercase">Tier:</span>
-                {(['ALL', 'TOP', 'STANDARD'] as const).map((tier) => (
-                  <button
-                    key={tier}
-                    onClick={() => setTierFilter(tier)}
-                    className={`px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-bold transition cursor-pointer flex-1 sm:flex-initial text-center ${
-                      tierFilter === tier
-                        ? tier === 'TOP'
-                          ? 'bg-amber-500/30 text-amber-300 border border-amber-500/50'
-                          : 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/50'
-                        : 'text-[#8A7C96] hover:text-[#33224B]'
-                    }`}
-                  >
-                    {tier}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center space-x-1 bg-nel-input p-1 rounded-xl border border-nel-purple/40 flex-1 sm:flex-initial justify-between sm:justify-start">
                 <span className="text-[11px] font-bold text-[#8A7C96] px-2 uppercase">Status:</span>
                 {(['ALL', 'ACTIVE', 'INACTIVE'] as const).map((status) => (
                   <button
@@ -1184,16 +1167,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <span
-                                className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
-                                  prize.tier === 'TOP'
-                                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                    : 'bg-emerald-500/20 text-[#8649AC] border-nel-pink/40'
-                                }`}
-                              >
-                                {prize.tier === 'TOP' && <Trophy className="w-3 h-3 text-amber-400" />}
-                                <span>{prize.tier}</span>
-                              </span>
+
                               <span
                                 className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${
                                   prize.isActive
@@ -1204,9 +1178,9 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 {prize.isActive ? 'Active' : 'Inactive'}
                               </span>
                             </div>
-                            <h4 className="font-bold text-[#33224B] text-base leading-snug break-words font-sans">
-                              {prize.name}
-                            </h4>
+                            <button type="button" onClick={() => handleOpenEdit(prize)}
+                              className="font-bold text-[#33224B] text-base leading-snug break-words font-sans text-left underline-offset-2 hover:underline"
+                              title="Edit prize and probability">{prize.name}</button>
                             {prize.description && (
                               <p className="text-xs text-[#8A7C96] line-clamp-2 mt-0.5 font-normal">
                                 {prize.description}
@@ -1295,7 +1269,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                     <thead className="bg-nel-input/80 text-[11px] uppercase font-bold text-[#8A7C96] border-b border-nel-purple/40">
                       <tr>
                         <th className="px-5 py-3.5">Prize Name</th>
-                        <th className="px-4 py-3.5">Tier</th>
                         <th className="px-4 py-3.5 text-center">PDD Starting</th>
                         <th className="px-4 py-3.5 text-center">PDD Remaining</th>
                         <th className="px-4 py-3.5 text-center">PDD Daily Cap</th>
@@ -1360,9 +1333,9 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 </div>
 
                                 <div className="min-w-0">
-                                  <div className="font-bold text-[#33224B] text-sm leading-snug">
-                                    {prize.name}
-                                  </div>
+                                  <button type="button" onClick={() => handleOpenEdit(prize)}
+                                    className="font-bold text-[#33224B] text-sm leading-snug text-left underline-offset-2 hover:underline"
+                                    title="Edit prize and probability">{prize.name}</button>
                                   {prize.description && (
                                     <div className="text-[11px] text-[#8A7C96] line-clamp-1 max-w-xs mt-0.5 font-normal">
                                       {prize.description}
@@ -1372,28 +1345,17 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                               </div>
                             </td>
 
-                            {/* Tier */}
-                            <td className="px-4 py-4 font-sans">
-                              <span
-                                className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
-                                  prize.tier === 'TOP'
-                                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                    : 'bg-emerald-500/20 text-[#8649AC] border-nel-pink/40'
-                                }`}
-                              >
-                                {prize.tier === 'TOP' && <Trophy className="w-3 h-3 text-amber-400" />}
-                                <span>{prize.tier}</span>
-                              </span>
-                            </td>
-
                             {/* PDD Starting Quantity */}
                             <td className="px-4 py-4 text-center font-bold text-[#645574]">
                               {pddStart}
                             </td>
 
                             {/* PDD Remaining Quantity */}
-                            <td className="px-4 py-4 text-center font-black text-[#8649AC]">
-                              {pddRem}
+                            <td className="px-4 py-4 text-center font-black text-[#8649AC] cursor-pointer hover:bg-[#EEE4FA]"
+                              onDoubleClick={() => handleOpenAdjust(prize,'PDD')}
+                              title="Double-click to edit PDD remaining stock">
+                              <button type="button" onClick={() => handleOpenAdjust(prize,'PDD')}
+                                aria-label={`Edit PDD remaining stock for ${prize.name}`} className="underline decoration-dotted underline-offset-4">{pddRem}</button>
                             </td>
                             <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PDD')}</td>
 
@@ -1403,8 +1365,11 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </td>
 
                             {/* PS Remaining Quantity */}
-                            <td className="px-4 py-4 text-center font-black text-sky-300">
-                              {psRem}
+                            <td className="px-4 py-4 text-center font-black text-sky-300 cursor-pointer hover:bg-[#EEE4FA]"
+                              onDoubleClick={() => handleOpenAdjust(prize,'PS')}
+                              title="Double-click to edit PS remaining stock">
+                              <button type="button" onClick={() => handleOpenAdjust(prize,'PS')}
+                                aria-label={`Edit PS remaining stock for ${prize.name}`} className="underline decoration-dotted underline-offset-4">{psRem}</button>
                             </td>
                             <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PS')}</td>
 
@@ -1904,16 +1869,19 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
-                    Tier *
+                    Draw Probability
                   </label>
                   <select
-                    value={editTier}
-                    onChange={(e) => setEditTier(e.target.value as PrizeTier)}
-                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm focus:border-nel-pink focus:outline-none font-bold"
+                    value={editProbability}
+                    onChange={(e) => setEditProbability(e.target.value as 'low'|'normal'|'high')}
+                    disabled={import.meta.env.VITE_DATA_BACKEND !== 'postgres'}
+                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-nel-input border border-[#E8DEF1] text-[#33224B] text-base sm:text-sm font-bold"
                   >
-                    <option value="STANDARD">STANDARD</option>
-                    <option value="TOP">TOP</option>
+                    <option value="low">Low · ½ normal odds</option>
+                    <option value="normal">Normal · current odds</option>
+                    <option value="high">High · 2× normal odds</option>
                   </select>
+                  <p className="text-[11px] text-[#8A7C96] mt-1">Weighted by remaining stock; limits and eligibility still apply.</p>
                 </div>
 
                 <div>
