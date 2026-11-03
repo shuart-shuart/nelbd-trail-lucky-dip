@@ -17,6 +17,7 @@ export interface DrawResponse {
   status?: string;
   drawnAt?: string;
   recovered?: boolean;
+  voucherClaimToken?: string;
   prize?: {
     id?: string;
     name: string;
