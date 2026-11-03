@@ -37,9 +37,6 @@ export const WelcomePage: React.FC = () => {
         <div className="kiosk-welcome-header w-full flex items-center justify-center mt-1">
           <img src={dateImage} alt="14 November to 6 December 2026" className="block w-auto max-w-[57.6%] max-h-[clamp(18px,4dvh,35px)] object-contain object-center mx-auto" />
         </div>
-        <p className="kiosk-trail-intro kiosk-trail-intro-bottom font-dm text-center text-nel-violet font-bold whitespace-nowrap">
-          Tap here to win your exclusive NELBD merchandise and vouchers!
-        </p>
       </section>
 
       {/* Primary action: no double outline, stronger distinction from the hero. */}
@@ -47,9 +44,9 @@ export const WelcomePage: React.FC = () => {
         type="button"
         onClick={() => navigate('/details')}
         className="kiosk-start-button w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[52px] sm:min-h-[62px] px-5 sm:px-8 flex items-center justify-center gap-3 sm:gap-5 font-dm font-bold text-[clamp(1.2rem,4vw,2rem)] tracking-tight  focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
-        aria-label="Start the trail lucky dip"
+        aria-label="Tap here to win your exclusive NELBD merchandise and vouchers"
       >
-        <span className="whitespace-nowrap">Start now!</span>
+        <span className="whitespace-nowrap">Tap here to win your exclusive NELBD merchandise and vouchers!</span>
       </button>
 
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
