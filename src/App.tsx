@@ -83,7 +83,8 @@ export default function App() {
                 </AdminAuthGuard>
               }
             />
-            <Route path="/admin/email" element={<AdminAuthGuard><AdminEmailCentre /></AdminAuthGuard>} />
+            <Route path="/admin/grab-vouchers" element={<AdminAuthGuard><AdminEmailCentre /></AdminAuthGuard>} />
+            <Route path="/admin/email" element={<Navigate to="/admin/grab-vouchers" replace />} />
             <Route
               path="/admin/settings"
               element={
