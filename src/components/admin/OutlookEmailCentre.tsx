@@ -1,4 +1,5 @@
 import React,{useEffect,useState} from 'react';
+import {getGrabVoucherSummary,type GrabVoucherSummary} from '../../api/postgresAdminClient';
 type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string};
 type Draft={to:string;subject:string;body:string;status:string;ticketNumber:string};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
@@ -11,11 +12,12 @@ async function api<T>(path:string,init?:RequestInit):Promise<T>{
 }
 export function OutlookEmailCentre(){
  const [rows,setRows]=useState<QueueRow[]>([]);
+ const [stock,setStock]=useState<GrabVoucherSummary|null>(null);
  const [draft,setDraft]=useState<Draft|null>(null);
  const [selected,setSelected]=useState('');
  const [error,setError]=useState('');
  const [busy,setBusy]=useState(false);
- const refresh=async()=>{try{setRows(await api<QueueRow[]>(''));setError('');}catch(e){setError(e instanceof Error?e.message:'Unable to load queue');}};
+ const refresh=async()=>{try{const [queue,summary]=await Promise.all([api<QueueRow[]>(''),getGrabVoucherSummary()]);setRows(queue);setStock(summary);setError('');}catch(e){setError(e instanceof Error?e.message:'Unable to load queue');}};
  useEffect(()=>{void refresh();},[]);
  const openDraft=async(id:string)=>{
   setBusy(true);setDraft(null);setSelected(id);
@@ -43,6 +45,7 @@ export function OutlookEmailCentre(){
   </div>
   <p className="text-sm mb-4">Manual sending only from nelbd@designsingapore.org. Review the recipient, copy the prepared message, send using that Outlook mailbox, then mark as sent. This dashboard does not send emails.</p>
   {error&&<p role="status" className="text-sm mb-3 text-[#7F003D]">{error}</p>}
+  <p className="text-sm mb-3 rounded-lg bg-[#F6F0FB] p-3">Grab voucher codes: {stock?.total??'—'} imported · {stock?.unassigned??'—'} unassigned · {stock?.currently_eligible??'—'} eligible today · {stock?.assigned??'—'} assigned. Real voucher import remains disabled pending security approval.</p>
   <div className="overflow-x-auto">
    <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
    <tbody>{rows.map(row=><tr key={row.drawId} className="border-t">
