@@ -32,6 +32,7 @@ export interface DrawResultScreenPayload {
   status?: string;
   drawnAt?: string;
   recovered?: boolean;
+  voucherClaimToken?: string;
   error?: string;
 }
 
