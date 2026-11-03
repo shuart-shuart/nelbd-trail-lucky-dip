@@ -41,7 +41,7 @@ export function OutlookEmailCentre(){
    <h2 className="text-xl font-bold">Outlook Email Centre · Grab vouchers</h2>
    <button type="button" onClick={()=>void refresh()} className="rounded-lg border px-3 py-2 text-sm">Refresh</button>
   </div>
-  <p className="text-sm mb-4">Manual sending only. Review the recipient, copy the prepared message, send from your authorised Outlook account, then mark as sent. No emails are sent by this dashboard.</p>
+  <p className="text-sm mb-4">Manual sending only from nelbd@designsingapore.org. Review the recipient, copy the prepared message, send using that Outlook mailbox, then mark as sent. This dashboard does not send emails.</p>
   {error&&<p role="status" className="text-sm mb-3 text-[#7F003D]">{error}</p>}
   <div className="overflow-x-auto">
    <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
