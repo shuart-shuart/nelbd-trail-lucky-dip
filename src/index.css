@@ -310,3 +310,15 @@ input, textarea {
   background: transparent !important;
   min-width: 0;
 }
+
+/* Welcome: invitation follows the date, remains a single line on mobile. */
+.nel-kiosk-root .kiosk-trail-intro-bottom {
+  width: 100%;
+  font-size: clamp(9px, 2.15vw, 17px);
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+.nel-kiosk-root .kiosk-start-button {
+  white-space: nowrap;
+}
