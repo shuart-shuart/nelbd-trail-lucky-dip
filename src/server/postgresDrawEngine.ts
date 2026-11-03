@@ -89,6 +89,19 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
       `INSERT INTO draws(ticket_number,participant_id,prize_id,prize_name,prize_tier,site,status,kiosk_id,claimed_at)
        VALUES($1,$2,$3,$4,$5,$6,'claimed',$7,now()) RETURNING id,drawn_at`,
       [ticket,participant.rows[0].id,chosen.id,chosen.name,chosen.tier,site,kioskId]);
+    let voucherClaimToken: string | undefined;
+    if (chosen.id === 'grab-voucher' && process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES') {
+      const available = await client.query(`SELECT id FROM grab_voucher_codes
+        WHERE assigned_draw_id IS NULL AND starts_at<=now() AND expires_at>now()
+        ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`);
+      if (!available.rowCount) throw new Error('GRAB_STOCK_EXHAUSTED');
+      voucherClaimToken=crypto.randomBytes(32).toString('base64url');
+      const tokenHash=crypto.createHash('sha256').update(voucherClaimToken).digest('hex');
+      await client.query('UPDATE grab_voucher_codes SET assigned_draw_id=$1,assigned_at=now() WHERE id=$2',
+        [draw.rows[0].id,available.rows[0].id]);
+      await client.query(`INSERT INTO grab_voucher_claim_sessions(draw_id,voucher_id,token_hash)
+        VALUES($1,$2,$3)`,[draw.rows[0].id,available.rows[0].id,tokenHash]);
+    }
     if (chosen.tier === 'TOP') {
       await client.query('INSERT INTO daily_top_awards(singapore_date,draw_id) VALUES($1,$2)', [singaporeDate,draw.rows[0].id]);
     }
@@ -98,7 +111,7 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
       [chosen.id,site,chosen.remaining_quantity,updated.rows[0].remaining_quantity,`kiosk_${site.toLowerCase()}`]);
     return {success:true,ticketNumber:ticket,participantNickname:nickname,site,
       prize:{id:chosen.id,name:chosen.name,tier:chosen.tier,description:chosen.description,imageUrl:chosen.image_url},
-      status:'claimed',drawnAt:new Date(draw.rows[0].drawn_at).toISOString()};
+      status:'claimed',drawnAt:new Date(draw.rows[0].drawn_at).toISOString(),voucherClaimToken};
   });
 }
 
