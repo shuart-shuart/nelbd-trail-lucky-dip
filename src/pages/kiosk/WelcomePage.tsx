@@ -24,29 +24,33 @@ export const WelcomePage: React.FC = () => {
   return (
     <div className="kiosk-welcome relative w-full max-w-xl mx-auto flex flex-col gap-2 sm:gap-3 py-2 my-auto isolate">
 
-      {/* Module 1: centred date and the NELBD violet Redeem illustration. */}
-      <section className="kiosk-welcome-hero kiosk-signage-outline kiosk-inset-frame w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet px-4 py-3 sm:px-6 sm:py-4 overflow-hidden">
-        <div className="kiosk-welcome-header w-full flex items-center justify-center pb-1">
-          <img src={dateImage} alt="14 November to 6 December 2026" className="block w-auto max-w-[82%] max-h-[clamp(32px,8dvh,76px)] object-contain object-center mx-auto" />
-        </div>
+      {/* Primary hierarchy: title first, artwork second, event details supporting. */}
+      <section className="kiosk-welcome-hero w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet px-5 py-4 sm:px-7 sm:py-5 overflow-hidden">
+        <h1 className="kiosk-welcome-title font-nel font-semibold text-center text-nel-violet">
+          Design Trail Lucky Dip
+        </h1>
         <img
           src={redeemSvg}
           alt="NELBD Redeem illustration"
-          className="block w-full h-auto max-h-[min(28dvh,260px)] object-contain object-center"
+          className="kiosk-welcome-art block w-full h-auto max-h-[min(27dvh,250px)] object-contain object-center"
         />
-        <h1 className="kiosk-welcome-title font-nel font-bold text-center text-nel-violet">Design Trail Lucky Dip</h1>
-        <p className="kiosk-trail-intro font-dm text-center text-nel-violet">Try your luck for an exclusive NELBD merchandise or Grab vouchers!</p>
+        <p className="kiosk-trail-intro font-dm text-center text-nel-violet font-bold">
+          Win exclusive NELBD merchandise or Grab vouchers!
+        </p>
+        <div className="kiosk-welcome-header w-full flex items-center justify-center mt-1">
+          <img src={dateImage} alt="14 November to 6 December 2026" className="block w-auto max-w-[72%] max-h-[clamp(22px,5dvh,44px)] object-contain object-center mx-auto" />
+        </div>
       </section>
 
-      {/* Module 2: the entire flat rounded rectangle is the start button. */}
+      {/* Primary action: no double outline, stronger distinction from the hero. */}
       <button
         type="button"
         onClick={() => navigate('/details')}
-        className="kiosk-start-button kiosk-signage-outline kiosk-inset-frame w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet min-h-[56px] sm:min-h-[76px] px-5 sm:px-8 flex items-center justify-center gap-4 sm:gap-6 font-nel font-semibold text-[clamp(1.45rem,5.3vw,2.6rem)] tracking-tight transition-colors hover:bg-[#ffc0de] active:bg-[#f7a7d1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
+        className="kiosk-start-button w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[60px] sm:min-h-[76px] px-5 sm:px-8 flex items-center justify-center gap-3 sm:gap-5 font-dm font-bold text-[clamp(1.2rem,4vw,2rem)] tracking-tight transition-colors hover:bg-[#ffc0de] active:bg-[#f7a7d1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
         aria-label="Press to start the trail lucky dip"
       >
         <span className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-nel-violet text-nel-pink shrink-0 flex items-center justify-center" aria-hidden="true">
-          <svg viewBox="0 0 24 24" className="w-7 h-7 sm:w-9 sm:h-9" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h16M13 5l7 7-7 7"/></svg>
+          <svg viewBox="0 0 24 24" className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h16M13 5l7 7-7 7"/></svg>
         </span>
         <span>Press to Start</span>
       </button>
