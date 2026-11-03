@@ -496,6 +496,7 @@ export const AdminHistory: React.FC = () => {
                         <span className="font-mono font-bold text-[#8649AC] text-sm bg-nel-input px-2.5 py-1 rounded-lg border border-nel-purple/40 inline-block mb-1">
                           {draw.ticketNumber}
                         </span>
+                          {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <div className="mt-1 flex gap-2 items-center text-xs"><strong>{(draw as any).reviewLabel?.toUpperCase()}</strong><button type="button" className="underline text-[#6E369E]" disabled={processingId===draw.id} onClick={()=>void markDrawReview(draw)}>Mark test/error</button></div>}
                         <div className="font-semibold text-[#33224B] text-base">
                           {draw.participantNickname || 'Trail Walker'}
                         </div>
@@ -598,6 +599,7 @@ export const AdminHistory: React.FC = () => {
                           <span className="font-mono font-bold text-[#8649AC] text-sm bg-nel-input px-2.5 py-1 rounded-lg border border-nel-purple/40">
                             {draw.ticketNumber}
                           </span>
+                          {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <div className="mt-1 flex gap-2 items-center text-xs"><strong>{(draw as any).reviewLabel?.toUpperCase()}</strong><button type="button" className="underline text-[#6E369E]" disabled={processingId===draw.id} onClick={()=>void markDrawReview(draw)}>Mark test/error</button></div>}
                         </td>
                         <td className="px-6 py-4 font-semibold text-[#33224B]">
                           {draw.participantNickname || 'Trail Walker'}
