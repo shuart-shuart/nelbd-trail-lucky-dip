@@ -134,3 +134,9 @@ export interface GrabVoucherSummary {
 export function getGrabVoucherSummary() {
   return json<GrabVoucherSummary>('/grab-vouchers/summary');
 }
+
+export async function setPostgresDrawReview(id:string,classification:'test'|'error'|null,note:string){
+ return json<{id:string;classification:string|null;note:string}>('/draws/'+encodeURIComponent(id)+'/review',{
+  method:'PUT',body:JSON.stringify({classification,note})
+ });
+}
