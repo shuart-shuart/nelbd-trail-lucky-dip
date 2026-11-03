@@ -12,6 +12,8 @@ export const ResultPage: React.FC = () => {
   const [countdown, setCountdown] = useState(180);
   const [grabEmail,setGrabEmail]=useState('');
   const [grabMessage,setGrabMessage]=useState('');
+  const [isEmailRecorded,setIsEmailRecorded]=useState(false);
+  const [isSubmittingEmail,setIsSubmittingEmail]=useState(false);
   const resetSessionRef = useRef(resetSession);
 
   useEffect(() => {
@@ -75,85 +77,106 @@ export const ResultPage: React.FC = () => {
     return () => clearInterval(timer);
   }, [navigate]);
 
+  const submitGrabEmail = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!drawResult?.voucherClaimToken || isSubmittingEmail || isEmailRecorded) return;
+    setIsSubmittingEmail(true);
+    setGrabMessage('');
+    try {
+      const response = await fetch('/api/grab/submit-email', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({claimToken:drawResult.voucherClaimToken,email:grabEmail}),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.accepted) {
+        setGrabMessage(data.error || 'Email could not be recorded. Please try again.');
+        return;
+      }
+      setIsEmailRecorded(true);
+      setGrabMessage(data.message || 'Email recorded. Your voucher is being prepared for delivery.');
+    } catch {
+      setGrabMessage('Unable to submit your email. Please try again or ask booth staff for help.');
+    } finally {
+      setIsSubmittingEmail(false);
+    }
+  };
+
   return (
-    <div className="kiosk-result w-full flex flex-col items-center justify-between text-center my-auto py-1">
-      <div className="kiosk-result-card kiosk-primary-panel kiosk-inset-frame relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-4 sm:p-5 md:p-6 shadow-none flex flex-col items-center justify-between">
-        {/* Original NELBD branding replaces text and the cross button. */}
-        <div className="w-full flex justify-center items-center py-1">
+    <div className="kiosk-result w-full min-h-0 flex-1 flex flex-col items-center justify-center text-center">
+      <div className="kiosk-result-card kiosk-primary-panel kiosk-inset-frame relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] shadow-none flex flex-col items-center">
+
+        <div className="kiosk-result-brand w-full flex justify-center items-center">
           <img
             src={nelbdLogo}
             alt="New Everyday Life, By Design"
-            className="block w-auto max-w-[min(58%,250px)] max-h-[clamp(34px,7dvh,72px)] object-contain"
+            className="block w-auto max-w-[min(68%,270px)] h-full object-contain"
           />
         </div>
 
-        {drawResult?.voucherClaimToken && (
-          <form onSubmit={async e=>{
-            e.preventDefault();
-            const response=await fetch('/api/grab/submit-email',{method:'POST',headers:{'Content-Type':'application/json'},
-              body:JSON.stringify({claimToken:drawResult.voucherClaimToken,email:grabEmail})});
-            const data=await response.json();
-            setGrabMessage(data.message||data.error||'Please ask booth staff for help.');
-          }} className="w-full max-w-md p-4 rounded-xl border-2 border-nel-violet">
-            <label htmlFor="grab-email" className="block font-bold mb-2">Email for your Grab voucher</label>
-            <input id="grab-email" type="email" required maxLength={254} value={grabEmail}
-              onChange={e=>setGrabEmail(e.target.value)} className="w-full rounded-lg p-3 text-base bg-white text-nel-violet"/>
-            <button type="submit" className="mt-3 rounded-lg bg-nel-violet text-white px-5 py-3 font-bold">Submit email</button>
-            {grabMessage&&<p role="status" className="mt-2 text-sm">{grabMessage}</p>}
-          </form>
-        )}
-        {/* PRIZE DISPLAY SECTION */}
-        <section className="my-1 py-1 w-full flex flex-col items-center justify-center">
-          {/* 
-            Prize PNG Image:
-            Integrated pink container with double-outline signage framing.
-            Preserves original photographic proportions and transparency.
-          */}
+        {/* The prize comes first; artwork enlarges to fill its violet frame. */}
+        <section className="kiosk-result-prize w-full min-h-0 flex flex-col items-center justify-center">
           {prizeImageUrl && (
-            <div className="mb-2">
-              <div className="w-[clamp(190px,34dvh,320px)] h-[clamp(190px,34dvh,320px)] rounded-2xl overflow-hidden bg-nel-pink border-[3px] border-nel-violet">
-                <img
-                  src={prizeImageUrl}
-                  alt={prizeName}
-                  className="w-full h-full object-contain"
-                />
-              </div>
+            <div className="kiosk-prize-frame shrink-0 rounded-2xl overflow-hidden bg-nel-pink border-[3px] border-nel-violet">
+              <img
+                src={prizeImageUrl}
+                alt={prizeName}
+                className="kiosk-prize-art block w-full h-full object-cover"
+              />
             </div>
           )}
-
-        {/* Single prize announcement; name is part of the headline. */}
-        <h1 className="font-nel font-semibold text-[clamp(1.75rem,5.3vw,3.2rem)] text-nel-violet tracking-tight leading-[1.1] text-center text-balance px-2 py-2">
-          You've won {prizeName}!
-        </h1>
-
+          <h1 className="kiosk-result-title font-nel font-semibold text-nel-violet tracking-tight leading-[1.08] text-center text-balance">
+            You've won {prizeName}!
+          </h1>
         </section>
 
-        {/* Booklet Dashed Divider Line */}
-        <div className="w-full border-b border-solid border-nel-violet/25 my-2" aria-hidden="true" />
-
-        {/* 
-          Signage Information Panel: Redemption Instruction
-          Uses square with double-outline styling and violet tint.
-        */}
-        <div className="w-full max-w-lg px-4 py-2 rounded-2xl bg-nel-violet/10 border-2 border-nel-violet text-center mb-2">
-            <p className="font-dm font-normal text-xs sm:text-sm text-nel-violet leading-snug">
-              Show this screen and your Design Trail booklet to our booth crew.
-            </p>
-            {ticketNumber && (
-              <p className="font-dm text-xs font-medium text-nel-violet/80 mt-1">
-                Ticket: {ticketNumber}
-              </p>
+        {drawResult?.voucherClaimToken && (
+          <div className="kiosk-result-fulfilment w-full max-w-md rounded-xl border-2 border-nel-violet">
+            {isEmailRecorded ? (
+              <div role="status" className="kiosk-result-success flex items-center justify-center gap-2 text-center">
+                <CheckCircle2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+                <p>{grabMessage}</p>
+              </div>
+            ) : (
+              <form onSubmit={submitGrabEmail} className="kiosk-result-email-form flex flex-col items-center">
+                <label htmlFor="grab-email" className="font-bold">Email for your Grab voucher</label>
+                <input
+                  id="grab-email"
+                  type="email"
+                  autoComplete="email"
+                  inputMode="email"
+                  required
+                  maxLength={254}
+                  value={grabEmail}
+                  onChange={event=>setGrabEmail(event.target.value)}
+                  className="w-full rounded-lg bg-white text-nel-violet text-base"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmittingEmail}
+                  className="kiosk-result-submit rounded-lg bg-nel-violet text-white font-bold disabled:opacity-60"
+                >
+                  {isSubmittingEmail ? 'Sending…' : 'Submit email'}
+                </button>
+                {grabMessage && <p role="alert" className="kiosk-result-email-error text-center">{grabMessage}</p>}
+              </form>
             )}
           </div>
+        )}
 
-        <p className="font-dm text-xs sm:text-sm text-nel-violet mt-1">Prizes are subject to availability. Limited to one redemption per person.</p>
-        {/* Automatic return to Welcome after three minutes on the result screen */}
-        <div className="w-full max-w-sm">
-          {/* Automatic Reset Countdown */}
-          <p className="text-xs text-nel-violet/75 font-medium font-dm mt-1" aria-live="off">
-            Resetting in {countdown}s
+        <div className="kiosk-result-instructions w-full max-w-lg rounded-xl bg-nel-violet/10 border-2 border-nel-violet text-center">
+          <p className="font-dm font-normal text-nel-violet leading-snug">
+            Show this screen and your Design Trail booklet to our booth crew.
           </p>
+          {ticketNumber && <p className="font-dm font-medium text-nel-violet/80">Ticket: {ticketNumber}</p>}
         </div>
+
+        <p className="kiosk-result-disclaimer font-dm text-nel-violet">
+          Prizes are subject to availability. Limited to one redemption per person.
+        </p>
+        <p className="kiosk-result-countdown text-nel-violet/75 font-medium font-dm" aria-live="off">
+          Resetting in {countdown}s
+        </p>
       </div>
     </div>
   );

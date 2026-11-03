@@ -115,12 +115,12 @@ export const DrawPage: React.FC = () => {
             role="status"
             aria-label="Drawing your prize"
           >
-            <div className="w-full max-w-[300px] flex flex-col items-center justify-center gap-4 p-4 rounded-2xl bg-nel-pink/10">
+            <div className="w-[76%] max-w-[280px] min-w-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-nel-pink/10">
               <img
                 src={drawStepsGif}
                 alt=""
                 aria-hidden="true"
-                className="block w-full max-w-[220px] max-h-[28dvh] aspect-square object-contain rounded-xl"
+                className="block w-full max-w-[min(240px,30dvh)] max-h-[min(240px,30dvh)] aspect-square object-contain rounded-xl"
               />
               <span className="font-dm font-normal text-nel-violet text-xs">
                 Drawing your prize…
