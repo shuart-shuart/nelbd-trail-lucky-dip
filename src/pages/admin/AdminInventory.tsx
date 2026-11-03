@@ -1217,8 +1217,10 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                           {/* Quick Active Toggle */}
                           <button
                             type="button"
-                            onClick={() => handleToggleActive(prize)}
-                            className={`p-2 rounded-xl border transition min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer shrink-0 ${
+                            onClick={() => void handleToggleActive(prize)}
+                            disabled={togglingPrizeId !== null}
+                            aria-pressed={prize.isActive}
+                            className={`p-2 rounded-xl border transition disabled:opacity-50 disabled:cursor-wait min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer shrink-0 ${
                               prize.isActive
                                 ? 'bg-emerald-950/40 border-emerald-600/60 text-emerald-300'
                                 : 'bg-[#F1EAF9] border-[#E8DEF1] text-[#33224B]/40'
