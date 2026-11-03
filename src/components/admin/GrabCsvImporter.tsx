@@ -27,7 +27,7 @@ export function GrabCsvImporter({onImported}:{onImported:()=>void}){
     for(let offset=0;offset<lines.length;offset+=100){
      const rows:VoucherRow[]=lines.slice(offset,offset+100).filter(Boolean).map(line=>{
       const values=line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
-      if(values.length!==8||values[2]!=='SG'||values[3]!=='5'||values[6]!=='ISSUED')
+      if(values.length!==8||values[2]!=='SG'||values[3]!=='SGD 5'||values[6]!=='ISSUED')
        throw Error('Invalid voucher record in '+file.name);
       return {url:values[0],code:values[1],country:'SG',denominationCents:500,
        startsAt:parseDate(values[4]),expiresAt:parseDate(values[5]),status:'ISSUED'};
