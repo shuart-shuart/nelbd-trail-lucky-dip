@@ -46,7 +46,7 @@ export function OutlookEmailCentre(){
   </div>
   <p className="text-sm mb-4">Voucher stock and winner email statuses. The current Outlook draft fallback is manual; automatic Power Automate dispatch is not enabled by this screen. Do not manually send any processing or sent item.</p>
   {error&&<p role="status" className="text-sm mb-3 text-[#7F003D]">{error}</p>}
-  <p className="text-sm mb-3 rounded-lg bg-[#F6F0FB] p-3">Grab voucher codes: {stock?.total??'—'} imported · {stock?.unassigned??'—'} unassigned · {stock?.currently_eligible??'—'} eligible today · {stock?.assigned??'—'} assigned. Real voucher import remains disabled pending security approval.</p>
+  <p className="text-sm mb-3 rounded-lg bg-[#F6F0FB] p-3">Grab voucher codes: {stock?.total??'—'} imported · {stock?.unassigned??'—'} unassigned · {stock?.currently_eligible??'—'} redeemable today · {stock?.early_test_remaining??0} early-test allocations available (not redeemable until 14 Nov) · {stock?.assigned??'—'} assigned. Real voucher import remains disabled pending security approval.</p>
   <GrabCsvImporter onImported={()=>void refresh()}/>
   <div className="overflow-x-auto">
    <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
