@@ -228,3 +228,32 @@ input, textarea {
   .nel-kiosk-root .kiosk-welcome-hero > img { max-height: 16dvh; }
   .nel-kiosk-root .kiosk-welcome-header img { max-height: 7dvh; }
 }
+
+/* Welcome: title is the visual anchor, date is secondary, CTA has a clean edge. */
+.nel-kiosk-root .kiosk-welcome-hero {
+  gap: clamp(5px, 1.15dvh, 12px);
+}
+.nel-kiosk-root .kiosk-welcome-title {
+  font-size: clamp(1.8rem, 5.5vw, 3.1rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.nel-kiosk-root .kiosk-welcome-art {
+  max-height: min(27dvh, 250px);
+}
+.nel-kiosk-root .kiosk-trail-intro {
+  max-width: 34rem;
+  font-size: clamp(.85rem, 2.2vw, 1.15rem);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.nel-kiosk-root .kiosk-welcome-header {
+  opacity: .9;
+}
+@media (max-height: 740px) {
+  .nel-kiosk-root .kiosk-welcome-art { max-height: 23dvh; }
+  .nel-kiosk-root .kiosk-welcome-title { font-size: clamp(1.55rem, 4.7vw, 2.6rem); }
+}
+@media (max-height: 560px) {
+  .nel-kiosk-root .kiosk-welcome-art { max-height: 16dvh; }
+}
