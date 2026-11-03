@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import {encryptVoucher,fingerprint} from './grabVoucherCrypto.ts';
 import { getPool, withTransaction } from './postgres.ts';
 import { loginAdmin, logoutAdmin, requireAdmin, requireSameOrigin } from './postgresAdminAuth.ts';
 
@@ -44,6 +45,70 @@ postgresAdminRouter.put('/prize-limits/:prizeId/:site',async (req,res)=>{
     if(!rows.length)return res.status(404).json({error:'Prize-site allocation not found'});
     res.json(rows[0]);
   }catch(e){console.error('Prize limit update failed',e);res.status(503).json({error:'Prize limit update unavailable'});}
+});
+
+
+/** Grab voucher credentials are never returned by inventory endpoints. */
+postgresAdminRouter.get('/grab-vouchers/summary',async (_req,res)=>{
+  try {
+    const {rows}=await getPool().query(`SELECT count(*)::int AS total,
+      count(*) FILTER(WHERE assigned_draw_id IS NULL)::int AS unassigned,
+      count(*) FILTER(WHERE assigned_draw_id IS NOT NULL)::int AS assigned,
+      count(*) FILTER(WHERE assigned_draw_id IS NULL AND starts_at<=now() AND expires_at>now())::int AS currently_eligible,
+      min(starts_at) AS earliest_start,max(expires_at) AS latest_expiry
+      FROM grab_voucher_codes`);
+    res.setHeader('Cache-Control','no-store');
+    res.json(rows[0]);
+  }catch {res.status(503).json({error:'Voucher summary unavailable'});}
+});
+/** Explicitly gated, authenticated and batched. Never returns plaintext codes or links. */
+postgresAdminRouter.post('/grab-vouchers/import-batch',async (req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  if(process.env.NELBD_GRAB_IMPORT_ENABLED!=='YES')
+    return res.status(423).json({error:'Voucher import is disabled pending security approval'});
+  const {batch,rows}=req.body||{};
+  if(typeof batch!=='string'||!/^[-_a-zA-Z0-9.]{1,100}$/.test(batch)||
+     !Array.isArray(rows)||rows.length<1||rows.length>100)
+    return res.status(400).json({error:'Invalid import batch'});
+  const normalized=[];
+  const seenCodes=new Set<string>(),seenUrls=new Set<string>();
+  for(const row of rows) {
+    const code=row?.code,url=row?.url,start=row?.startsAt,expiry=row?.expiresAt;
+    if(typeof code!=='string'||!/^[A-Z0-9_-]{5,80}$/.test(code)||
+       typeof url!=='string'||url.length>1000||
+       typeof start!=='string'||typeof expiry!=='string'||
+       row.country!=='SG'||row.status!=='ISSUED'||row.denominationCents!==500)
+      return res.status(400).json({error:'Invalid voucher row'});
+    let parsed:URL;
+    try{parsed=new URL(url);}catch{return res.status(400).json({error:'Invalid redemption URL'});}
+    if(parsed.protocol!=='https:'||parsed.hostname!=='api.grab.com'||
+       !parsed.pathname.startsWith('/gifts/'))
+      return res.status(400).json({error:'Unexpected Grab redemption URL'});
+    const from=new Date(start),to=new Date(expiry);
+    if(!Number.isFinite(from.getTime())||!Number.isFinite(to.getTime())||from>=to)
+      return res.status(400).json({error:'Invalid voucher validity dates'});
+    const codeHash=fingerprint(code),urlHash=fingerprint(url);
+    if(seenCodes.has(codeHash)||seenUrls.has(urlHash))
+      return res.status(400).json({error:'Duplicate voucher in batch'});
+    seenCodes.add(codeHash);seenUrls.add(urlHash);
+    normalized.push({code:encryptVoucher(code),url:encryptVoucher(url),codeHash,urlHash,from,to});
+  }
+  try {
+    const imported=await withTransaction(async client=>{
+      let count=0;
+      for(const v of normalized) {
+        const inserted=await client.query(`INSERT INTO grab_voucher_codes
+          (code_ciphertext,url_ciphertext,code_fingerprint,url_fingerprint,denomination_cents,starts_at,expires_at,source_batch)
+          VALUES($1,$2,$3,$4,500,$5,$6,$7)
+          ON CONFLICT DO NOTHING RETURNING id`,
+          [v.code,v.url,v.codeHash,v.urlHash,v.from,v.to,batch]);
+        count+=inserted.rowCount||0;
+      }
+      return count;
+    });
+    res.setHeader('Cache-Control','no-store');
+    res.json({imported,duplicates:normalized.length-imported});
+  }catch {res.status(503).json({error:'Voucher import failed; batch rolled back'});}
 });
 
 postgresAdminRouter.get('/inventory',async (_req,res)=>{
