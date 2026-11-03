@@ -64,6 +64,7 @@ interface ParsedCsvItem {
 export const AdminInventory: React.FC = () => {
   const { user } = useAuth();
   const [prizes, setPrizes] = useState<PrizeWithInventory[]>([]);
+  const [togglingPrizeId, setTogglingPrizeId] = useState<string | null>(null);
   const [adjustments, setAdjustments] = useState<InventoryAdjustment[]>([]);
   const [prizeLimits,setPrizeLimits]=useState<PrizeSiteLimit[]>([]);
   useEffect(()=>{if(import.meta.env.VITE_DATA_BACKEND!=='postgres')return;
@@ -561,7 +562,7 @@ export const AdminInventory: React.FC = () => {
   // DELETE / DEACTIVATE HANDLER
   // -------------------------------------------------------------
   const handleToggleActive = async (prize: PrizeWithInventory) => {
-    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Prize activation is not yet supported on PostgreSQL.', 'error'); return; }
+    if (togglingPrizeId) return;
     const nextActive = !prize.isActive;
 
     // Check TOP prize rule when activating
@@ -572,13 +573,21 @@ export const AdminInventory: React.FC = () => {
       }
     }
 
+    setTogglingPrizeId(prize.id);
     try {
-      await updatePrize(prize.id, { isActive: nextActive });
+      if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+        await updatePostgresPrize(prize.id, { isActive: nextActive });
+        setPrizes(await getPostgresPrizesWithInventory());
+      } else {
+        await updatePrize(prize.id, { isActive: nextActive });
+      }
       showNotification(
         `"${prize.name}" is now ${nextActive ? 'Active in lucky dip pool' : 'Deactivated'}.`
       );
     } catch (err: any) {
-      showNotification('Failed to toggle active status.', 'error');
+      showNotification(err?.message || 'Failed to toggle active status.', 'error');
+    } finally {
+      setTogglingPrizeId(null);
     }
   };
 
@@ -1343,7 +1352,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         <th className="px-4 py-3.5 text-center">Total Starting</th>
                         <th className="px-4 py-3.5 text-center">Total Remaining</th>
                         <th className="px-4 py-3.5 text-center">Active</th>
-                        <th className="px-5 py-3.5 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-nel-purple/20/80 font-mono">
@@ -1460,8 +1468,12 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             {/* Active */}
                             <td className="px-4 py-4 text-center font-sans">
                               <button
-                                onClick={() => handleToggleActive(prize)}
-                                className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold border inline-flex items-center gap-1 transition cursor-pointer ${
+                                type="button"
+                                onClick={() => void handleToggleActive(prize)}
+                                disabled={togglingPrizeId !== null}
+                                aria-pressed={prize.isActive}
+                                aria-label={`${prize.isActive ? 'Deactivate' : 'Activate'} ${prize.name}`}
+                                className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold border inline-flex items-center gap-1 transition cursor-pointer disabled:opacity-50 disabled:cursor-wait ${
                                   prize.isActive
                                     ? 'bg-[#F0E8F9]/60 border-nel-pink/40/60 text-[#8649AC] hover:bg-emerald-900/60'
                                     : 'bg-[#F1EAF9] border-[#E8DEF1] text-[#8A7C96] hover:bg-slate-750'
@@ -1482,60 +1494,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                               </button>
                             </td>
 
-                            {/* Actions */}
-                            <td className="px-5 py-4 text-right font-sans">
-                              <div className="flex items-center justify-end space-x-1.5">
-                                {/* Edit Button */}
-                                <button
-                                  onClick={() => handleOpenEdit(prize)}
-                                  className="px-2.5 py-1 rounded-lg bg-[#F1EAF9] hover:bg-slate-700 text-[#33224B] text-xs font-semibold flex items-center gap-1 border border-[#E8DEF1] transition cursor-pointer"
-                                  title="Edit Prize"
-                                >
-                                  <Edit2 className="w-3 h-3 text-[#8649AC]" />
-                                  <span>Edit</span>
-                                </button>
-
-                                {/* Adjust Stock Button */}
-                                <button
-                                  onClick={() => handleOpenAdjust(prize, 'PDD')}
-                                  className="px-2.5 py-1 rounded-lg bg-[#F1EAF9] hover:bg-slate-700 text-[#8649AC] text-xs font-semibold flex items-center gap-1 border border-teal-500/20 transition cursor-pointer"
-                                  title="Adjust Stock"
-                                >
-                                  <span>Adjust Stock</span>
-                                </button>
-
-                                {/* Delete / Deactivate Button */}
-                                {hasHistory ? (
-                                  <button
-                                    onClick={() => handleToggleActive(prize)}
-                                    className={`p-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
-                                      prize.isActive
-                                        ? 'bg-amber-950/40 border-amber-800/40 text-amber-300 hover:bg-amber-900/60'
-                                        : 'bg-[#F0E8F9]/40 border-nel-pink/40/40 text-[#8649AC] hover:bg-emerald-900/60'
-                                    }`}
-                                    title={
-                                      prize.isActive
-                                        ? 'Deactivate (Prize has transaction history)'
-                                        : 'Activate'
-                                    }
-                                  >
-                                    {prize.isActive ? (
-                                      <PowerOff className="w-3.5 h-3.5" />
-                                    ) : (
-                                      <Power className="w-3.5 h-3.5" />
-                                    )}
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => handleDeletePrize(prize)}
-                                    className="p-1.5 rounded-lg bg-[#F1EAF9] hover:bg-red-950/60 hover:text-red-400 text-[#8A7C96] border border-[#E8DEF1] transition cursor-pointer"
-                                    title="Permanently Delete (No history)"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                              </div>
-                            </td>
                           </tr>
                         );
                       })}
