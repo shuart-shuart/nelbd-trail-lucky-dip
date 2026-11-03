@@ -275,11 +275,15 @@ export const AdminInventory: React.FC = () => {
   // DIRECT IMAGE UPLOAD HANDLER
   // -------------------------------------------------------------
   const handleDirectImageUpload = async (prize: PrizeWithInventory, file: File) => {
-    if (import.meta.env.VITE_DATA_BACKEND === 'postgres') { showNotification('Image editing is not yet supported on PostgreSQL.', 'error'); return; }
     setIsUploadingImageFor(prize.id);
     try {
       const dataUrl = await processPngUpload(file);
-      await updatePrize(prize.id, { imageUrl: dataUrl });
+      if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
+        await updatePostgresPrize(prize.id, { imageUrl: dataUrl });
+        setPrizes(await getPostgresPrizesWithInventory());
+      } else {
+        await updatePrize(prize.id, { imageUrl: dataUrl });
+      }
       showNotification(`PNG image saved for "${prize.name}".`);
     } catch (err: any) {
       showNotification(err?.message || 'Failed to process PNG image.', 'error');
