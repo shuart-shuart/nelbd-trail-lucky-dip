@@ -110,14 +110,19 @@ export const DrawPage: React.FC = () => {
         className="kiosk-draw-module kiosk-draw-action kiosk-inset-frame relative flex aspect-square w-[min(84vw,480px,58dvh)] max-w-full shrink-0 items-center justify-center rounded-full bg-nel-pink text-nel-violet cursor-pointer select-none transition-transform active:scale-[0.98] disabled:cursor-wait focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
       >
         {isDrawing ? (
-          <span className="flex flex-col items-center justify-center gap-3 px-6" role="status" aria-label="Drawing your prize">
+        <div
+          className="w-full flex flex-col items-center justify-center"
+          role="status"
+          aria-label="Drawing your prize"
+        >
+          <div className="w-full max-w-[300px] flex flex-col items-center justify-center p-4 rounded-2xl bg-nel-pink/10">
             <img
               src={drawStepsGif}
               alt=""
               aria-hidden="true"
-              className="block w-[min(48vw,260px,32dvh)] aspect-square object-contain rounded-2xl"
+              className="block w-full max-w-[220px] max-h-[28dvh] aspect-square object-contain rounded-xl"
             />
-            <span className="font-dm font-semibold text-nel-violet text-[clamp(.8rem,2.5vw,1rem)]">
+           <span className="font-dm font-normal text-nel-violet text-xs">
               Drawing your prize…
             </span>
           </span>
