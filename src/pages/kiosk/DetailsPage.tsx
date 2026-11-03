@@ -229,10 +229,10 @@ export const DetailsPage: React.FC = () => {
             <button
               type="submit"
               disabled={isChecking}
-              className="kiosk-primary-action w-full min-h-[52px] py-3 px-6 rounded-2xl bg-nel-violet hover:bg-[#340557] active:scale-[0.98] text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-violet shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-violet"
+              className="kiosk-primary-action w-full min-h-[52px] py-3 px-6 rounded-2xl bg-nel-pink active:scale-[0.98] text-nel-violet font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-violet shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-violet"
             >
               <span>{isChecking ? 'VERIFYING...' : 'CONTINUE'}</span>
-              {!isChecking && <ArrowRight className="w-6 h-6 text-nel-pink stroke-[2.5]" aria-hidden="true" />}
+              {!isChecking && <ArrowRight className="w-6 h-6 text-nel-violet stroke-[2.5]" aria-hidden="true" />}
             </button>
           </div>
         </form>
