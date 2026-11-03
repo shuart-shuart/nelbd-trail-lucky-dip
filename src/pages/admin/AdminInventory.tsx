@@ -27,7 +27,6 @@ import {
 import { processPngUpload } from '../../utils/imageUpload';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { InventoryPrizeLimits } from '../../components/admin/InventoryPrizeLimits';
-import { OutlookEmailCentre } from '../../components/admin/OutlookEmailCentre';
 import {
   subscribeToPrizesWithInventory,
   subscribeToInventoryAdjustments,
@@ -880,7 +879,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
       }
     >
-      {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <OutlookEmailCentre />}
       {/* Toast Notification Banner */}
       {feedbackMessage && (
         <div
