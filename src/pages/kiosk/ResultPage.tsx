@@ -9,6 +9,8 @@ export const ResultPage: React.FC = () => {
   const navigate = useNavigate();
   const { session, resetSession } = useKiosk();
   const [countdown, setCountdown] = useState(180);
+  const [grabEmail,setGrabEmail]=useState('');
+  const [grabMessage,setGrabMessage]=useState('');
   const resetSessionRef = useRef(resetSession);
 
   useEffect(() => {
@@ -126,6 +128,21 @@ export const ResultPage: React.FC = () => {
             <span>Trail Reward Confirmed</span>
           </div>
 
+        {drawResult?.voucherClaimToken && (
+          <form onSubmit={async e=>{
+            e.preventDefault();
+            const response=await fetch('/api/grab/submit-email',{method:'POST',headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({claimToken:drawResult.voucherClaimToken,email:grabEmail})});
+            const data=await response.json();
+            setGrabMessage(data.message||data.error||'Please ask booth staff for help.');
+          }} className="w-full max-w-md p-4 rounded-xl border-2 border-nel-violet">
+            <label htmlFor="grab-email" className="block font-bold mb-2">Email for your Grab voucher</label>
+            <input id="grab-email" type="email" required maxLength={254} value={grabEmail}
+              onChange={e=>setGrabEmail(e.target.value)} className="w-full rounded-lg p-3 text-base bg-white text-nel-violet"/>
+            <button type="submit" className="mt-3 rounded-lg bg-nel-violet text-white px-5 py-3 font-bold">Submit email</button>
+            {grabMessage&&<p role="status" className="mt-2 text-sm">{grabMessage}</p>}
+          </form>
+        )}
         {/* PRIZE DISPLAY SECTION */}
         <section className="my-2 py-2 w-full flex flex-col items-center justify-center">
           {/* 
