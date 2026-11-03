@@ -322,3 +322,10 @@ input, textarea {
 .nel-kiosk-root .kiosk-start-button {
   white-space: nowrap;
 }
+
+/* Full-sentence welcome CTA: legible and single-line on typical phones. */
+.nel-kiosk-root .kiosk-start-button {
+  font-size: clamp(9px, 2.1vw, 18px);
+  letter-spacing: -0.015em;
+  padding-inline: clamp(8px, 2vw, 24px);
+}
