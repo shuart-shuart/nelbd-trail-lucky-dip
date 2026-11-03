@@ -43,26 +43,42 @@ The winner will enter their email on the existing Lucky Dip result page. Postgre
 - Do not permit trigger callers to arbitrarily select the sender. The flow is **only** for NELBD Grab fulfilment.
 - Enable Secure Inputs and Secure Outputs where supported to protect voucher codes/links in run history.
 
-## Step 3 — delivery confirmation (NOT YET CONFIGURABLE)
+## Step 3 — delivery confirmation (implemented in PR #25; not deployed)
 
-The application must first implement a server endpoint such as `POST /api/grab/automation/complete` with separate authenticated credentials and replay-safe semantics.
+Add a Power Automate HTTP action **after the shared mailbox Outlook action**. Configure its **Run after** setting for **is successful** only.
 
-When that endpoint exists, put an **HTTP POST** action after successful Outlook sending, body:
+- Method: `POST`
+- URL (staging): `https://nelbd-trail-lucky-dip-staging.onrender.com/api/grab/automation/complete`
+- Headers: `Content-Type: application/json` and `Authorization: Bearer <shared-secret>`
+- Body (insert the actual trigger dynamic-content field, not a literal placeholder):
+  ```json
+  {"deliveryId":"<deliveryId from HTTP trigger>","status":"sent"}
+  ```
+- Save a **new strong random 32+ character secret** as `NELBD_POWER_AUTOMATE_CALLBACK_KEY` in Render and use the exact same secret in the Power Automate confirmation action. Do not share it in chat, GitHub, screenshots or flow run history.
+- Keep `NELBD_POWER_AUTOMATE_ENABLED=NO` until migration 007 is applied and a controlled test passes.
+- If Outlook definitively fails, staff should review the `processing` item; it is intentionally not automatically retried. An action timeout can mean the message was sent, so never reissue without reconciliation.
+- If the callback itself fails after Outlook succeeds, **do not rerun the Outlook send step** to fix it. Staff must reconcile the recorded delivery state.
 
-```json
-{"deliveryId":"<dynamic trigger deliveryId>","status":"sent"}
-```
+Backend endpoint uses server-side bearer secret verification and an atomic transition from `processing` to `sent`; duplicate `sent` callbacks acknowledge without sending again. Email provider acceptance is not proof of inbox arrival.
 
-The API must authenticate the callback, validate the associated in-flight attempt, and atomically record its result. It must accept an identical repeated callback without resending. If sending fails definitively, report `failed`; if Outlook times out with unknown outcome, **do not blindly retry**.
+## Dispatch worker
 
-**Do not set up Step 3 yet**; no callback endpoint is deployed.
+When the app is running with `NELBD_POWER_AUTOMATE_ENABLED=YES`, `NELBD_GRAB_FULFILMENT_ENABLED=YES`, `DRAW_BACKEND=postgres`, the signed trigger URL and callback secret configured, the worker periodically leases one queued eligible voucher record in a PostgreSQL transaction and POSTs it to Power Automate. The claim is marked `processing` **before** the HTTP request, protecting against duplicate dispatch on restart. An uncertain outcome remains `processing` for staff review. This prioritizes **at-most-once dispatch** over automatic recovery. It does not guarantee that Power Automate or its connectors themselves will never retry a send; check the flow's retry/concurrency settings and test with dummy data.
+
+## Required environment
+
+- `NELBD_POWER_AUTOMATE_TRIGGER_URL`: signed HTTPS request trigger URL, stored only in Render.
+- `NELBD_POWER_AUTOMATE_CALLBACK_KEY`: new random 32+ character secret, shared between Render and Power Automate HTTP callback.
+- `NELBD_POWER_AUTOMATE_ENABLED=NO` until activation; set `YES` only after controlled test and approved deployment.
+- `NELBD_GRAB_FULFILMENT_ENABLED`: existing voucher claim flag, requires `YES` for live flow.
+- `DRAW_BACKEND=postgres`: active PostgreSQL drawing engine.
 
 ## Backend architecture work remaining
 
-1. Implement a durable transactional dispatch/outbox mechanism: reliably trigger HTTP POST after email capture without losing jobs on server restarts, and protect against duplicate sends on retries.
-2. Authenticate outbound delivery (signed Power Automate URL kept secret), validate recipient and actual assigned voucher server-side, and fail closed on missing configuration.
-3. Implement authenticated delivery-result callback and a mechanism for staff to reconcile ambiguous outcomes without replay.
-4. Add the separate **Grab Vouchers** admin tab, preserving existing kiosk UI and protecting voucher code/link display behind permissions.
+1. Review the implemented periodic transactional dispatch worker and confirm Render startup, lease behavior, and error handling with integration tests.
+2. Verify secure Render configuration and flow run-history settings; do not log full voucher codes or request bodies.
+3. Implement staff reconciliation UI/actions for ambiguous outcomes without replay; the authenticated callback endpoint exists in PR #25 but is not deployed.
+4. Review the added **Grab Vouchers** admin tab and expand delivery-history details as needed.
 5. Verify existing database migrations and inventory counts; never re-import the 11,720 codes without checking current inventory.
 6. Test with dummy vouchers and a designated test mailbox; do not enable real sends before controlled acceptance testing.
 
