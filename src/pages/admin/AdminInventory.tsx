@@ -1243,6 +1243,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 <MapPin className="w-3 h-3 text-[#8649AC]" />
                                 <span>PDD Station</span>
                               </span>
+                              <span className="text-[10px]">Cap: {capLabel(prize.id,'PDD')}</span>
                             </div>
                             <div className="flex items-baseline justify-between mt-1">
                               <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
@@ -1253,7 +1254,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </div>
                           </div>
 
-                          <div className="text-xs text-[#675779]">PDD cap: {capLabel(prize.id,'PDD')}</div>
                           {/* PS Station */}
                           <div className="p-2.5 rounded-xl bg-white border border-sky-500/30 flex flex-col justify-between">
                             <div className="flex items-center justify-between text-[11px] mb-1">
@@ -1261,6 +1261,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                                 <MapPin className="w-3 h-3 text-sky-400" />
                                 <span>PS Station</span>
                               </span>
+                              <span className="text-[10px]">Cap: {capLabel(prize.id,'PS')}</span>
                             </div>
                             <div className="flex items-baseline justify-between mt-1">
                               <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
