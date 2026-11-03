@@ -27,7 +27,7 @@ import {
   getPrizes,
 } from '../../firebase/firestoreService';
 import { Draw, DrawStatus, Participant, SiteLocation } from '../../firebase/types';
-import { getPostgresDrawHistory, getAllPostgresDrawHistory, getPostgresParticipants, getAllPostgresParticipants, getPostgresDashboardStats, getPostgresPrizesWithInventory } from '../../api/postgresAdminClient';
+import { getPostgresDrawHistory, getAllPostgresDrawHistory, getPostgresParticipants, getAllPostgresParticipants, getPostgresDashboardStats, getPostgresPrizesWithInventory,setPostgresDrawReview } from '../../api/postgresAdminClient';
 
 export const AdminHistory: React.FC = () => {
   const [draws, setDraws] = useState<Draw[]>([]);
@@ -225,6 +225,22 @@ export const AdminHistory: React.FC = () => {
     return matchQuery && matchSite;
   });
 
+  const markDrawReview=async(draw:Draw)=>{
+    const current=(draw as Draw & {reviewLabel?:string}).reviewLabel||'';
+    const choice=window.prompt('Classification for '+draw.ticketNumber+': test, error, or clear',current||'test');
+    if(choice===null)return;
+    const label=choice.trim().toLowerCase();
+    if(!['test','error','clear'].includes(label)){window.alert('Choose test, error, or clear.');return;}
+    const note=label==='clear'?'':window.prompt('Reason (optional; maximum 500 characters)','') ;
+    if(note===null)return;
+    if(note.length>500){window.alert('Reason must be 500 characters or fewer.');return;}
+    setProcessingId(draw.id);
+    try{
+      await setPostgresDrawReview(draw.id,label==='clear'?null:label as 'test'|'error',note);
+      setDraws(prev=>prev.map(d=>d.id===draw.id?{...d,reviewLabel:label==='clear'?null:label,reviewNote:note} as Draw:d));
+    }catch(err){window.alert(err instanceof Error?err.message:'Unable to update draw label');}
+    finally{setProcessingId(null);}
+  };
   const handleStatusChange = async (draw: Draw, newStatus: DrawStatus) => {
     setProcessingId(draw.id);
     try {
