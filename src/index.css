@@ -329,3 +329,115 @@ input, textarea {
   letter-spacing: -0.015em;
   padding-inline: clamp(8px, 2vw, 24px);
 }
+
+
+/* Result screen: keep prize, email and instructions inside an ordinary mobile viewport.
+   The keyboard or exceptionally short landscape screens may scroll to preserve access. */
+.nel-kiosk-root:has(.kiosk-result) {
+  overflow-y: hidden;
+}
+.nel-kiosk-root .kiosk-main:has(.kiosk-result) {
+  min-height: 0;
+  padding-top: max(6px, env(safe-area-inset-top));
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+}
+.nel-kiosk-root .kiosk-result {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+.nel-kiosk-root .kiosk-result-card {
+  max-height: calc(100dvh - 16px);
+  overflow: hidden;
+  justify-content: center;
+  gap: clamp(2px, 0.7dvh, 7px);
+  padding: clamp(11px, 1.6dvh, 18px) 13px;
+}
+.nel-kiosk-root .kiosk-result-brand {
+  flex: 0 0 auto;
+  height: clamp(28px, 5dvh, 48px);
+}
+.nel-kiosk-root .kiosk-result-prize {
+  gap: clamp(2px, .5dvh, 7px);
+  flex: 0 1 auto;
+}
+.nel-kiosk-root .kiosk-prize-frame {
+  width: min(58vw, 26dvh, 260px);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+}
+.nel-kiosk-root .kiosk-prize-art {
+  transform: scale(1.12);
+  transform-origin: center;
+  object-position: center;
+}
+.nel-kiosk-root .kiosk-result-title {
+  font-size: clamp(1.15rem, 4.5vw, 2.4rem);
+  padding-inline: 3px;
+  margin: 0;
+}
+.nel-kiosk-root .kiosk-result-fulfilment {
+  padding: clamp(5px, .9dvh, 9px) clamp(7px, 1.4vw, 12px);
+  flex: 0 0 auto;
+}
+.nel-kiosk-root .kiosk-result-email-form {
+  gap: clamp(3px, .55dvh, 6px);
+}
+.nel-kiosk-root .kiosk-result-email-form label {
+  font-size: clamp(12px, 2.7vw, 16px);
+  line-height: 1.2;
+}
+.nel-kiosk-root .kiosk-result-email-form input {
+  height: clamp(36px, 4.6dvh, 43px);
+  padding: 4px 10px;
+  font-size: 16px; /* prevents automatic Safari zoom on focus */
+  min-height: 0;
+}
+.nel-kiosk-root .kiosk-result-submit {
+  min-height: 34px;
+  padding: 6px 18px;
+  font-size: clamp(12px, 2.7vw, 15px);
+}
+.nel-kiosk-root .kiosk-result-email-error,
+.nel-kiosk-root .kiosk-result-success {
+  font-size: clamp(11px, 2.6vw, 14px);
+  line-height: 1.2;
+}
+.nel-kiosk-root .kiosk-result-instructions {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+}
+.nel-kiosk-root .kiosk-result-instructions p {
+  font-size: clamp(10px, 2.35vw, 13px);
+  line-height: 1.25;
+}
+.nel-kiosk-root .kiosk-result-disclaimer {
+  font-size: clamp(9px, 2.1vw, 12px);
+  line-height: 1.2;
+  margin: 0;
+}
+.nel-kiosk-root .kiosk-result-countdown {
+  font-size: clamp(10px, 2.1vw, 12px);
+  line-height: 1.15;
+  margin: 0;
+}
+@media (min-width: 640px) {
+  .nel-kiosk-root .kiosk-prize-frame {
+    width: min(40vw, 29dvh, 300px);
+  }
+}
+@media (max-height: 650px) {
+  .nel-kiosk-root .kiosk-prize-frame { width: min(50vw, 22dvh, 210px); }
+  .nel-kiosk-root .kiosk-result-brand { height: clamp(24px, 4dvh, 36px); }
+  .nel-kiosk-root .kiosk-result-card { padding-block: 9px; }
+  .nel-kiosk-root .kiosk-result-instructions { padding-block: 3px; }
+}
+@media (max-height: 480px) {
+  .nel-kiosk-root:has(.kiosk-result) { overflow-y: auto; }
+  .nel-kiosk-root .kiosk-result-card { overflow-y: auto; }
+}
+.nel-kiosk-root:has(.kiosk-result:focus-within) {
+  overflow-y: auto;
+}
+.nel-kiosk-root .kiosk-result-card:focus-within {
+  overflow-y: auto; /* allow reaching submit if a mobile keyboard reduces viewport */
+}
