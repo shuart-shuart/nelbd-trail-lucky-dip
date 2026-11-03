@@ -99,12 +99,12 @@ export const DetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="kiosk-details w-full flex flex-col justify-center my-auto py-2">
+    <div className="kiosk-details w-full flex flex-col justify-center my-auto py-1">
       {/* 
         BOOKLET EDITORIAL PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
         Follows the official signage reference with outer bold border and inset double outline.
       */}
-      <div className="kiosk-form-card kiosk-primary-panel kiosk-inset-frame w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-6 sm:p-8 shadow-2xl">
+      <div className="kiosk-form-card kiosk-primary-panel kiosk-inset-frame w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-none">
         
         {/* Step Header */}
         <div className="flex items-center justify-between pb-1">
@@ -120,11 +120,11 @@ export const DetailsPage: React.FC = () => {
         {/* <h1 className="font-nel font-semibold text-2xl sm:text-3xl md:text-4xl text-nel-violet leading-[1.1] tracking-tight mt-1">
           Ready for your Lucky Dip?
         </h1> */}
-         <p id="mobile-help" className="mt-1 text-sm font-dm text-nel-purple/80">
+         <p id="mobile-help" className="mt-1 text-sm font-dm text-nel-violet/85">
                Limited to one redemption per person. 
             </p>
         {/* Form */}
-        <form onSubmit={handleSubmit} noValidate className="w-full space-y-4 sm:space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="w-full space-y-3 sm:space-y-4">
           
           {/* Name Field */}
           <div>
@@ -148,7 +148,7 @@ export const DetailsPage: React.FC = () => {
                 if (nameError) setNameError(null);
               }}
               placeholder="e.g. Alex"
-              className={`w-full min-h-[50px] px-4 py-3 rounded-xl bg-nel-pink border-2 text-base sm:text-lg font-dm font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none focus:ring-4 transition-all ${
+              className={`w-full min-h-[50px] px-4 py-3 rounded-xl bg-nel-pink border-2 text-base sm:text-lg font-dm font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none focus:ring-4 transition-all ${
                 nameError
                   ? 'border-red-600 focus:ring-red-300'
                   : 'border-nel-purple/80 focus:border-nel-violet focus:ring-nel-purple/20'
@@ -207,7 +207,7 @@ export const DetailsPage: React.FC = () => {
                 className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none font-dm"
               />
             </div>
-            <p id="mobile-help" className="mt-1 text-[11px] font-dm text-nel-purple/80">Please enter 8 digits, without spaces. Your mobile number is used to verify for repeated redemption, all information shared will not be held after the event.</p>
+            <p id="mobile-help" className="mt-1 text-xs font-dm text-nel-purple/80">Please enter 8 digits, without spaces. Your mobile number is used to verify for repeated redemption, all information shared will not be held after the event.</p>
             {mobileError && (
               <p
                 id="mobile-error"
@@ -229,7 +229,7 @@ export const DetailsPage: React.FC = () => {
             <button
               type="submit"
               disabled={isChecking}
-              className="kiosk-primary-action w-full min-h-[58px] py-4 px-6 rounded-2xl bg-nel-violet hover:bg-[#340557] active:scale-[0.98] text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-purple/50 shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-purple"
+              className="kiosk-primary-action w-full min-h-[52px] py-3 px-6 rounded-2xl bg-nel-violet hover:bg-[#340557] active:scale-[0.98] text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-purple/50 shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-purple"
             >
               <span>{isChecking ? 'VERIFYING...' : 'CONTINUE'}</span>
               {!isChecking && <ArrowRight className="w-6 h-6 text-nel-pink stroke-[2.5]" aria-hidden="true" />}
