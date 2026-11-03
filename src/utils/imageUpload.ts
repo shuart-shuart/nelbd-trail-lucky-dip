@@ -41,6 +41,10 @@ export async function processPngUpload(file: File, maxDimension = 600): Promise<
 
         // Always encode as PNG for transparency
         const pngDataUrl = canvas.toDataURL('image/png');
+        if (pngDataUrl.length > 1900000) {
+          reject(new Error('PNG is too detailed to store (limit 1.9 MB after resizing). Try a simpler or smaller PNG.'));
+          return;
+        }
         resolve(pngDataUrl);
       };
       img.onerror = () => reject(new Error('Failed to decode image file.'));
