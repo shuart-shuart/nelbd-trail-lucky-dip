@@ -41,10 +41,10 @@ export function OutlookEmailCentre(){
  };
  return <section className="mb-6 rounded-2xl border border-[#DDD2E8] bg-white p-4 sm:p-6 text-[#33224B]">
   <div className="flex justify-between items-center gap-3 mb-2">
-   <h2 className="text-xl font-bold">Outlook Email Centre · Grab vouchers</h2>
+   <h2 className="text-xl font-bold">Grab voucher inventory and delivery</h2>
    <button type="button" onClick={()=>void refresh()} className="rounded-lg border px-3 py-2 text-sm">Refresh</button>
   </div>
-  <p className="text-sm mb-4">Manual sending only from nelbd@designsingapore.org. Review the recipient, copy the prepared message, send using that Outlook mailbox, then mark as sent. This dashboard does not send emails.</p>
+  <p className="text-sm mb-4">Voucher stock and winner email statuses. The current Outlook draft fallback is manual; automatic Power Automate dispatch is not enabled by this screen. Do not manually send any processing or sent item.</p>
   {error&&<p role="status" className="text-sm mb-3 text-[#7F003D]">{error}</p>}
   <p className="text-sm mb-3 rounded-lg bg-[#F6F0FB] p-3">Grab voucher codes: {stock?.total??'—'} imported · {stock?.unassigned??'—'} unassigned · {stock?.currently_eligible??'—'} eligible today · {stock?.assigned??'—'} assigned. Real voucher import remains disabled pending security approval.</p>
   <GrabCsvImporter onImported={()=>void refresh()}/>
@@ -53,7 +53,7 @@ export function OutlookEmailCentre(){
    <tbody>{rows.map(row=><tr key={row.drawId} className="border-t">
     <td className="p-2">{row.ticketNumber}</td><td className="p-2">{row.site}</td>
     <td className="p-2">{row.recipientEmail||'Awaiting winner'}</td><td className="p-2">{row.status}</td>
-    <td className="p-2"><button disabled={!row.recipientEmail||busy} onClick={()=>void openDraft(row.drawId)}
+    <td className="p-2"><button disabled={!row.recipientEmail||busy||row.status==='processing'||row.status==='sent'} onClick={()=>void openDraft(row.drawId)}
       className="rounded-lg border px-3 py-1 disabled:opacity-40">Review draft</button></td>
    </tr>)}</tbody></table>
    {!rows.length&&<p className="text-sm py-3">No Grab voucher email drafts yet.</p>}
@@ -67,7 +67,7 @@ export function OutlookEmailCentre(){
     <button onClick={()=>void copy()} className="rounded-lg bg-[#270342] text-white px-4 py-2 text-sm">Copy email for Outlook</button>
     <a href="https://outlook.office.com/mail/" target="_blank" rel="noopener noreferrer"
        className="rounded-lg border px-4 py-2 text-sm">Open Outlook</a>
-    <button disabled={busy||draft.status==='sent'} onClick={()=>void markSent()}
+    <button disabled={busy||draft.status==='sent'||draft.status==='processing'} onClick={()=>void markSent()}
        className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40">Mark manually sent</button>
    </div>
    <p className="text-xs mt-2">Voucher details are sensitive. Do not share drafts or paste them into public systems. Sent status is a staff declaration, not a delivery receipt.</p>

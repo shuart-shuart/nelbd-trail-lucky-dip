@@ -2,6 +2,7 @@ import express from 'express';
 import { checkPostgres } from './src/server/postgres.ts';
 import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
 import { grabClaimRouter } from './src/server/grabClaimRoutes.ts';
+import { grabDeliveryRouter, startGrabDeliveryWorker } from './src/server/grabDeliveryRoutes.ts';
 import { executePostgresLuckyDipDraw, checkPostgresMobileHasDrawn } from './src/server/postgresDrawEngine.ts';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -28,6 +29,7 @@ if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
 }
 
 app.use('/api/grab',grabClaimRouter);
+app.use('/api/grab',grabDeliveryRouter);
 
 // ---------------------------------------------------------------------------
 // LUCKY DIP BACKEND API ROUTES
@@ -191,6 +193,7 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Lucky Dip server running on port ${PORT} [${isProduction ? 'production' : 'development'}]`);
+    startGrabDeliveryWorker();
   });
 }
 

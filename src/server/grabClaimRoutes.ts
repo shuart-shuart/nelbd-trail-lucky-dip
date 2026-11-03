@@ -19,6 +19,6 @@ grabClaimRouter.post('/submit-email',async(req,res)=>{
       WHERE token_hash=$1 AND status='awaiting_email'
       RETURNING draw_id`,[hash,email.trim().toLowerCase()]);
     if(!rows.length)return res.status(409).json({error:'This claim has already been submitted or has expired. Please ask booth staff for help.'});
-    return res.json({accepted:true,message:'Email recorded. Voucher delivery is pending activation.'});
+    return res.json({accepted:true,message:process.env.NELBD_POWER_AUTOMATE_ENABLED==='YES' ? 'Email recorded. Your voucher is being prepared for delivery.' : 'Email recorded. Voucher delivery is pending activation.'});
   }catch {return res.status(503).json({error:'Unable to record email right now'});}
 });

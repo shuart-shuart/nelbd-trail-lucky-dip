@@ -77,6 +77,8 @@ postgresAdminRouter.get('/outlook-centre/:drawId/draft',async (req,res)=>{
     if(!rows.length)return res.status(404).json({error:'Draft not found'});
     const row=rows[0];
     if(!row.recipient_email)return res.status(409).json({error:'Winner has not submitted an email'});
+    if(row.status==='processing'||row.status==='sent'||process.env.NELBD_POWER_AUTOMATE_ENABLED==='YES')
+      return res.status(409).json({error:'This voucher is managed by automatic fulfilment or has already been sent'});
     const code=decryptGrabCredential(row.code_ciphertext);
     const link=decryptGrabCredential(row.url_ciphertext);
     const expires=new Intl.DateTimeFormat('en-SG',{timeZone:'Asia/Singapore',dateStyle:'long'}).format(new Date(row.expires_at));
@@ -94,6 +96,7 @@ Please keep this email private. Terms and conditions apply.`,
   }catch {res.status(503).json({error:'Unable to prepare draft'});}
 });
 postgresAdminRouter.post('/outlook-centre/:drawId/mark-sent',async(req,res)=>{
+  if(process.env.NELBD_POWER_AUTOMATE_ENABLED==='YES') return res.status(423).json({error:'Manual sending is disabled during automatic fulfilment'});
   if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
   if(!/^[0-9a-f-]{36}$/i.test(req.params.drawId)||req.body?.confirmed!==true)
     return res.status(400).json({error:'Explicit confirmation required'});
@@ -127,7 +130,7 @@ postgresAdminRouter.post('/grab-vouchers/import-batch',async (req,res)=>{
   if(typeof batch!=='string'||!/^[-_a-zA-Z0-9.]{1,100}$/.test(batch)||
      !Array.isArray(rows)||rows.length<1||rows.length>100)
     return res.status(400).json({error:'Invalid import batch'});
-  const normalized=[];
+  const normalized: Array<{code:string;url:string;codeHash:string;urlHash:string;from:Date;to:Date}>=[];
   const seenCodes=new Set<string>(),seenUrls=new Set<string>();
   for(const row of rows) {
     const code=row?.code,url=row?.url,start=row?.startsAt,expiry=row?.expiresAt;
