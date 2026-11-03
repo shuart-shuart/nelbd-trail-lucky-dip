@@ -228,6 +228,41 @@ postgresAdminRouter.get('/settings',async (_req,res)=>{
   try {const {rows}=await getPool().query('SELECT * FROM kiosk_settings WHERE id=1');res.json(rows[0]||null);}
   catch {res.status(503).json({error:'Settings unavailable'});}
 });
+/** Change allocated starting stock while preserving all existing claims. */
+postgresAdminRouter.post('/inventory/:id/:site/starting',async (req,res)=>{
+  const {id,site}=req.params;
+  const starting=req.body?.startingQuantity;
+  if (!['PDD','PS'].includes(site)||!Number.isSafeInteger(starting)||starting<0||starting>1000000)
+    return res.status(400).json({error:'Invalid starting inventory quantity'});
+  const admin=res.locals.admin;
+  if(admin.site_access!=='ALL'&&admin.site_access!==site)
+    return res.status(403).json({error:'Site access denied'});
+  try {
+    const result=await withTransaction(async client=>{
+      const existing=await client.query('SELECT allocated_quantity,remaining_quantity,claimed_quantity FROM site_inventory WHERE prize_id=$1 AND site=$2 FOR UPDATE',[id,site]);
+      if(!existing.rowCount)return {notFound:true};
+      const {allocated_quantity,remaining_quantity,claimed_quantity}=existing.rows[0];
+      const claimed=Number(claimed_quantity);
+      if(starting<claimed) return {belowClaimed:claimed};
+      const newRemaining=starting-claimed;
+      const updated=await client.query(`UPDATE site_inventory SET allocated_quantity=$3,remaining_quantity=$4,updated_at=now()
+        WHERE prize_id=$1 AND site=$2 RETURNING *`,[id,site,starting,newRemaining]);
+      if(starting!==Number(allocated_quantity)) {
+        await client.query(`INSERT INTO inventory_adjustments
+          (prize_id,site,previous_quantity,new_quantity,delta,reason,adjusted_by)
+          VALUES($1,$2,$3,$4,$5,'manual_adjustment',$6)`,
+          [id,site,Number(remaining_quantity),newRemaining,newRemaining-Number(remaining_quantity),admin.email]);
+      }
+      return {row:updated.rows[0]};
+    });
+    if('notFound' in result)return res.status(404).json({error:'Inventory item not found'});
+    if('belowClaimed' in result)return res.status(409).json({error:'Starting quantity cannot be below already claimed units ('+result.belowClaimed+').'});
+    return res.json(result.row);
+  } catch {
+    return res.status(503).json({error:'Starting inventory update unavailable'});
+  }
+});
+
 postgresAdminRouter.post('/inventory/:id/:site/quantity',async (req,res)=>{
   const {id,site}=req.params;
   const remaining=req.body?.remainingQuantity;
