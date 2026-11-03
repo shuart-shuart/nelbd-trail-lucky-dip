@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { processPngUpload } from '../../utils/imageUpload';
 import { AdminLayout } from '../../components/admin/AdminLayout';
-import { PrizeThrottlingPanel } from '../../components/admin/PrizeThrottlingPanel';
+import { InventoryPrizeLimits } from '../../components/admin/InventoryPrizeLimits';
 import { OutlookEmailCentre } from '../../components/admin/OutlookEmailCentre';
 import {
   subscribeToPrizesWithInventory,
@@ -880,7 +880,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
       }
     >
-      {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <PrizeThrottlingPanel />}
       {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <OutlookEmailCentre />}
       {/* Toast Notification Banner */}
       {feedbackMessage && (
@@ -1964,6 +1963,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
             )}
 
             <form onSubmit={handleSaveEditPrize} className="space-y-4">
+              {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <InventoryPrizeLimits prizeId={editingPrize.id} />}
+
               <div>
                 <label className="block text-xs font-bold uppercase text-[#645574] mb-1.5">
                   Prize Name *
