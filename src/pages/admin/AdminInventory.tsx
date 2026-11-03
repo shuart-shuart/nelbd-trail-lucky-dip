@@ -1222,7 +1222,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             <div className="flex items-baseline justify-between mt-1">
                               <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
                               <div>
-                                <span className="font-black text-[#8649AC] text-base">{pddRem}</span>
+                                <button type="button" onClick={() => handleOpenAdjust(prize,'PDD')} className="font-black text-[#8649AC] text-base underline decoration-dotted" aria-label={`Edit PDD remaining stock for ${prize.name}`}>{pddRem}</button>
                                 <span className="text-[#33224B]/50 text-xs"> / {pddStart}</span>
                               </div>
                             </div>
@@ -1240,7 +1240,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             <div className="flex items-baseline justify-between mt-1">
                               <span className="text-[11px] text-[#33224B]/50 font-sans">Rem / Start:</span>
                               <div>
-                                <span className="font-black text-sky-300 text-base">{psRem}</span>
+                                <button type="button" onClick={() => handleOpenAdjust(prize,'PS')} className="font-black text-sky-300 text-base underline decoration-dotted" aria-label={`Edit PS remaining stock for ${prize.name}`}>{psRem}</button>
                                 <span className="text-[#33224B]/50 text-xs"> / {psStart}</span>
                               </div>
                             </div>
