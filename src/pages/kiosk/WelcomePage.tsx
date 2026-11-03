@@ -2,13 +2,12 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
 import { SiteLocation } from '../../firebase/types';
-import abbeySvg from '../../assets/img/ABBEY.svg';
+import redeemSvg from '../../assets/img/REDEEM.svg';
 import nelLogo from '../../assets/img/nelbd-logo2.png';
 import dateImage from '../../assets/img/date.png';
 
 /**
- * Flat signage-style welcome screen. The Abbey asset is the original SVG
- * already committed under src/assets/img/ABBEY.svg (not a generated redraw).
+ * Flat signage-style welcome screen. The Redeem artwork is the original SVG asset, recoloured in NELBD violet.
  */
 export const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,7 +25,7 @@ export const WelcomePage: React.FC = () => {
   return (
     <div className="kiosk-welcome relative w-full max-w-xl mx-auto flex flex-col gap-4 sm:gap-5 py-4 sm:py-6 my-auto isolate">
 
-      {/* Module 1: logo/date split with the original Abbey illustration fully visible. */}
+      {/* Module 1: logo/date split with the NELBD violet Redeem illustration fully visible. */}
       <section className="kiosk-welcome-hero kiosk-signage-outline kiosk-inset-frame w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
         <div className="kiosk-welcome-header grid grid-cols-2 gap-3 sm:gap-5 items-start">
           <div className="kiosk-brand-image min-w-0">
@@ -37,8 +36,8 @@ export const WelcomePage: React.FC = () => {
           </div>
         </div>
         <img
-          src={abbeySvg}
-          alt="Abbey illustration showing a child, walking adult and wheelchair user"
+          src={redeemSvg}
+          alt="NELBD Redeem illustration"
           className="block w-full h-auto max-h-[45dvh] object-contain object-center"
         />
         <h1 className="kiosk-welcome-title font-nel font-bold text-center text-nel-violet">Design Trail Lucky Dip</h1>
