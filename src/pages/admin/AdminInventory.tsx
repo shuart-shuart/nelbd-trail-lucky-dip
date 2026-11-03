@@ -1282,55 +1282,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                           </div>
                         </div>
 
-                        {/* Mobile Actions Toolbar */}
-                        <div className="flex items-center gap-2 pt-1">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenAdjust(prize, 'PDD')}
-                            className="flex-1 py-2.5 px-3 min-h-[44px] rounded-xl bg-nel-purple/50 hover:bg-slate-700 active:scale-98 text-[#8649AC] text-xs font-bold flex items-center justify-center gap-1.5 border border-[#E2CBF0] transition cursor-pointer"
-                          >
-                            <span>Adjust Stock</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit(prize)}
-                            className="py-2.5 px-3.5 min-h-[44px] rounded-xl bg-[#F1EAF9] hover:bg-slate-700 active:scale-98 text-[#33224B] text-xs font-semibold flex items-center justify-center gap-1.5 border border-[#E8DEF1] transition cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5 text-[#8649AC]" />
-                            <span>Edit</span>
-                          </button>
-
-                          {hasHistory ? (
-                            <button
-                              type="button"
-                              onClick={() => handleToggleActive(prize)}
-                              className={`p-2.5 min-h-[44px] min-w-[44px] rounded-xl border transition cursor-pointer flex items-center justify-center shrink-0 ${
-                                prize.isActive
-                                  ? 'bg-amber-950/40 border-amber-800/40 text-amber-300 hover:bg-amber-900/60'
-                                  : 'bg-emerald-950/40 border-emerald-700/50 text-emerald-300 hover:bg-emerald-900/60'
-                              }`}
-                              title={prize.isActive ? 'Deactivate prize' : 'Activate prize'}
-                              aria-label={prize.isActive ? 'Deactivate' : 'Activate'}
-                            >
-                              {prize.isActive ? (
-                                <PowerOff className="w-4 h-4" />
-                              ) : (
-                                <Power className="w-4 h-4" />
-                              )}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleDeletePrize(prize)}
-                              className="p-2.5 min-h-[44px] min-w-[44px] rounded-xl bg-[#F1EAF9] hover:bg-red-950/60 hover:text-red-400 text-[#8A7C96] border border-[#E8DEF1] transition cursor-pointer flex items-center justify-center shrink-0"
-                              title="Permanently Delete (No history)"
-                              aria-label="Delete prize"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
                       </div>
                     );
                   })}
