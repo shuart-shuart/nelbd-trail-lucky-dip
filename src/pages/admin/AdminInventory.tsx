@@ -44,7 +44,7 @@ import {
   InventoryAdjustment,
 } from '../../firebase/types';
 import { useAuth } from '../../context/AuthContext';
-import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining, updatePostgresPrize } from '../../api/postgresAdminClient';
+import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining, updatePostgresPrize, getPrizeSiteLimits, type PrizeSiteLimit } from '../../api/postgresAdminClient';
 
 interface ParsedCsvItem {
   rowNumber: number;
@@ -65,6 +65,14 @@ export const AdminInventory: React.FC = () => {
   const { user } = useAuth();
   const [prizes, setPrizes] = useState<PrizeWithInventory[]>([]);
   const [adjustments, setAdjustments] = useState<InventoryAdjustment[]>([]);
+  const [prizeLimits,setPrizeLimits]=useState<PrizeSiteLimit[]>([]);
+  useEffect(()=>{if(import.meta.env.VITE_DATA_BACKEND!=='postgres')return;
+    const refresh=()=>void getPrizeSiteLimits().then(setPrizeLimits).catch(()=>{});
+    refresh();const timer=setInterval(refresh,15000);return()=>clearInterval(timer);
+  },[]);
+  const capLabel=(id:string,site:'PDD'|'PS')=>{const row=prizeLimits.find(x=>x.prizeId===id&&x.site===site);
+    return !row?'—':row.paused?'Paused':row.dailyCap===null?'Unlimited':row.awardedToday+' / '+row.dailyCap;
+  };
   const [activeTab, setActiveTab] = useState<'inventory' | 'adjustments'>('inventory');
 
   // Search and Filters
@@ -1245,6 +1253,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             </div>
                           </div>
 
+                          <div className="text-xs text-[#675779]">PDD cap: {capLabel(prize.id,'PDD')}</div>
                           {/* PS Station */}
                           <div className="p-2.5 rounded-xl bg-white border border-sky-500/30 flex flex-col justify-between">
                             <div className="flex items-center justify-between text-[11px] mb-1">
@@ -1326,8 +1335,10 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         <th className="px-4 py-3.5">Tier</th>
                         <th className="px-4 py-3.5 text-center">PDD Starting</th>
                         <th className="px-4 py-3.5 text-center">PDD Remaining</th>
+                        <th className="px-4 py-3.5 text-center">PDD Daily Cap</th>
                         <th className="px-4 py-3.5 text-center">PS Starting</th>
                         <th className="px-4 py-3.5 text-center">PS Remaining</th>
+                        <th className="px-4 py-3.5 text-center">PS Daily Cap</th>
                         <th className="px-4 py-3.5 text-center">Total Starting</th>
                         <th className="px-4 py-3.5 text-center">Total Remaining</th>
                         <th className="px-4 py-3.5 text-center">Active</th>
@@ -1422,6 +1433,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             <td className="px-4 py-4 text-center font-black text-[#8649AC]">
                               {pddRem}
                             </td>
+                            <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PDD')}</td>
 
                             {/* PS Starting Quantity */}
                             <td className="px-4 py-4 text-center font-bold text-[#645574]">
@@ -1432,6 +1444,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             <td className="px-4 py-4 text-center font-black text-sky-300">
                               {psRem}
                             </td>
+                            <td className="px-3 py-4 text-center text-xs font-semibold">{capLabel(prize.id,'PS')}</td>
 
                             {/* Total Starting Quantity */}
                             <td className="px-4 py-4 text-center font-bold text-[#33224B] bg-nel-input/30">
