@@ -1,6 +1,7 @@
 import express from 'express';
 import { checkPostgres } from './src/server/postgres.ts';
 import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
+import { grabClaimRouter } from './src/server/grabClaimRoutes.ts';
 import { executePostgresLuckyDipDraw, checkPostgresMobileHasDrawn } from './src/server/postgresDrawEngine.ts';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -25,6 +26,8 @@ app.use(express.json({limit:'3mb'}));
 if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
   app.use('/api/admin', postgresAdminRouter);
 }
+
+app.use('/api/grab',grabClaimRouter);
 
 // ---------------------------------------------------------------------------
 // LUCKY DIP BACKEND API ROUTES
