@@ -44,7 +44,7 @@ import {
   InventoryAdjustment,
 } from '../../firebase/types';
 import { useAuth } from '../../context/AuthContext';
-import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining, updatePostgresPrize, getPrizeSiteLimits, type PrizeSiteLimit } from '../../api/postgresAdminClient';
+import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining, updatePostgresStarting, updatePostgresPrize, getPrizeSiteLimits, type PrizeSiteLimit } from '../../api/postgresAdminClient';
 
 interface ParsedCsvItem {
   rowNumber: number;
@@ -120,6 +120,7 @@ export const AdminInventory: React.FC = () => {
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [adjustingPrize, setAdjustingPrize] = useState<PrizeWithInventory | null>(null);
   const [adjustSite, setAdjustSite] = useState<SiteLocation>('PDD');
+  const [adjustMode,setAdjustMode]=useState<'remaining'|'starting'>('remaining');
   const [adjustmentValue, setAdjustmentValue] = useState<string>('0');
   const [adjustReason, setAdjustReason] = useState<string>('');
   const [adjustError, setAdjustError] = useState<string | null>(null);
@@ -489,21 +490,22 @@ export const AdminInventory: React.FC = () => {
   // -------------------------------------------------------------
   // ADJUST STOCK HANDLER
   // -------------------------------------------------------------
-  const handleOpenAdjust = (prize: PrizeWithInventory, site: SiteLocation = 'PDD') => {
+  const handleOpenAdjust = (prize: PrizeWithInventory, site: SiteLocation = 'PDD', mode:'remaining'|'starting'='remaining') => {
     setAdjustingPrize(prize);
     setAdjustSite(site);
-    setAdjustmentValue(String(site==='PDD'?prize.pddInventory.remainingQuantity:prize.psInventory.remainingQuantity));
+    setAdjustMode(mode);
+    const inventory=site==='PDD'?prize.pddInventory:prize.psInventory;
+    setAdjustmentValue(String(mode==='starting'?inventory.allocatedQuantity:inventory.remainingQuantity));
     setAdjustReason('');
     setAdjustError(null);
     setIsAdjustModalOpen(true);
   };
 
-  const currentRemainingForAdjust = useMemo(() => {
+  const currentQuantityForAdjust = useMemo(() => {
     if (!adjustingPrize) return 0;
-    return adjustSite === 'PDD'
-      ? adjustingPrize.pddInventory.remainingQuantity
-      : adjustingPrize.psInventory.remainingQuantity;
-  }, [adjustingPrize, adjustSite]);
+    const inventory=adjustSite==='PDD'?adjustingPrize.pddInventory:adjustingPrize.psInventory;
+    return adjustMode==='starting'?inventory.allocatedQuantity:inventory.remainingQuantity;
+  }, [adjustingPrize,adjustSite,adjustMode]);
 
   const calculatedNewRemaining = Number(adjustmentValue);
 
@@ -516,17 +518,27 @@ export const AdminInventory: React.FC = () => {
       setAdjustError('Enter a valid nonnegative whole number, up to 1,000,000.');
       return;
     }
-    if (calculatedNewRemaining === currentRemainingForAdjust) {
+    if (calculatedNewRemaining === currentQuantityForAdjust) {
       setIsAdjustModalOpen(false);
       return;
     }
 
+    const inventory=adjustSite==='PDD'?adjustingPrize.pddInventory:adjustingPrize.psInventory;
+    if(adjustMode==='starting' && calculatedNewRemaining<inventory.claimedQuantity){
+      setAdjustError('Starting stock cannot be lower than already claimed units ('+inventory.claimedQuantity+').');
+      return;
+    }
     setIsSubmittingAdjustment(true);
     try {
       if (import.meta.env.VITE_DATA_BACKEND === 'postgres') {
-        await updatePostgresRemaining(adjustingPrize.id,adjustSite,calculatedNewRemaining);
+        if(adjustMode==='starting')
+          await updatePostgresStarting(adjustingPrize.id,adjustSite,calculatedNewRemaining);
+        else
+          await updatePostgresRemaining(adjustingPrize.id,adjustSite,calculatedNewRemaining);
         const [items,audit]=await Promise.all([getPostgresPrizesWithInventory(),getPostgresInventoryAdjustments()]);
         setPrizes(items);setAdjustments(audit);
+      } else if(adjustMode==='starting') {
+        throw new Error('Starting quantity editing requires the PostgreSQL inventory backend.');
       } else await updateSiteInventoryQuantity({
         prizeId: adjustingPrize.id,
         prizeName: adjustingPrize.name,
@@ -538,7 +550,7 @@ export const AdminInventory: React.FC = () => {
       });
 
       showNotification(
-        `Remaining stock for "${adjustingPrize.name}" at ${adjustSite} updated to ${calculatedNewRemaining}.`
+        `${adjustMode==='starting'?'Starting':'Remaining'} stock for "${adjustingPrize.name}" at ${adjustSite} updated to ${calculatedNewRemaining}.`
       );
       setIsAdjustModalOpen(false);
     } catch (err: any) {
@@ -2101,18 +2113,20 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {isAdjustModalOpen && adjustingPrize && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4" role="presentation">
-          <div role="dialog" aria-modal="true" aria-label="Edit remaining stock" className="bg-white border border-[#DDD2E8] rounded-2xl max-w-md w-full p-6 text-[#33224B] shadow-xl">
-            <h3 className="text-xl font-bold mb-1">Edit Remaining Stock</h3>
+          <div role="dialog" aria-modal="true" aria-label={`Edit ${adjustMode} stock`} className="bg-white border border-[#DDD2E8] rounded-2xl max-w-md w-full p-6 text-[#33224B] shadow-xl">
+            <h3 className="text-xl font-bold mb-1">Edit {adjustMode==='starting'?'Starting':'Remaining'} Stock</h3>
             <p className="text-sm text-[#645574] mb-4">{adjustingPrize.name} · {adjustSite}</p>
             {adjustError && <p role="alert" className="text-red-700 text-sm mb-3">{adjustError}</p>}
             <form onSubmit={handleSaveStockAdjustment} className="space-y-4">
-              <label className="block text-sm font-semibold">New remaining quantity
+              <label className="block text-sm font-semibold">New {adjustMode==='starting'?'starting':'remaining'} quantity
                 <input autoFocus type="number" min="0" max="1000000" step="1" required
                   value={adjustmentValue}
                   onChange={e => setAdjustmentValue(e.target.value)}
                   className="block mt-2 w-full border border-[#CCC0D8] rounded-xl px-4 py-3 text-lg font-mono bg-white text-[#33224B]" />
               </label>
-              <p className="text-xs text-[#756782]">Previously: {currentRemainingForAdjust}. This adjustment is audited and will update the site's allocated stock total without changing past draws.</p>
+              <p className="text-xs text-[#756782]">Previously: {currentQuantityForAdjust}. {adjustMode==='starting'
+                ? 'Already claimed units are preserved; remaining stock is recalculated automatically.'
+                : 'The adjustment updates allocated stock.'} Past draws remain unchanged and the action is audited.</p>
               <div className="flex justify-end gap-2">
                 <button type="button" disabled={isSubmittingAdjustment} onClick={() => setIsAdjustModalOpen(false)}
                   className="rounded-xl border px-4 py-2 text-sm">Cancel</button>
