@@ -175,7 +175,7 @@ export const DetailsPage: React.FC = () => {
               Singapore Mobile Number *
             </label>
             <div
-              className={`flex items-center min-h-[50px] rounded-xl bg-nel-pink border overflow-hidden focus-within:ring-0 ${
+              className={`kiosk-phone-field flex items-center min-h-[50px] rounded-xl bg-nel-pink border overflow-hidden focus-within:ring-0 ${
                 mobileError
                   ? 'border-nel-violet'
                   : 'border-nel-violet'
