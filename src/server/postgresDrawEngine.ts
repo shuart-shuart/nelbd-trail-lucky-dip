@@ -64,7 +64,13 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
          AND (p.tier<>'TOP' OR $2::boolean=false)
          AND (p.id<>'grab-voucher' OR ($4::boolean=true AND EXISTS (
            SELECT 1 FROM grab_voucher_codes v WHERE v.assigned_draw_id IS NULL
-             AND v.starts_at<=now() AND v.expires_at>now())))
+             AND v.expires_at>now() AND (
+               v.starts_at<=now() OR
+               ($5::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
+                AND v.starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
+                AND (SELECT count(*) FROM grab_voucher_codes used
+                     WHERE used.assigned_at IS NOT NULL AND used.assigned_at < used.starts_at)<20)
+             ))))
          AND ($3::boolean=false OR NOT EXISTS (
            SELECT 1 FROM prize_site_limits lim WHERE lim.prize_id=p.id AND lim.site=i.site
            AND (lim.paused OR (lim.daily_cap IS NOT NULL AND
@@ -72,7 +78,9 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
                AND (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date =
                    (now() AT TIME ZONE 'Asia/Singapore')::date) >= lim.daily_cap))
          ))
-       ORDER BY p.id FOR UPDATE OF i`, [site, Boolean(top.rowCount), throttlingEnabled, process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES']);
+       ORDER BY p.id FOR UPDATE OF i`, [site, Boolean(top.rowCount), throttlingEnabled,
+         process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES',
+         process.env.NELBD_GRAB_EARLY_TEST_20 === 'YES']);
     // Draw probability adjusts stock-weighted selection, without changing stock totals.
     // normal = current odds; low = half of normal; high = twice normal.
     const weight = (row: {probability:string;remaining_quantity:number}) =>
@@ -96,8 +104,13 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
     let voucherClaimToken: string | undefined;
     if (chosen.id === 'grab-voucher' && process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES') {
       const available = await client.query(`SELECT id FROM grab_voucher_codes
-        WHERE assigned_draw_id IS NULL AND starts_at<=now() AND expires_at>now()
-        ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`);
+        WHERE assigned_draw_id IS NULL AND expires_at>now()
+          AND (starts_at<=now() OR (
+            $1::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
+            AND starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
+            AND (SELECT count(*) FROM grab_voucher_codes used
+                 WHERE used.assigned_at IS NOT NULL AND used.assigned_at < used.starts_at)<20))
+        ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`,[process.env.NELBD_GRAB_EARLY_TEST_20 === 'YES']);
       if (!available.rowCount) throw new Error('GRAB_STOCK_EXHAUSTED');
       voucherClaimToken=crypto.randomBytes(32).toString('base64url');
       const tokenHash=crypto.createHash('sha256').update(voucherClaimToken).digest('hex');

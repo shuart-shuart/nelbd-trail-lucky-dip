@@ -115,10 +115,20 @@ postgresAdminRouter.get('/grab-vouchers/summary',async (_req,res)=>{
       count(*) FILTER(WHERE assigned_draw_id IS NULL)::int AS unassigned,
       count(*) FILTER(WHERE assigned_draw_id IS NOT NULL)::int AS assigned,
       count(*) FILTER(WHERE assigned_draw_id IS NULL AND starts_at<=now() AND expires_at>now())::int AS currently_eligible,
-      min(starts_at) AS earliest_start,max(expires_at) AS latest_expiry
+      min(starts_at) AS earliest_start,max(expires_at) AS latest_expiry,
+      count(*) FILTER (WHERE assigned_at IS NOT NULL AND assigned_at<starts_at)::int AS early_assigned,
+      count(*) FILTER (WHERE assigned_draw_id IS NULL
+        AND starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
+        AND expires_at>now())::int AS eligible_early_pool
       FROM grab_voucher_codes`);
+    const earlyEnabled=process.env.NELBD_GRAB_EARLY_TEST_20==='YES' &&
+      Date.now()<Date.parse('2026-11-13T16:00:00Z');
+    const raw=rows[0];
+    const earlyTestRemaining=earlyEnabled
+      ? Math.min(Math.max(0,20-Number(raw.early_assigned||0)),Number(raw.eligible_early_pool||0))
+      : 0;
     res.setHeader('Cache-Control','no-store');
-    res.json(rows[0]);
+    res.json({...raw,early_test_remaining:earlyTestRemaining});
   }catch {res.status(503).json({error:'Voucher summary unavailable'});}
 });
 /** Explicitly gated, authenticated and batched. Never returns plaintext codes or links. */
