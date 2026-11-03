@@ -83,7 +83,7 @@ export const ResultPage: React.FC = () => {
     session.site === 'PS' ? 'Impact Hub' : 'Innovation Hub';
 
   return (
-    <div className="kiosk-result w-full flex flex-col items-center justify-between text-center my-auto py-2">
+    <div className="kiosk-result w-full flex flex-col items-center justify-between text-center my-auto py-1">
       {/* 
         BOOKLET CAMPAIGN RESULT PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
         Follows the official signage reference:
@@ -92,7 +92,7 @@ export const ResultPage: React.FC = () => {
         - High-contrast prize name in oversized NEL Rounded SemiBold
         - Integrated pink/purple signage framing (no stark white blocks)
       */}
-      <div className="kiosk-result-card kiosk-primary-panel kiosk-inset-frame relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-5 sm:p-7 md:p-8 shadow-2xl flex flex-col items-center justify-between">
+      <div className="kiosk-result-card kiosk-primary-panel kiosk-inset-frame relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-4 sm:p-5 md:p-6 shadow-none flex flex-col items-center justify-between">
         
         {/* Close control: ends this result session and returns to Welcome. */}
         <button
@@ -107,7 +107,7 @@ export const ResultPage: React.FC = () => {
 
         {/* Top Tag & Campaign Header */}
         <div className="w-full flex items-center justify-between pb-2 pr-12">
-          <span className="font-dm font-bold text-xs sm:text-sm text-nel-purple uppercase tracking-wider">
+          <span className="font-dm font-bold text-xs sm:text-sm text-nel-violet/80 uppercase tracking-wider">
             New Everyday Life, By Design
           </span>
 
@@ -115,13 +115,13 @@ export const ResultPage: React.FC = () => {
 
         {/* Celebration Headline */}
         <div className="py-1">
-          <h1 className="font-nel font-semibold text-3xl sm:text-4xl md:text-5xl text-nel-violet tracking-tight uppercase leading-[1.05]">
+          <h1 className="font-nel font-semibold text-[clamp(1.7rem,5vw,2.8rem)] text-nel-violet tracking-tight uppercase leading-[1.05]">
             YOU'VE WON!
           </h1>
         </div>
 
         {/* Booklet Dashed Divider Line */}
-        <div className="w-full border-b-2 sm:border-b-4 border-dashed border-nel-purple/35 my-3" aria-hidden="true" />
+        <div className="w-full border-b border-solid border-nel-violet/25 my-2" aria-hidden="true" />
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-nel-purple text-nel-pink font-dm font-bold text-xs uppercase tracking-wider mb-2">
             <CheckCircle2 className="w-3.5 h-3.5 text-nel-pink" aria-hidden="true" />
@@ -144,15 +144,15 @@ export const ResultPage: React.FC = () => {
           </form>
         )}
         {/* PRIZE DISPLAY SECTION */}
-        <section className="my-2 py-2 w-full flex flex-col items-center justify-center">
+        <section className="my-1 py-1 w-full flex flex-col items-center justify-center">
           {/* 
             Prize PNG Image:
             Integrated pink container with double-outline signage framing.
             Preserves original photographic proportions and transparency.
           */}
           {prizeImageUrl && (
-            <div className="mb-3 sm:mb-4">
-              <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl bg-nel-pink border-2 border-nel-violet p-2.5 sm:p-3 flex items-center justify-center">
+            <div className="mb-2">
+              <div className="w-[clamp(100px,19dvh,190px)] h-[clamp(100px,19dvh,190px)] rounded-2xl bg-nel-pink border-2 border-nel-violet p-2.5 sm:p-3 flex items-center justify-center">
                 <img
                   src={prizeImageUrl}
                   alt={prizeName}
@@ -163,7 +163,7 @@ export const ResultPage: React.FC = () => {
           )}
 
           {/* Actual Prize Name in Oversized NEL Rounded Typography */}
-          <div className="font-dm font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-nel-violet leading-[1.08] tracking-tight px-2 break-words max-w-md">
+          <div className="font-dm font-bold text-[clamp(1.65rem,4.5vw,3rem)] text-nel-violet leading-[1.08] tracking-tight px-2 break-words max-w-md">
             {prizeName}
           </div>
         </section>
@@ -175,12 +175,12 @@ export const ResultPage: React.FC = () => {
           Signage Information Panel: Redemption Instruction
           Uses square with double-outline styling and violet tint.
         */}
-        <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-purple/15 border-2 border-nel-violet text-center mb-4">
+        <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-purple/15 border-2 border-nel-violet text-center mb-2">
           <p className="font-dm font-semibold text-base sm:text-lg text-nel-violet leading-tight">
             Show this screen and your Design Trail booklet to our booth crew.
           </p>
           {ticketNumber && (
-            <p className="font-mono text-sm font-bold text-nel-purple mt-1 tracking-wide">
+            <p className="font-mono text-sm font-bold text-nel-violet/80 mt-1 tracking-wide">
               Ticket: {ticketNumber}
             </p>
           )}
@@ -190,7 +190,7 @@ export const ResultPage: React.FC = () => {
         {/* Automatic return to Welcome after three minutes on the result screen */}
         <div className="w-full max-w-sm">
           {/* Automatic Reset Countdown */}
-          <p className="text-xs text-nel-purple font-medium font-dm mt-3" aria-live="off">
+          <p className="text-xs text-nel-purple font-medium font-dm mt-1" aria-live="off">
             Resetting in {countdown}s
           </p>
         </div>
