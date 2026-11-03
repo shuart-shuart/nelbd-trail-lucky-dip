@@ -277,3 +277,36 @@ input, textarea {
   outline: none !important;
   box-shadow: none !important;
 }
+
+/* Details: unframed pink module and a single neat stroke per field.
+   The phone prefix and number share ONE border; no inner input rectangle. */
+.nel-kiosk-root .kiosk-form-card {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+.nel-kiosk-root .kiosk-form-card::before,
+.nel-kiosk-root .kiosk-form-card::after {
+  content: none !important;
+  display: none !important;
+}
+.nel-kiosk-root .kiosk-form-card #name-input,
+.nel-kiosk-root .kiosk-form-card .kiosk-phone-field {
+  border: 2px solid var(--nel-violet) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.nel-kiosk-root .kiosk-form-card #name-input:is(:hover, :focus, :focus-visible, :active),
+.nel-kiosk-root .kiosk-form-card .kiosk-phone-field:is(:hover, :focus-within, :active) {
+  border: 2px solid var(--nel-violet) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.nel-kiosk-root .kiosk-form-card .kiosk-phone-field #mobile-input,
+.nel-kiosk-root .kiosk-form-card .kiosk-phone-field #mobile-input:is(:hover, :focus, :focus-visible, :active) {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  min-width: 0;
+}
