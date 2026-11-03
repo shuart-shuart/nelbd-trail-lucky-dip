@@ -9,7 +9,8 @@ export const grabDeliveryRouter = Router();
 function enabled(): boolean {
   return process.env.NELBD_POWER_AUTOMATE_ENABLED === 'YES' &&
     process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES' &&
-    process.env.DRAW_BACKEND === 'postgres';
+    process.env.DRAW_BACKEND === 'postgres' &&
+    (process.env.NELBD_POWER_AUTOMATE_CALLBACK_KEY || '').length >= 32;
 }
 
 function validCallbackKey(value: string): boolean {
