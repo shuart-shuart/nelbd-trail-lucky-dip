@@ -104,7 +104,7 @@ export const DetailsPage: React.FC = () => {
         BOOKLET EDITORIAL PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
         Follows the official signage reference with outer bold border and inset double outline.
       */}
-      <div className="kiosk-form-card kiosk-primary-panel kiosk-inset-frame w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-none">
+      <div className="kiosk-form-card kiosk-primary-panel w-full bg-nel-pink text-nel-violet rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-none">
         
         {/* Step Header */}
         <div className="flex items-center justify-between pb-1">
@@ -148,10 +148,10 @@ export const DetailsPage: React.FC = () => {
                 if (nameError) setNameError(null);
               }}
               placeholder="e.g. Alex"
-              className={`w-full min-h-[50px] px-4 py-3 rounded-xl bg-nel-pink border-2 text-base sm:text-lg font-dm font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none focus:ring-4 transition-all ${
+              className={`w-full min-h-[50px] px-4 py-3 rounded-xl bg-nel-pink border text-base sm:text-lg font-dm font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none focus:ring-0 ${
                 nameError
-                  ? 'border-red-600 focus:ring-red-300'
-                  : 'border-nel-violet focus:border-nel-violet focus:ring-nel-violet/20'
+                  ? 'border-nel-violet'
+                  : 'border-nel-violet'
               }`}
             />
             {nameError && (
@@ -175,14 +175,14 @@ export const DetailsPage: React.FC = () => {
               Singapore Mobile Number *
             </label>
             <div
-              className={`flex items-center min-h-[50px] rounded-xl bg-nel-pink border-2 overflow-hidden focus-within:ring-4 transition-all ${
+              className={`flex items-center min-h-[50px] rounded-xl bg-nel-pink border overflow-hidden focus-within:ring-0 ${
                 mobileError
-                  ? 'border-red-600 focus-within:ring-red-300'
-                  : 'border-nel-violet focus-within:border-nel-violet focus-within:ring-nel-violet/20'
+                  ? 'border-nel-violet'
+                  : 'border-nel-violet'
               }`}
             >
               <span
-                className="pl-4 pr-3 py-3 text-base sm:text-lg font-bold text-nel-violet border-r-2 border-nel-violet select-none font-dm"
+                className="pl-4 pr-3 py-3 text-base sm:text-lg font-bold text-nel-violet select-none font-dm"
                 aria-hidden="true"
               >
                 +65
@@ -204,7 +204,7 @@ export const DetailsPage: React.FC = () => {
                   if (mobileError) setMobileError(null);
                 }}
                 placeholder="81234567"
-                className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-purple/40 focus:outline-none font-dm"
+                className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none font-dm"
               />
             </div>
             <p id="mobile-help" className="mt-1 text-xs font-dm text-nel-violet">Please enter 8 digits, without spaces. Your mobile number is used to verify for repeated redemption, all information shared will not be held after the event.</p>
@@ -229,10 +229,10 @@ export const DetailsPage: React.FC = () => {
             <button
               type="submit"
               disabled={isChecking}
-              className="kiosk-primary-action w-full min-h-[52px] py-3 px-6 rounded-2xl bg-nel-pink active:scale-[0.98] text-nel-violet font-nel font-semibold text-xl sm:text-2xl tracking-wide border-2 border-nel-violet shadow-xl flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-violet"
+              className="kiosk-primary-action w-full min-h-[52px] py-3 px-6 rounded-2xl bg-nel-violet text-nel-pink font-nel font-semibold text-xl sm:text-2xl tracking-wide border-0 shadow-none flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <span>{isChecking ? 'VERIFYING...' : 'CONTINUE'}</span>
-              {!isChecking && <ArrowRight className="w-6 h-6 text-nel-violet stroke-[2.5]" aria-hidden="true" />}
+              {!isChecking && <ArrowRight className="w-6 h-6 text-nel-pink stroke-[2.5]" aria-hidden="true" />}
             </button>
           </div>
         </form>
