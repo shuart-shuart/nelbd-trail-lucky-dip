@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useKiosk } from '../../context/KioskContext';
 import { SiteLocation } from '../../firebase/types';
 import redeemSvg from '../../assets/img/REDEEM.svg';
-import nelLogo from '../../assets/img/nelbd-logo2.png';
 import dateImage from '../../assets/img/date.png';
 
 /**
@@ -25,15 +24,10 @@ export const WelcomePage: React.FC = () => {
   return (
     <div className="kiosk-welcome relative w-full max-w-xl mx-auto flex flex-col gap-4 sm:gap-5 py-4 sm:py-6 my-auto isolate">
 
-      {/* Module 1: logo/date split with the NELBD violet Redeem illustration fully visible. */}
+      {/* Module 1: centred date and the NELBD violet Redeem illustration. */}
       <section className="kiosk-welcome-hero kiosk-signage-outline kiosk-inset-frame w-full rounded-[14px] sm:rounded-[18px] bg-nel-pink text-nel-violet px-5 py-5 sm:px-7 sm:py-7 overflow-hidden">
-        <div className="kiosk-welcome-header grid grid-cols-2 gap-3 sm:gap-5 items-start">
-          <div className="kiosk-brand-image min-w-0">
-            <img src={nelLogo} alt="New Everyday Life, By Design" className="block w-full h-auto object-contain object-left" />
-          </div>
-          <div className="kiosk-date-image min-w-0 flex items-center justify-start">
-            <img src={dateImage} alt="14 November to 6 December 2026" className="block w-full h-auto object-contain object-left" />
-          </div>
+        <div className="kiosk-welcome-header w-full flex items-center justify-center pb-2 sm:pb-3">
+          <img src={dateImage} alt="14 November to 6 December 2026" className="block w-auto max-w-[82%] max-h-24 sm:max-h-28 object-contain object-center mx-auto" />
         </div>
         <img
           src={redeemSvg}
