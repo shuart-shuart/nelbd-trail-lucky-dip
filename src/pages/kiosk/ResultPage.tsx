@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import nelbdLogo from '../../assets/img/nelbd-logo.png';
 import { useKiosk } from '../../context/KioskContext';
 import { db } from '../../firebase/config';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
@@ -74,48 +75,21 @@ export const ResultPage: React.FC = () => {
     return () => clearInterval(timer);
   }, [navigate]);
 
-  const handleFinish = () => {
-    resetSession();
-    navigate('/');
-  };
-
-  const configuredSiteName =
-    session.site === 'PS' ? 'Impact Hub' : 'Innovation Hub';
-
   return (
     <div className="kiosk-result w-full flex flex-col items-center justify-between text-center my-auto py-1">
-      {/* 
-        BOOKLET CAMPAIGN RESULT PANEL (SHAPE SYSTEM: SQUARE WITH DOUBLE OUTLINE)
-        Follows the official signage reference:
-        - Bold outer border with inset concentric double outline
-        - Dashed dividers
-        - High-contrast prize name in oversized NEL Rounded SemiBold
-        - Integrated pink/purple signage framing (no stark white blocks)
-      */}
       <div className="kiosk-result-card kiosk-primary-panel kiosk-inset-frame relative w-full bg-nel-pink text-nel-violet rounded-3xl sm:rounded-[32px] p-4 sm:p-5 md:p-6 shadow-none flex flex-col items-center justify-between">
-        
-        {/* Close control: ends this result session and returns to Welcome. */}
-        <button
-          type="button"
-          onClick={handleFinish}
-          aria-label="Close prize result and return to welcome"
-          title="Close"
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-11 h-11 rounded-full bg-nel-violet text-nel-pink border-2 border-nel-purple flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-nel-purple/50"
-        >
-          <X className="w-6 h-6" aria-hidden="true" />
-        </button>
-
-        {/* Top Tag & Campaign Header */}
-        <div className="w-full flex items-center justify-between pb-2 pr-12">
-          <span className="font-dm font-bold text-xs sm:text-sm text-nel-violet/80 uppercase tracking-wider">
-            New Everyday Life, By Design
-          </span>
-
+        {/* Original NELBD branding replaces text and the cross button. */}
+        <div className="w-full flex justify-center items-center py-1">
+          <img
+            src={nelbdLogo}
+            alt="New Everyday Life, By Design"
+            className="block w-auto max-w-[min(58%,250px)] max-h-[clamp(34px,7dvh,72px)] object-contain"
+          />
         </div>
 
         {/* Celebration Headline */}
         <div className="py-1">
-          <h1 className="font-nel font-semibold text-[clamp(1.7rem,5vw,2.8rem)] text-nel-violet tracking-tight uppercase leading-[1.05]">
+          <h1 className="font-nel font-semibold text-[clamp(2rem,5.8vw,3.4rem)] text-nel-violet tracking-tight uppercase leading-[1.05]">
             YOU'VE WON!
           </h1>
         </div>
@@ -123,7 +97,7 @@ export const ResultPage: React.FC = () => {
         {/* Booklet Dashed Divider Line */}
         <div className="w-full border-b border-solid border-nel-violet/25 my-2" aria-hidden="true" />
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-nel-purple text-nel-pink font-dm font-bold text-xs uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-nel-violet text-nel-pink font-dm font-bold text-xs uppercase tracking-wider mb-2">
             <CheckCircle2 className="w-3.5 h-3.5 text-nel-pink" aria-hidden="true" />
             <span>Trail Reward Confirmed</span>
           </div>
@@ -152,7 +126,7 @@ export const ResultPage: React.FC = () => {
           */}
           {prizeImageUrl && (
             <div className="mb-2">
-              <div className="w-[clamp(100px,19dvh,190px)] h-[clamp(100px,19dvh,190px)] rounded-2xl bg-nel-pink border-2 border-nel-violet p-2.5 sm:p-3 flex items-center justify-center">
+              <div className="w-[clamp(125px,23dvh,210px)] h-[clamp(125px,23dvh,210px)] rounded-2xl bg-nel-pink border-[3px] border-nel-violet p-2.5 sm:p-3 flex items-center justify-center">
                 <img
                   src={prizeImageUrl}
                   alt={prizeName}
@@ -163,20 +137,20 @@ export const ResultPage: React.FC = () => {
           )}
 
           {/* Actual Prize Name in Oversized NEL Rounded Typography */}
-          <div className="font-dm font-bold text-[clamp(1.65rem,4.5vw,3rem)] text-nel-violet leading-[1.08] tracking-tight px-2 break-words max-w-md">
+          <div className="font-dm font-bold text-[clamp(1.55rem,4.4vw,2.55rem)] text-nel-violet leading-[1.08] tracking-tight px-2 break-words max-w-md">
             {prizeName}
           </div>
         </section>
 
         {/* Booklet Dashed Divider Line */}
-        <div className="w-full border-b-2 sm:border-b-4 border-dashed border-nel-purple/35 my-3" aria-hidden="true" />
+        <div className="w-full border-b border-solid border-nel-violet/25 my-2" aria-hidden="true" />
 
         {/* 
           Signage Information Panel: Redemption Instruction
           Uses square with double-outline styling and violet tint.
         */}
-        <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-purple/15 border-2 border-nel-violet text-center mb-2">
-          <p className="font-dm font-semibold text-base sm:text-lg text-nel-violet leading-tight">
+        <div className="w-full max-w-sm p-3.5 rounded-2xl bg-nel-violet/10 border-2 border-nel-violet text-center mb-2">
+          <p className="font-dm font-semibold text-sm sm:text-base text-nel-violet leading-tight">
             Show this screen and your Design Trail booklet to our booth crew.
           </p>
           {ticketNumber && (
@@ -186,11 +160,11 @@ export const ResultPage: React.FC = () => {
           )}
         </div>
 
-        <p className="font-dm text-sm text-nel-violet mt-1">Prizes are subject to availability. Limited to one redemption per person.</p>
+        <p className="font-dm text-xs sm:text-sm text-nel-violet mt-1">Prizes are subject to availability. Limited to one redemption per person.</p>
         {/* Automatic return to Welcome after three minutes on the result screen */}
         <div className="w-full max-w-sm">
           {/* Automatic Reset Countdown */}
-          <p className="text-xs text-nel-purple font-medium font-dm mt-1" aria-live="off">
+          <p className="text-xs text-nel-violet/75 font-medium font-dm mt-1" aria-live="off">
             Resetting in {countdown}s
           </p>
         </div>
