@@ -16,6 +16,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminInventory } from './pages/admin/AdminInventory';
 import { AdminHistory } from './pages/admin/AdminHistory';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { AdminEmailCentre } from './pages/admin/AdminEmailCentre';
 
 export default function App() {
   return (
@@ -82,6 +83,7 @@ export default function App() {
                 </AdminAuthGuard>
               }
             />
+            <Route path="/admin/email" element={<AdminAuthGuard><AdminEmailCentre /></AdminAuthGuard>} />
             <Route
               path="/admin/settings"
               element={
