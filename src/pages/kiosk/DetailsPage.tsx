@@ -182,7 +182,7 @@ export const DetailsPage: React.FC = () => {
                 type="tel"
                 inputMode="numeric"
                 aria-invalid={!!mobileError}
-                aria-describedby={mobileError ? "mobile-error mobile-help" : "mobile-help"}
+                aria-describedby={mobileError ? "mobile-error" : undefined}
                 pattern="[0-9]*"
                 autoComplete="tel-national"
                 required
@@ -197,7 +197,6 @@ export const DetailsPage: React.FC = () => {
                 className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none font-dm"
               />
             </div>
-            <p id="mobile-help" className="mt-1 text-xs font-dm text-nel-violet">8 digits, no spaces.</p>
             {mobileError && (
               <p
                 id="mobile-error"
