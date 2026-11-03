@@ -1,13 +1,14 @@
 import React, {useEffect,useState} from 'react';
-import {getPrizeSiteLimits,savePrizeSiteLimit,type PrizeSiteLimit} from '../../api/postgresAdminClient';
+import {getPrizeSiteLimits,savePrizeSiteLimit,getGrabVoucherSummary,type GrabVoucherSummary,type PrizeSiteLimit} from '../../api/postgresAdminClient';
 
 export function PrizeThrottlingPanel() {
   const [rows,setRows]=useState<PrizeSiteLimit[]>([]);
+  const [grab,setGrab]=useState<GrabVoucherSummary|null>(null);
   const [error,setError]=useState('');
   const [busy,setBusy]=useState('');
   const [loaded,setLoaded]=useState(false);
   const refresh=async()=>{
-    try {setRows(await getPrizeSiteLimits());setError('');}
+    try {const [limits,stock]=await Promise.all([getPrizeSiteLimits(),getGrabVoucherSummary()]);setRows(limits);setGrab(stock);setError('');}
     catch(e){setError(e instanceof Error?e.message:'Unable to load throttles');}
     finally{setLoaded(true);}
   };
@@ -50,6 +51,7 @@ export function PrizeThrottlingPanel() {
         </div>
       </div>)}
     </div>
+    <div className="mt-4 rounded-xl bg-[#F6F0FB] p-4 text-sm"><strong>Grab S$5 voucher code inventory</strong><p className="mt-1">Securely imported: {grab?.total??'—'} · Available unassigned: {grab?.unassigned??'—'} · Eligible today: {grab?.currently_eligible??'—'} · Assigned: {grab?.assigned??'—'}</p><p className="mt-1 text-xs">The 11,720 supplied CSV records have not been imported. Import and email fulfilment require separate security configuration.</p></div>
     <p className="mt-4 text-xs text-[#675779]">Grab code imports and Gmail sending remain disabled. Daily caps only affect the draw when throttling is enabled on the server.</p>
   </section>;
 }
