@@ -35,20 +35,22 @@ export const WelcomePage: React.FC = () => {
           className="kiosk-welcome-art block w-full h-auto max-h-[min(24dvh,225px)] object-contain object-center"
         />
         <div className="kiosk-welcome-header w-full flex items-center justify-center mt-1">
-          <img src={dateImage} alt="14 November to 6 December 2026" className="block w-auto max-w-[57.6%] max-h-[clamp(18px,4dvh,35px)] object-contain object-center mx-auto" />
+          <img src={dateImage} alt="14 November to 6 December 2026" className="block w-auto max-w-[37.6%] max-h-[clamp(18px,4dvh,35px)] object-contain object-center mx-auto" />
         </div>
       </section>
 
-      {/* Primary action: no double outline, stronger distinction from the hero. */}
+      {/* Primary action */}
       <button
         type="button"
         onClick={() => navigate('/details')}
-        className="kiosk-start-button w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[52px] sm:min-h-[62px] px-5 sm:px-8 flex items-center justify-center gap-3 sm:gap-5 font-dm font-bold text-[clamp(1.2rem,4vw,2rem)] tracking-tight  focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
+        className="kiosk-start-button w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[52px] sm:min-h-[62px] px-3 sm:px-6 py-2 flex items-center justify-center font-dm font-bold text-[clamp(0.9rem,2.5vw,1.6rem)] leading-tight tracking-tight text-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
         aria-label="Tap here to win your exclusive NELBD merchandise and vouchers"
       >
-        <span className="whitespace-nowrap">Tap here to win your exclusive NELBD merchandise and vouchers!</span>
+        <span className="max-w-full whitespace-normal break-words">
+          Tap here to win your exclusive NELBD merchandise and vouchers!
+        </span>
       </button>
-
+      
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
       <div className="kiosk-venue-card w-full rounded-full bg-nel-pink p-1 sm:p-1.5">
         <div role="group" aria-label="Redemption venue" className="kiosk-venue-track grid grid-cols-2 rounded-full">
