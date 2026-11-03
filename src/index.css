@@ -277,8 +277,3 @@ input, textarea {
   outline: none !important;
   box-shadow: none !important;
 }
-:where(button):focus-visible {
-  /* Keyboard-only affordance without changing the control itself. */
-  text-decoration: underline;
-  text-underline-offset: .2em;
-}
