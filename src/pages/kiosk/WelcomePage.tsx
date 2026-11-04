@@ -25,7 +25,7 @@ export const WelcomePage: React.FC = () => {
     <div className="kiosk-welcome relative w-full max-w-xl mx-auto flex flex-col gap-2 sm:gap-3 py-2 my-auto isolate">
 
       {/* Primary hierarchy: title first, artwork second, event details supporting. */}
-      <section className="kiosk-welcome-hero w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet px-5 py-4 sm:px-7 sm:py-5 overflow-hidden">
+      <section className="kiosk-welcome-hero kiosk-inset-frame w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet px-5 py-4 sm:px-7 sm:py-5 overflow-hidden">
         <h1 className="kiosk-welcome-title font-nel font-semibold text-center text-nel-violet">
           Design Trail Lucky Dip
         </h1>
@@ -43,7 +43,7 @@ export const WelcomePage: React.FC = () => {
       <button
         type="button"
         onClick={() => navigate('/details')}
-        className="kiosk-start-button w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[52px] sm:min-h-[62px] px-3 sm:px-6 py-2 flex items-center justify-center font-dm font-bold text-[clamp(0.9rem,2.5vw,1.6rem)] leading-tight tracking-tight text-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
+        className="kiosk-start-button kiosk-inset-frame w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[52px] sm:min-h-[62px] px-3 sm:px-6 py-2 flex items-center justify-center font-dm font-bold text-[clamp(0.9rem,2.5vw,1.6rem)] leading-tight tracking-tight text-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
         aria-label="Tap here to win your exclusive NELBD merchandise and vouchers"
       >
         <div className="flex flex-col items-center justify-center w-full max-w-full gap-1 text-center px-2">
@@ -58,7 +58,7 @@ export const WelcomePage: React.FC = () => {
       </button>
       
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
-      <div className="kiosk-venue-card w-full rounded-full bg-nel-pink p-1 sm:p-1.5">
+      <div className="kiosk-venue-card kiosk-inset-frame w-full rounded-full bg-nel-pink p-1 sm:p-1.5">
         <div role="group" aria-label="Redemption venue" className="kiosk-venue-track grid grid-cols-2 rounded-full">
           {([['PDD', 'Innovation Hub'], ['PS', 'Impact Hub']] as const).map(([value, label]) => (
             <button

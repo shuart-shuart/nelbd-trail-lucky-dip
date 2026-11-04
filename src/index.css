@@ -148,6 +148,15 @@ input, textarea {
 .nel-kiosk-root .kiosk-welcome .kiosk-inset-frame::after {
   border-radius: 8px;
 }
+/* The venue selector is pill-shaped; its outline follows the pill,
+   not the rounded rectangle used by the welcome hero and start CTA. */
+.nel-kiosk-root .kiosk-welcome .kiosk-venue-card.kiosk-inset-frame::after {
+  border-radius: 999px;
+}
+/* Preserve the details form card's larger rounded corners. */
+.nel-kiosk-root .kiosk-details .kiosk-form-card.kiosk-inset-frame::after {
+  border-radius: max(8px, calc(1rem - 8px));
+}
 .nel-kiosk-root .kiosk-draw .kiosk-inset-frame::after {
   border-radius: 50%;
 }
@@ -278,17 +287,16 @@ input, textarea {
   box-shadow: none !important;
 }
 
-/* Details: unframed pink module and a single neat stroke per field.
-   The phone prefix and number share ONE border; no inner input rectangle. */
+/* Details: keep the pink card's violet inset stroke, while each input
+   retains exactly one separate border. The phone number and prefix share it. */
 .nel-kiosk-root .kiosk-form-card {
   border: 0 !important;
   outline: 0 !important;
   box-shadow: none !important;
 }
-.nel-kiosk-root .kiosk-form-card::before,
-.nel-kiosk-root .kiosk-form-card::after {
-  content: none !important;
-  display: none !important;
+/* Room for the decorative inset without crowding form text on narrow phones. */
+.nel-kiosk-root .kiosk-form-card.kiosk-inset-frame {
+  padding-inline: max(24px, 4vw);
 }
 .nel-kiosk-root .kiosk-form-card #name-input,
 .nel-kiosk-root .kiosk-form-card .kiosk-phone-field {
