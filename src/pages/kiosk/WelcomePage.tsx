@@ -58,7 +58,7 @@ export const WelcomePage: React.FC = () => {
       </button>
       
       {/* Module 3: slim, quiet two-way location toggle; no selector heading. */}
-      <div className="kiosk-venue-card kiosk-inset-frame w-full rounded-full bg-nel-pink p-1 sm:p-1.5">
+      <div className="kiosk-venue-card w-full rounded-full bg-nel-pink p-1 sm:p-1.5">
         <div role="group" aria-label="Redemption venue" className="kiosk-venue-track grid grid-cols-2 rounded-full">
           {([['PDD', 'Innovation Hub'], ['PS', 'Impact Hub']] as const).map(([value, label]) => (
             <button
