@@ -181,12 +181,15 @@ postgresAdminRouter.get('/grab-vouchers/offline-retry-candidates',async (_req,re
   res.setHeader('Cache-Control','no-store');
   try{
     const {rows}=await getPool().query(`SELECT c.draw_id AS "drawId",
-      d.ticket_number AS "ticketNumber",c.delivery_started_at AS "attemptedAt"
+      d.ticket_number AS "ticketNumber",c.delivery_started_at AS "attemptedAt",
+      (c.delivery_error_code IS NULL AND c.provider_message_id IS NULL
+       AND c.delivery_started_at BETWEEN $1::timestamptz AND $2::timestamptz) AS "canRetry",
+      (c.delivery_error_code = 'OFFLINE_FLOW_RETRY_ONCE') AS "alreadyRetried"
       FROM grab_voucher_claim_sessions c JOIN draws d ON d.id=c.draw_id
       WHERE c.status='processing'
-        AND c.delivery_started_at >= $1::timestamptz
-        AND c.delivery_started_at <= $2::timestamptz
-        AND c.delivery_error_code IS NULL AND c.provider_message_id IS NULL
+        AND ((c.delivery_started_at BETWEEN $1::timestamptz AND $2::timestamptz
+              AND c.delivery_error_code IS NULL AND c.provider_message_id IS NULL)
+          OR c.delivery_error_code = 'OFFLINE_FLOW_RETRY_ONCE')
       ORDER BY c.delivery_started_at ASC LIMIT 2`,
       [offlineTestWindowStart,offlineTestWindowEnd]);
     return res.json(rows);
