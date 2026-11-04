@@ -169,6 +169,50 @@ postgresAdminRouter.get('/grab-vouchers/delivery-diagnostics',async (_req,res)=>
   }
 });
 
+/** Narrow one-time recovery for the two Power Automate HTTP 400s on 2026-11-04 UTC.
+ *  This is NOT a general retry for uncertain Outlook sends. No voucher allocation changes.
+ *  Require super-admin acknowledgement that the flow was OFF, and leave a durable retry
+ *  marker so the same claim cannot be resubmitted again if the new outcome is unknown.
+ */
+const offlineTestWindowStart='2026-11-04T00:10:20.000Z';
+const offlineTestWindowEnd='2026-11-04T00:10:56.000Z';
+postgresAdminRouter.get('/grab-vouchers/offline-retry-candidates',async (_req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  res.setHeader('Cache-Control','no-store');
+  try{
+    const {rows}=await getPool().query(`SELECT c.draw_id AS "drawId",
+      d.ticket_number AS "ticketNumber",c.delivery_started_at AS "attemptedAt"
+      FROM grab_voucher_claim_sessions c JOIN draws d ON d.id=c.draw_id
+      WHERE c.status='processing'
+        AND c.delivery_started_at >= $1::timestamptz
+        AND c.delivery_started_at <= $2::timestamptz
+        AND c.delivery_error_code IS NULL AND c.provider_message_id IS NULL
+      ORDER BY c.delivery_started_at ASC LIMIT 2`,
+      [offlineTestWindowStart,offlineTestWindowEnd]);
+    return res.json(rows);
+  }catch{return res.status(503).json({error:'Retry candidates unavailable'});}
+});
+postgresAdminRouter.post('/grab-vouchers/offline-retry/:drawId',async (req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  if(req.body?.confirmedOffline!==true ||
+     req.body?.confirmedNoSend!==true ||
+     !/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(req.params.drawId))
+    return res.status(400).json({error:'Explicit confirmation and valid draw ID required'});
+  try{
+    const {rows}=await getPool().query(`UPDATE grab_voucher_claim_sessions
+      SET status='queued',delivery_error_code='OFFLINE_FLOW_RETRY_ONCE',updated_at=now()
+      WHERE draw_id=$1
+        AND status='processing' AND delivery_error_code IS NULL
+        AND provider_message_id IS NULL
+        AND delivery_started_at >= $2::timestamptz
+        AND delivery_started_at <= $3::timestamptz
+      RETURNING draw_id`,
+      [req.params.drawId,offlineTestWindowStart,offlineTestWindowEnd]);
+    if(!rows.length)return res.status(409).json({error:'Not an eligible one-time offline-flow retry, or already retried'});
+    return res.json({queuedForRetry:true});
+  }catch{return res.status(503).json({error:'Unable to request one-time retry'});}
+});
+
 /** Explicitly gated, authenticated and batched. Never returns plaintext codes or links. */
 postgresAdminRouter.post('/grab-vouchers/import-batch',async (req,res)=>{
   if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});

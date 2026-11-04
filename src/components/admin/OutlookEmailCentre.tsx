@@ -3,9 +3,19 @@ import {GrabCsvImporter} from './GrabCsvImporter';
 import {getGrabVoucherSummary,getGrabDeliveryDiagnostics,type GrabVoucherSummary,type GrabDeliveryDiagnostics} from '../../api/postgresAdminClient';
 type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string};
 type Draft={to:string;subject:string;body:string;status:string;ticketNumber:string};
+type OfflineRetryCandidate={drawId:string;ticketNumber:string;attemptedAt:string};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
  const response=await fetch('/api/admin/outlook-centre'+path,{
   ...init,credentials:'same-origin',headers:{'Content-Type':'application/json',...init?.headers},cache:'no-store'
+ });
+ const data=await response.json().catch(()=>({error:'Request failed'}));
+ if(!response.ok)throw new Error(data.error||'Request failed');
+ return data as T;
+}
+async function offlineRetryApi<T>(path:string,init?:RequestInit):Promise<T>{
+ const response=await fetch('/api/admin/grab-vouchers/'+path,{
+  ...init,credentials:'same-origin',cache:'no-store',
+  headers:{'Content-Type':'application/json',...init?.headers},
  });
  const data=await response.json().catch(()=>({error:'Request failed'}));
  if(!response.ok)throw new Error(data.error||'Request failed');
@@ -20,10 +30,15 @@ export function OutlookEmailCentre(){
  const [selected,setSelected]=useState('');
  const [error,setError]=useState('');
  const [busy,setBusy]=useState(false);
+ const [retryCandidates,setRetryCandidates]=useState<OfflineRetryCandidate[]>([]);
+ const [retryBusy,setRetryBusy]=useState(false);
+ const [retryNotice,setRetryNotice]=useState('');
  const refresh=async()=>{
-  const [queueResult,summaryResult,diagnosticsResult]=await Promise.allSettled([
-    api<QueueRow[]>(''),getGrabVoucherSummary(),getGrabDeliveryDiagnostics()
+  const [queueResult,summaryResult,diagnosticsResult,retriesResult]=await Promise.allSettled([
+    api<QueueRow[]>(''),getGrabVoucherSummary(),getGrabDeliveryDiagnostics(),
+    offlineRetryApi<OfflineRetryCandidate[]>('offline-retry-candidates')
   ]);
+  if(retriesResult.status==='fulfilled')setRetryCandidates(retriesResult.value);
   if(queueResult.status==='fulfilled')setRows(queueResult.value);
   if(summaryResult.status==='fulfilled')setStock(summaryResult.value);
   setError(queueResult.status==='rejected'||summaryResult.status==='rejected'
@@ -37,6 +52,22 @@ export function OutlookEmailCentre(){
   }
  };
  useEffect(()=>{void refresh();},[]);
+ const requestOfflineRetry=async(row:OfflineRetryCandidate)=>{
+  if(retryBusy)return;
+  if(!window.confirm('Verify that your Power Automate flow was OFF at the time of this attempt, and that no Outlook email was sent for ticket '+row.ticketNumber+'. Retry its existing assigned voucher ONCE?'))return;
+  setRetryBusy(true);
+  setRetryNotice('');
+  try{
+    await offlineRetryApi('offline-retry/'+encodeURIComponent(row.drawId),{
+      method:'POST',
+      body:JSON.stringify({confirmedOffline:true,confirmedNoSend:true})
+    });
+    setRetryNotice('One-time delivery retry queued for '+row.ticketNumber+'. Check Power Automate run history and refresh delivery status. Do not repeat this draw.');
+    await refresh();
+  }catch(e){
+    setRetryNotice(e instanceof Error?e.message:'Could not request retry');
+  }finally{setRetryBusy(false);}
+ };
  const openDraft=async(id:string)=>{
   setBusy(true);setDraft(null);setSelected(id);
   try{setDraft(await api<Draft>('/'+encodeURIComponent(id)+'/draft'));setError('');}
@@ -109,6 +140,19 @@ export function OutlookEmailCentre(){
       <p className="text-xs mt-2 text-[#645574]">Read-only. No codes, email addresses, callback secrets or trigger URLs are displayed here. Refresh to update.</p>
     </> : <p className="text-sm">{diagnosticsError||'Loading delivery diagnostics…'}</p>}
   </div>
+  {retryCandidates.length>0&&<div className="mb-4 rounded-xl border border-amber-400 bg-amber-50 p-3 sm:p-4 text-[#33224B]">
+    <h3 className="font-bold mb-2">Recover Power Automate offline test attempts</h3>
+    <p className="text-sm mb-3">Render recorded two HTTP 400 responses when the flow was switched off. These one-time recovery controls apply only to those original attempt times. Verify there is no successful Outlook send in Power Automate run history before retrying. The SAME voucher will be used; no new voucher is assigned.</p>
+    {retryCandidates.map(row=><div key={row.drawId} className="flex items-center justify-between flex-wrap gap-2 mb-2">
+      <div className="text-sm"><strong>{row.ticketNumber}</strong><span className="block text-xs">Original attempt: {new Date(row.attemptedAt).toLocaleString()}</span></div>
+      <button type="button" disabled={retryBusy} onClick={()=>void requestOfflineRetry(row)}
+        className="rounded-lg bg-[#270342] text-white px-3 py-2 text-sm font-semibold disabled:opacity-50">
+        Retry this email once
+      </button>
+    </div>)}
+    <p className="text-xs">This action is irreversible: the worker may immediately send the email once queued. Confirm that the flow is now ON.</p>
+  </div>}
+  {retryNotice&&<p role="status" className="mb-3 text-sm rounded-lg bg-[#F6F0FB] p-3">{retryNotice}</p>}
   <GrabCsvImporter onImported={()=>void refresh()}/>
   <div className="overflow-x-auto">
    <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
