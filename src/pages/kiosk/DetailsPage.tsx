@@ -100,7 +100,7 @@ export const DetailsPage: React.FC = () => {
 
   return (
     <div className="kiosk-details w-full flex flex-col justify-center my-auto py-1">
-      <div className="kiosk-form-card kiosk-primary-panel w-full bg-nel-pink text-nel-violet rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-none">
+      <div className="kiosk-form-card kiosk-inset-frame kiosk-primary-panel w-full bg-nel-pink text-nel-violet rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-none">
         <div className="flex items-center justify-between gap-3">
           <span className="font-dm font-bold text-xs sm:text-sm uppercase tracking-wider text-nel-violet">
             Step 1 of 2
