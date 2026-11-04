@@ -57,7 +57,9 @@ postgresAdminRouter.get('/outlook-centre',async (_req,res)=>{
   try {
     const {rows}=await getPool().query(`SELECT c.draw_id AS "drawId",
       d.ticket_number AS "ticketNumber",d.site,c.recipient_email AS "recipientEmail",
-      c.status,c.created_at AS "createdAt",c.updated_at AS "updatedAt"
+      c.status,c.created_at AS "createdAt",c.updated_at AS "updatedAt",
+      c.delivery_started_at AS "deliveryStartedAt",
+      c.delivery_error_code AS "handoffState"
       FROM grab_voucher_claim_sessions c JOIN draws d ON d.id=c.draw_id
       ORDER BY c.created_at DESC LIMIT 200`);
     res.setHeader('Cache-Control','no-store');
@@ -184,12 +186,12 @@ postgresAdminRouter.get('/grab-vouchers/offline-retry-candidates',async (_req,re
       d.ticket_number AS "ticketNumber",c.delivery_started_at AS "attemptedAt",
       (c.delivery_error_code IS NULL AND c.provider_message_id IS NULL
        AND c.delivery_started_at BETWEEN $1::timestamptz AND $2::timestamptz) AS "canRetry",
-      (c.delivery_error_code = 'OFFLINE_FLOW_RETRY_ONCE') AS "alreadyRetried"
+      (c.delivery_error_code LIKE 'OFFLINE_FLOW_RETRY_ONCE%') AS "alreadyRetried"
       FROM grab_voucher_claim_sessions c JOIN draws d ON d.id=c.draw_id
       WHERE c.status='processing'
         AND ((c.delivery_started_at BETWEEN $1::timestamptz AND $2::timestamptz
               AND c.delivery_error_code IS NULL AND c.provider_message_id IS NULL)
-          OR c.delivery_error_code = 'OFFLINE_FLOW_RETRY_ONCE')
+          OR c.delivery_error_code LIKE 'OFFLINE_FLOW_RETRY_ONCE%')
       ORDER BY c.delivery_started_at ASC LIMIT 2`,
       [offlineTestWindowStart,offlineTestWindowEnd]);
     return res.json(rows);

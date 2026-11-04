@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import {GrabCsvImporter} from './GrabCsvImporter';
 import {getGrabVoucherSummary,getGrabDeliveryDiagnostics,type GrabVoucherSummary,type GrabDeliveryDiagnostics} from '../../api/postgresAdminClient';
-type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string};
+type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string;deliveryStartedAt:string|null;handoffState:string|null};
 type Draft={to:string;subject:string;body:string;status:string;ticketNumber:string};
 type OfflineRetryCandidate={drawId:string;ticketNumber:string;attemptedAt:string;canRetry:boolean;alreadyRetried:boolean};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
@@ -93,7 +93,7 @@ export function OutlookEmailCentre(){
    <h2 className="text-xl font-bold">Grab voucher inventory and delivery</h2>
    <button type="button" onClick={()=>void refresh()} className="rounded-lg border px-3 py-2 text-sm">Refresh</button>
   </div>
-  <p className="text-sm mb-4">Voucher stock and winner email statuses. The current Outlook draft fallback is manual; automatic Power Automate dispatch is not enabled by this screen. Do not manually send any processing or sent item.</p>
+  <p className="text-sm mb-4">Voucher stock and winner email statuses. Automatic Power Automate dispatch is managed by Render; a processing item may be waiting for a callback even if the HTTP trigger was accepted. Do not retry processing or sent items without checking Run history and Outlook first.</p>
   {error&&<p role="status" className="text-sm mb-3 text-[#7F003D]">{error}</p>}
   <p className="text-sm mb-3 rounded-lg bg-[#F6F0FB] p-3">Grab voucher codes: {stock?.total??'—'} imported · {stock?.unassigned??'—'} unassigned · {stock?.currently_eligible??'—'} redeemable today · {stock?.early_test_remaining??0} early-test allocations available (not redeemable until 14 Nov) · {stock?.assigned??'—'} assigned. Real voucher import remains disabled pending security approval.</p>
   <div className="mb-4 rounded-xl border border-[#DDD2E8] p-3 sm:p-4">
@@ -160,7 +160,23 @@ export function OutlookEmailCentre(){
    <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
    <tbody>{rows.map(row=><tr key={row.drawId} className="border-t">
     <td className="p-2">{row.ticketNumber}</td><td className="p-2">{row.site}</td>
-    <td className="p-2">{row.recipientEmail||'Awaiting winner'}</td><td className="p-2">{row.status}</td>
+    <td className="p-2">{row.recipientEmail||'Awaiting winner'}</td><td className="p-2">
+      <span className="font-semibold">{row.status}</span>
+      {row.status==='processing'&&<span className="block text-xs text-[#645574]">
+        {row.handoffState?.includes('TRIGGER_ACCEPTED_AWAITING_CALLBACK')
+          ? 'Microsoft accepted HTTP trigger; awaiting Step 3 callback'
+          : row.handoffState?.includes('HTTP_')
+          ? 'Power Automate trigger rejected request ('+row.handoffState.split('HTTP_').pop()+')'
+          : row.handoffState?.includes('TRANSPORT_ERROR')
+          ? 'Network handoff failed; reconcile before retry'
+          : row.handoffState?.startsWith('OFFLINE_FLOW_RETRY_ONCE')
+          ? 'One-time retry requested; result unconfirmed'
+          : 'Handoff outcome not recorded — check Power Automate'}
+      </span>}
+      {row.deliveryStartedAt&&row.status==='processing'&&<span className="block text-xs text-[#645574]">
+        Attempted: {new Date(row.deliveryStartedAt).toLocaleString()}
+      </span>}
+    </td>
     <td className="p-2"><div className="flex flex-wrap items-center gap-2">
       <button disabled={!row.recipientEmail||busy||row.status==='processing'||row.status==='sent'} onClick={()=>void openDraft(row.drawId)}
         className="rounded-lg border px-3 py-1 disabled:opacity-40">Review draft</button>

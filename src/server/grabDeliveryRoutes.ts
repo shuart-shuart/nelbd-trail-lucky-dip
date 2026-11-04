@@ -45,6 +45,20 @@ grabDeliveryRouter.post('/automation/complete', async (req,res) => {
   }
 });
 
+/** Record only a fixed, non-sensitive diagnostic label for an attempted handoff.
+ * Never overwrite a callback that already marked the voucher sent or failed.
+ */
+async function recordGrabHandoff(deliveryId:string,code:string):Promise<void> {
+  try {
+    await getPool().query(
+      "UPDATE grab_voucher_claim_sessions SET delivery_error_code=CASE WHEN delivery_error_code='OFFLINE_FLOW_RETRY_ONCE' THEN 'OFFLINE_FLOW_RETRY_ONCE:' || $2 ELSE $2 END,updated_at=now() WHERE delivery_attempt_id=$1 AND status='processing'",
+      [deliveryId,code]
+    );
+  } catch {
+    console.error('Grab delivery diagnostic state update failed');
+  }
+}
+
 let polling = false;
 export async function dispatchNextGrabVoucher(): Promise<void> {
   const endpoint = process.env.NELBD_POWER_AUTOMATE_TRIGGER_URL || '';
@@ -76,10 +90,26 @@ export async function dispatchNextGrabVoucher(): Promise<void> {
     if (!delivery) return;
     // Dispatch deliberately at most once. A timeout or uncertain response remains
     // processing for manual reconciliation, never an automatic repeat email.
-    const response = await fetch(endpoint,{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(delivery),signal:AbortSignal.timeout(20000)});
-    if (!response.ok) console.error('Grab delivery handoff returned non-success HTTP status',response.status);
+    let response: Response;
+    try {
+      response = await fetch(endpoint,{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(delivery),signal:AbortSignal.timeout(20000)});
+    } catch {
+      await recordGrabHandoff(delivery.deliveryId,'TRANSPORT_ERROR');
+      console.error('Grab delivery handoff transport failure; manual reconciliation required');
+      return;
+    }
+    if (response.ok) {
+      // Power Automate 2xx only confirms the HTTP trigger accepted the handoff.
+      // Actual sending requires the separate /automation/complete callback.
+      await recordGrabHandoff(delivery.deliveryId,'TRIGGER_ACCEPTED_AWAITING_CALLBACK');
+      console.info('Grab delivery handoff accepted; awaiting Power Automate callback',response.status);
+    } else {
+      await recordGrabHandoff(delivery.deliveryId,'HTTP_'+response.status);
+      // Do not log the raw Microsoft response, trigger URL, voucher code or recipient.
+      console.error('Grab delivery handoff rejected by Power Automate HTTP',response.status);
+    }
   } catch {
     console.error('Grab delivery handoff needs staff reconciliation');
   } finally {
