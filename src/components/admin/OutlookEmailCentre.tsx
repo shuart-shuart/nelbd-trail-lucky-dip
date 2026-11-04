@@ -3,7 +3,7 @@ import {GrabCsvImporter} from './GrabCsvImporter';
 import {getGrabVoucherSummary,getGrabDeliveryDiagnostics,type GrabVoucherSummary,type GrabDeliveryDiagnostics} from '../../api/postgresAdminClient';
 type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string};
 type Draft={to:string;subject:string;body:string;status:string;ticketNumber:string};
-type OfflineRetryCandidate={drawId:string;ticketNumber:string;attemptedAt:string};
+type OfflineRetryCandidate={drawId:string;ticketNumber:string;attemptedAt:string;canRetry:boolean;alreadyRetried:boolean};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
  const response=await fetch('/api/admin/outlook-centre'+path,{
   ...init,credentials:'same-origin',headers:{'Content-Type':'application/json',...init?.headers},cache:'no-store'
@@ -39,6 +39,7 @@ export function OutlookEmailCentre(){
     offlineRetryApi<OfflineRetryCandidate[]>('offline-retry-candidates')
   ]);
   if(retriesResult.status==='fulfilled')setRetryCandidates(retriesResult.value);
+  else setRetryCandidates([]);
   if(queueResult.status==='fulfilled')setRows(queueResult.value);
   if(summaryResult.status==='fulfilled')setStock(summaryResult.value);
   setError(queueResult.status==='rejected'||summaryResult.status==='rejected'
@@ -140,18 +141,19 @@ export function OutlookEmailCentre(){
       <p className="text-xs mt-2 text-[#645574]">Read-only. No codes, email addresses, callback secrets or trigger URLs are displayed here. Refresh to update.</p>
     </> : <p className="text-sm">{diagnosticsError||'Loading delivery diagnostics…'}</p>}
   </div>
-  {retryCandidates.length>0&&<div className="mb-4 rounded-xl border border-amber-400 bg-amber-50 p-3 sm:p-4 text-[#33224B]">
+  <div className="mb-4 rounded-xl border border-amber-400 bg-amber-50 p-3 sm:p-4 text-[#33224B]">
     <h3 className="font-bold mb-2">Recover Power Automate offline test attempts</h3>
-    <p className="text-sm mb-3">Render recorded two HTTP 400 responses when the flow was switched off. These one-time recovery controls apply only to those original attempt times. Verify there is no successful Outlook send in Power Automate run history before retrying. The SAME voucher will be used; no new voucher is assigned.</p>
+    <p className="text-sm mb-3">For the two Power Automate HTTP 400 attempts while the flow was off: confirm there was no successful Outlook email or flow run before retrying. Each enabled button resends the SAME assigned voucher once, never another code.</p>
     {retryCandidates.map(row=><div key={row.drawId} className="flex items-center justify-between flex-wrap gap-2 mb-2">
       <div className="text-sm"><strong>{row.ticketNumber}</strong><span className="block text-xs">Original attempt: {new Date(row.attemptedAt).toLocaleString()}</span></div>
-      <button type="button" disabled={retryBusy} onClick={()=>void requestOfflineRetry(row)}
+      <button type="button" disabled={retryBusy||!row.canRetry} onClick={()=>void requestOfflineRetry(row)}
         className="rounded-lg bg-[#270342] text-white px-3 py-2 text-sm font-semibold disabled:opacity-50">
-        Retry this email once
+        {row.canRetry?'Retry this email once':row.alreadyRetried?'Already retried — review':'Retry unavailable'}
       </button>
     </div>)}
-    <p className="text-xs">This action is irreversible: the worker may immediately send the email once queued. Confirm that the flow is now ON.</p>
-  </div>}
+    {!retryCandidates.length&&<p className="text-sm mb-2">No eligible original offline-flow attempt is currently available to retry. A processing item may already have been retried or may require manual reconciliation.</p>}
+    <p className="text-xs">The flow must be ON. The worker may send immediately after you confirm; use one button at a time and check Run history. Repeated attempts are blocked.</p>
+  </div>
   {retryNotice&&<p role="status" className="mb-3 text-sm rounded-lg bg-[#F6F0FB] p-3">{retryNotice}</p>}
   <GrabCsvImporter onImported={()=>void refresh()}/>
   <div className="overflow-x-auto">
@@ -159,8 +161,18 @@ export function OutlookEmailCentre(){
    <tbody>{rows.map(row=><tr key={row.drawId} className="border-t">
     <td className="p-2">{row.ticketNumber}</td><td className="p-2">{row.site}</td>
     <td className="p-2">{row.recipientEmail||'Awaiting winner'}</td><td className="p-2">{row.status}</td>
-    <td className="p-2"><button disabled={!row.recipientEmail||busy||row.status==='processing'||row.status==='sent'} onClick={()=>void openDraft(row.drawId)}
-      className="rounded-lg border px-3 py-1 disabled:opacity-40">Review draft</button></td>
+    <td className="p-2"><div className="flex flex-wrap items-center gap-2">
+      <button disabled={!row.recipientEmail||busy||row.status==='processing'||row.status==='sent'} onClick={()=>void openDraft(row.drawId)}
+        className="rounded-lg border px-3 py-1 disabled:opacity-40">Review draft</button>
+      {retryCandidates.find(candidate=>candidate.drawId===row.drawId) && (() => {
+        const candidate=retryCandidates.find(item=>item.drawId===row.drawId)!;
+        return <button type="button" disabled={!candidate.canRetry||retryBusy}
+          onClick={()=>void requestOfflineRetry(candidate)}
+          className="rounded-lg bg-[#270342] text-white px-3 py-1 disabled:opacity-40">
+          {candidate.canRetry?'Retry email once':'Already retried'}
+        </button>;
+      })()}
+    </div></td>
    </tr>)}</tbody></table>
    {!rows.length&&<p className="text-sm py-3">No Grab voucher email drafts yet.</p>}
   </div>
