@@ -51,7 +51,7 @@ grabDeliveryRouter.post('/automation/complete', async (req,res) => {
 async function recordGrabHandoff(deliveryId:string,code:string):Promise<void> {
   try {
     await getPool().query(
-      "UPDATE grab_voucher_claim_sessions SET delivery_error_code=$2,updated_at=now() WHERE delivery_attempt_id=$1 AND status='processing'",
+      "UPDATE grab_voucher_claim_sessions SET delivery_error_code=CASE WHEN delivery_error_code='OFFLINE_FLOW_RETRY_ONCE' THEN 'OFFLINE_FLOW_RETRY_ONCE:' || $2 ELSE $2 END,updated_at=now() WHERE delivery_attempt_id=$1 AND status='processing'",
       [deliveryId,code]
     );
   } catch {
