@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {questAdminRouter} from './questRoutes.ts';
+import {questFulfilmentAdminRouter} from './questFulfilmentRoutes.ts';
 import {encryptVoucher,fingerprint} from './grabVoucherCrypto.ts';
 import {decryptGrabCredential} from './grabVoucherDecrypt.ts';
 import { getPool, withTransaction } from './postgres.ts';
@@ -14,6 +15,7 @@ postgresAdminRouter.use(async (req,res,next) => {
   try { await requireAdmin(req,res,next); } catch(e) { console.error('Admin session error',e); res.status(503).json({error:'Admin session unavailable'}); }
 });
 postgresAdminRouter.use('/quest',questAdminRouter);
+postgresAdminRouter.use('/quest',questFulfilmentAdminRouter);
 postgresAdminRouter.post('/logout', async (req,res) => {
   try { await logoutAdmin(req,res); } catch { res.status(503).json({error:'Logout unavailable'}); }
 });
