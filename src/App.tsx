@@ -19,6 +19,7 @@ import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminEmailCentre } from './pages/admin/AdminEmailCentre';
 import { AdminQuestPage } from './pages/admin/AdminQuestPage';
 import { QuestClaimPage } from './pages/QuestClaimPage';
+import { QuestVouchersPage } from './pages/QuestVouchersPage';
 
 export default function App() {
   return (
