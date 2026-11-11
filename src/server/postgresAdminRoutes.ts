@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {questAdminRouter} from './questRoutes.ts';
+import {questFulfilmentAdminRouter} from './questFulfilmentRoutes.ts';
 import {encryptVoucher,fingerprint} from './grabVoucherCrypto.ts';
 import {decryptGrabCredential} from './grabVoucherDecrypt.ts';
 import { getPool, withTransaction } from './postgres.ts';
