@@ -48,5 +48,6 @@ export function AdminQuestPage(){
      </div></td>
     </tr>)}</tbody></table></div>
   </div>
+  <QuestDeliveryControls slots={slots} onRefresh={refresh}/>
  </AdminLayout>;
 }
