@@ -13,6 +13,7 @@ postgresAdminRouter.post('/login', async (req,res) => {
 postgresAdminRouter.use(async (req,res,next) => {
   try { await requireAdmin(req,res,next); } catch(e) { console.error('Admin session error',e); res.status(503).json({error:'Admin session unavailable'}); }
 });
+postgresAdminRouter.use('/quest',questAdminRouter);
 postgresAdminRouter.post('/logout', async (req,res) => {
   try { await logoutAdmin(req,res); } catch { res.status(503).json({error:'Logout unavailable'}); }
 });
