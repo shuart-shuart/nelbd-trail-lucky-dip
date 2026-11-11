@@ -17,6 +17,8 @@ import { AdminInventory } from './pages/admin/AdminInventory';
 import { AdminHistory } from './pages/admin/AdminHistory';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminEmailCentre } from './pages/admin/AdminEmailCentre';
+import { AdminQuestPage } from './pages/admin/AdminQuestPage';
+import { QuestClaimPage } from './pages/QuestClaimPage';
 
 export default function App() {
   return (
@@ -58,6 +60,8 @@ export default function App() {
               }
             />
 
+            <Route path="/quest/claim/:token" element={<QuestClaimPage />} />
+
             {/* Protected Admin Routes */}
             <Route
               path="/admin"
@@ -85,6 +89,7 @@ export default function App() {
             />
             <Route path="/admin/grab-vouchers" element={<AdminAuthGuard><AdminEmailCentre /></AdminAuthGuard>} />
             <Route path="/admin/email" element={<Navigate to="/admin/grab-vouchers" replace />} />
+            <Route path="/admin/quest" element={<AdminAuthGuard><AdminQuestPage /></AdminAuthGuard>} />
             <Route
               path="/admin/settings"
               element={
