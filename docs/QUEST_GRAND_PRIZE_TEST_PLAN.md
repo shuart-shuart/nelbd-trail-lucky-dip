@@ -35,3 +35,6 @@
 
 ## Not done
 No live migration, import, real email, or deployment has been performed. Full end-to-end tests require an isolated database and a configured Microsoft test flow.
+
+## First deployment activation
+The Quest database migration is separate from the ordinary Lucky Dip migration runner. Temporarily set APPLY_NELBD_QUEST_MIGRATIONS=YES for the first Render deployment; verify 20 seeded slots and S$8,400, then immediately set it back to NO. Keep NELBD_QUEST_SEND_ENABLED=NO and NELBD_QUEST_IMPORT_ENABLED=NO during initial UI testing.
