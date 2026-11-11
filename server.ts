@@ -1,4 +1,5 @@
 import express from 'express';
+import {questClaimRouter} from './src/server/questRoutes.ts';
 import { checkPostgres } from './src/server/postgres.ts';
 import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
 import { grabClaimRouter } from './src/server/grabClaimRoutes.ts';
