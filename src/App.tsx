@@ -62,6 +62,7 @@ export default function App() {
             />
 
             <Route path="/quest/claim/:token" element={<QuestClaimPage />} />
+            <Route path="/quest/vouchers/:token" element={<QuestVouchersPage />} />
 
             {/* Protected Admin Routes */}
             <Route
