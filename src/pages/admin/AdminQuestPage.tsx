@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {AdminLayout} from '../../components/admin/AdminLayout';
+import {QuestDeliveryControls} from '../../components/admin/QuestDeliveryControls';
 
 type Slot={slotId:string;tier:string;amountCents:number;quantity:number;pairNumber:number;name:string|null;email:string|null;state:string;linkIssued:boolean;deliveryStatus:string|null;sentAt:string|null};
 async function req<T>(path:string,options?:RequestInit):Promise<T>{
