@@ -18,6 +18,11 @@ async function main() {
     await run(['scripts/apply-postgres-migrations.ts']);
     console.log('PostgreSQL migration completed. Starting server.');
   }
+  if (process.env.APPLY_NELBD_QUEST_MIGRATIONS === 'YES') {
+    console.log('Explicitly authorized Quest-only schema migration starting.');
+    await run(['scripts/apply-quest-migrations.ts']);
+    console.log('Quest schema verified. Starting existing app.');
+  }
   if (process.env.CONFIRM_NELBD_ADMIN_BOOTSTRAP === 'YES') {
     console.log('One-time PostgreSQL administrator bootstrap requested.');
     await run(['scripts/bootstrap-postgres-admin.ts']);
