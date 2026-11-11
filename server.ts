@@ -31,6 +31,8 @@ if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
 }
 
 app.use('/api/quest',questClaimRouter);
+app.use('/api/quest',questViewRouter);
+app.use('/api/quest',questCallbackRouter);
 app.use('/api/grab',grabClaimRouter);
 app.use('/api/grab',grabDeliveryRouter);
 
