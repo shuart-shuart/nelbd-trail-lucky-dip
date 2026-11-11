@@ -1,4 +1,5 @@
 import express from 'express';
+import {questClaimRouter} from './src/server/questRoutes.ts';
 import { checkPostgres } from './src/server/postgres.ts';
 import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
 import { grabClaimRouter } from './src/server/grabClaimRoutes.ts';
@@ -28,6 +29,7 @@ if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
   app.use('/api/admin', postgresAdminRouter);
 }
 
+app.use('/api/quest',questClaimRouter);
 app.use('/api/grab',grabClaimRouter);
 app.use('/api/grab',grabDeliveryRouter);
 
