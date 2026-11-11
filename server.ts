@@ -29,6 +29,7 @@ if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
   app.use('/api/admin', postgresAdminRouter);
 }
 
+app.use('/api/quest',questClaimRouter);
 app.use('/api/grab',grabClaimRouter);
 app.use('/api/grab',grabDeliveryRouter);
 
