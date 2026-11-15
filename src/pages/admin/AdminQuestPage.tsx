@@ -49,6 +49,7 @@ export function AdminQuestPage(){
      </div></td>
     </tr>)}</tbody></table></div>
   </div>
+  <QuestOutlookControls slots={slots} onRefresh={refresh}/>
   <QuestDeliveryControls slots={slots} onRefresh={refresh}/>
  </AdminLayout>;
 }
