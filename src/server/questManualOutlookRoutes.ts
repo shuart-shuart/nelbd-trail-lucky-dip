@@ -15,21 +15,34 @@ const baseOrigin=()=>{
   throw new Error('Invalid Quest public URL');
  return url.origin;
 };
-const placement=(tier:string)=>tier==='first'?'1st Place':tier==='second'?'2nd Place':tier==='third'?'3rd Place':'Consolation Prize';
-function draft(slot:{winner_name:string;prize_cents:number;voucher_quantity:number;tier:string},url:string){
+const bcc=['grace@farm.sg','selwyn@farm.sg','Prunella_ONG@designsingapore.org','bernando@farm.sg','Trina_BONG@designsingapore.org','Jovin_LEE@designsingapore.org'].join('; ');
+const ordinal=(n:number)=>n+(n%100>=11&&n%100<=13?'th':n%10===1?'st':n%10===2?'nd':n%10===3?'rd':'th');
+function draft(slot:{slot_id:string;winner_name:string;prize_cents:number;voucher_quantity:number;tier:string},url:string){
  const value='S$'+(slot.prize_cents/100).toLocaleString('en-SG');
- const title=placement(slot.tier);
+ const rank=slot.tier==='first'?1:slot.tier==='second'?2:slot.tier==='third'?3:4+Number(slot.slot_id.match(/^C([1-7])[AB]$/)?.[1]||0)-1;
+ if(!Number.isInteger(rank)||rank<1||rank>10)throw new Error('INVALID_QUEST_RANK');
+ const place=ordinal(rank)+' place';
+ const count=slot.voucher_quantity;
+ const item=count===1?'one Grab voucher':count+' Grab vouchers';
+ const gift=count===1?'your Grab voucher':'your Grab vouchers';
  return {
-  subject:'Congratulations! '+title+' of New Everyday Life, By Design Quest',
-  body:'Hi '+slot.winner_name+',\n\nCongratulations!\n\n'+
-   "You've won Grab vouchers worth "+value+' at the NELBD Quest!\n\n'+
-   'Your prize includes '+slot.voucher_quantity+' Grab voucher'+(slot.voucher_quantity===1?'':'s')+'.\n\n'+
-   'View your Grab vouchers securely:\n'+url+'\n\n'+
-   'Open the link to see your unique Grab gift code'+(slot.voucher_quantity===1?'':'s')+
-   ' and redemption link'+(slot.voucher_quantity===1?'':'s')+
-   '. You may either open each Grab voucher link or manually enter the code in the Grab app, following Grab\'s instructions.\n\n'+
-   'Important: Please check voucher validity and redemption terms. Keep your private link and codes confidential.\n\n'+
-   'Thank you for exploring New Everyday Life, By Design!\n\nNELBD Team'
+  bcc,
+  subject:'Congratulations on Your '+ordinal(rank)+' Place Finish in the NELBD Quest!',
+  body:'Hi '+slot.winner_name+',\\n\\n'+
+   'Congratulations on finishing in '+place+' in the New Everyday Life, By Design (NELBD) Quest! 🎉\\n\\n'+
+   "We're delighted to share that you've won "+value+' worth of Grab vouchers!\\n\\n'+
+   'As part of your prize, you will receive '+item+'.\\n\\n'+
+   'Your Grab '+(count===1?'voucher is':'vouchers are')+' ready to redeem!\\n\\n'+
+   'View '+gift+' securely:\\n'+url+'\\n\\n'+
+   'Click the link above to view your unique Grab voucher '+(count===1?'code and redemption link':'codes and redemption links')+
+   '. Follow the instructions provided by Grab to redeem '+(count===1?'it':'them')+'.\\n\\n'+
+   'A few things to note:\\n'+
+   '• The Grab voucher'+(count===1?' is':'s are')+' valid until 13 May 2027.\\n'+
+   '• Please keep your voucher '+(count===1?'code':'codes')+' and private access link confidential.\\n'+
+   '• Redemption is subject to Grab\'s applicable terms and conditions.\\n\\n'+
+   'Thank you for taking part in the NELBD Quest and exploring New Everyday Life, By Design with us!\\n\\n'+
+   'We hope you enjoyed the experience, and congratulations once again!\\n\\n'+
+   'Warm regards,\\nNELBD Team\\nNew Everyday Life, By Design'
  };
 }
 questManualOutlookRouter.use((_req,res,next)=>{
