@@ -161,7 +161,7 @@ questViewRouter.get('/vouchers/:token',async(req,res)=>{
  res.setHeader('Cache-Control','no-store, private');res.setHeader('Referrer-Policy','no-referrer');res.setHeader('X-Robots-Tag','noindex, nofollow');
  if(!tokenPattern.test(req.params.token))return res.status(404).json({error:'Secure link unavailable'});
  try{
-  const {rows}=await getPool().query("SELECT slot_id,tier,prize_cents,voucher_quantity,state FROM quest_prize_slots WHERE viewer_token_hash=$1 AND viewer_revoked_at IS NULL AND viewer_expires_at>now() AND state IN ('processing','sent')",[hash(req.params.token)]);
+  const {rows}=await getPool().query("SELECT slot_id,tier,prize_cents,voucher_quantity,state FROM quest_prize_slots WHERE viewer_token_hash=$1 AND viewer_revoked_at IS NULL AND viewer_expires_at>now() AND (state IN ('processing','sent') OR (state='approved' AND delivery_status='MANUAL_READY'))",[hash(req.params.token)]);
   const slot=rows[0];if(!slot)return res.status(404).json({error:'This private voucher link is unavailable or has expired'});
   const vouchers=await getPool().query('SELECT denomination_cents,code_ciphertext,url_ciphertext,starts_at,expires_at FROM quest_vouchers WHERE slot_id=$1 ORDER BY id',[slot.slot_id]);
   if(vouchers.rowCount!==slot.voucher_quantity)return res.status(503).json({error:'Voucher allocation incomplete'});
