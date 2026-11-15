@@ -142,7 +142,7 @@ questFulfilmentAdminRouter.post('/slots/:id/send',async(req,res)=>{
 questFulfilmentAdminRouter.post('/slots/:id/cancel',async(req,res)=>{
  if(!idPattern.test(req.params.id)||req.body?.confirmed!==true)return res.status(400).json({error:'Explicit cancellation required'});
  try{
-  const {rows}=await getPool().query("UPDATE quest_prize_slots SET state='cancelled',updated_at=now() WHERE slot_id=$1 AND state='approved' RETURNING slot_id",[req.params.id]);
+  const {rows}=await getPool().query("UPDATE quest_prize_slots SET state='cancelled',updated_at=now() WHERE slot_id=$1 AND state='approved' AND viewer_token_hash IS NULL AND delivery_status IS NULL RETURNING slot_id",[req.params.id]);
   if(!rows.length)return res.status(409).json({error:'Only a not-yet-sent approved claim can be cancelled'});
   await getPool().query("INSERT INTO quest_events(slot_id,event,actor) VALUES($1,'send_cancelled',$2)",[req.params.id,res.locals.admin.email]);
   return res.json({cancelled:true});
