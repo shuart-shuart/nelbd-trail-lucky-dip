@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 type Slot={slotId:string;tier:string;amountCents:number;quantity:number;name:string|null;email:string|null;state:string;deliveryStatus:string|null;sentAt:string|null};
-type Draft={slotId:string;to:string;link:string;subject:string;body:string;notice:string;expiresAt:string};
+type Draft={slotId:string;to:string;bcc:string;link:string;subject:string;body:string;notice:string;expiresAt:string};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
  const r=await fetch('/api/admin/quest'+path,{...init,credentials:'same-origin',cache:'no-store',
   headers:{'Content-Type':'application/json',...init?.headers}});
@@ -31,8 +31,8 @@ export function QuestOutlookControls({slots,onRefresh}:{slots:Slot[];onRefresh:(
  };
  const copyDraft=async()=>{
   if(!draft)return;
-  try{await navigator.clipboard.writeText('To: '+draft.to+'\nSubject: '+draft.subject+'\n\n'+draft.body);
-   setNotice('Copied to clipboard. Paste into Outlook and confirm the recipient before sending.');}
+  try{await navigator.clipboard.writeText('To: '+draft.to+'\nBCC: '+draft.bcc+'\nSubject: '+draft.subject+'\n\n'+draft.body);
+   setNotice('Copied To, BCC, subject and message. Paste each into the matching Outlook fields and verify before sending.');}
   catch{setNotice('Clipboard unavailable; select and copy the message manually.');}
  };
  const markSent=async()=>{
@@ -78,10 +78,12 @@ export function QuestOutlookControls({slots,onRefresh}:{slots:Slot[];onRefresh:(
    <p className="font-bold">Outlook-ready message · private link visible only now</p>
    <p className="text-xs text-rose-800">Save this draft before switching slots or refreshing. Link regeneration invalidates the old link. Do not share with unintended recipients.</p>
    <label className="block text-xs font-semibold">To<input className="block w-full mt-1 border rounded-lg p-2 text-sm" readOnly value={draft.to}/></label>
+   <label className="block text-xs font-semibold">BCC (paste into Outlook BCC field)<input className="block w-full mt-1 border rounded-lg p-2 text-sm" readOnly value={draft.bcc}/></label>
+   <button type="button" onClick={()=>void navigator.clipboard.writeText(draft.bcc).then(()=>setNotice("BCC addresses copied. Paste them into Outlook BCC.")).catch(()=>setNotice("Please select and copy the BCC addresses manually."))} className="border rounded-lg px-3 py-2 text-sm">Copy BCC addresses only</button>
    <label className="block text-xs font-semibold">Subject<input className="block w-full mt-1 border rounded-lg p-2 text-sm" readOnly value={draft.subject}/></label>
    <label className="block text-xs font-semibold">Email body<textarea className="block w-full mt-1 border rounded-lg p-3 text-sm" rows={15} readOnly value={draft.body}/></label>
    <button type="button" onClick={()=>void copyDraft()} className="bg-[#270342] text-white rounded-lg px-4 py-3 font-bold">Copy full Outlook draft</button>
-   <p className="text-xs">No email has been sent. Check recipient address in Outlook and send manually.</p>
+   <p className="text-xs">No email has been sent. Outlook does not automatically populate recipient fields from pasted body text: copy To and BCC into their respective fields. BCC recipients also receive the private voucher link.</p>
   </div>}
   {notice&&<p role="status" className="rounded-lg bg-[#F6F0FB] p-3 text-sm">{notice}</p>}
  </section>;
