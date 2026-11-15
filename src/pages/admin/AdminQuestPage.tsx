@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import {AdminLayout} from '../../components/admin/AdminLayout';
 import {QuestDeliveryControls} from '../../components/admin/QuestDeliveryControls';
+import {QuestOutlookControls} from '../../components/admin/QuestOutlookControls';
 
 type Slot={slotId:string;tier:string;amountCents:number;quantity:number;pairNumber:number;name:string|null;email:string|null;state:string;linkIssued:boolean;deliveryStatus:string|null;sentAt:string|null};
 async function req<T>(path:string,options?:RequestInit):Promise<T>{
@@ -48,6 +49,7 @@ export function AdminQuestPage(){
      </div></td>
     </tr>)}</tbody></table></div>
   </div>
+  <QuestOutlookControls slots={slots} onRefresh={refresh}/>
   <QuestDeliveryControls slots={slots} onRefresh={refresh}/>
  </AdminLayout>;
 }

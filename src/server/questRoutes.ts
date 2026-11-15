@@ -62,6 +62,25 @@ questAdminRouter.post('/slots/:id/claim-link',async(req,res)=>{
   return res.json({link:'/quest/claim/'+token,warning:'Copy this link now. It will not be shown again, and any prior link is invalidated.'});
  }catch{return res.status(503).json({error:'Unable to generate claim link'});}
 });
+/** Staff enters confirmed recipient details without needing public one-time claim form. */
+questAdminRouter.put('/slots/:id/winner',async(req,res)=>{
+ res.setHeader('Cache-Control','no-store');
+ const id=req.params.id;
+ const name=typeof req.body?.name==='string'?req.body.name.trim():'';
+ const email=typeof req.body?.email==='string'?req.body.email.trim().toLowerCase():'';
+ if(!/^(F[12]|S[12]|T[12]|C[1-7][AB])$/.test(id)||
+    name.length<2||name.length>100||email.length>254||
+    !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))
+   return res.status(400).json({error:'Valid name, email and prize slot required'});
+ try{
+  const {rows}=await getPool().query(
+   "UPDATE quest_prize_slots SET winner_name=$2,winner_email=$3,state='submitted',approved_by=NULL,approved_at=NULL,claim_token_hash=NULL,updated_at=now(),submitted_at=now() WHERE slot_id=$1 AND state IN ('unclaimed','submitted','approved') AND viewer_token_hash IS NULL AND delivery_attempt_id IS NULL RETURNING slot_id",
+   [id,name,email]);
+  if(!rows.length)return res.status(409).json({error:'Slot already prepared, sent, or locked. Winner details cannot be changed'});
+  await getPool().query("INSERT INTO quest_events(slot_id,event,actor) VALUES($1,'staff_winner_updated',$2)",[id,res.locals.admin.email]);
+  return res.json({saved:true,requiresApproval:true,emailNotSent:true});
+ }catch{return res.status(503).json({error:'Unable to save winner information'});}
+});
 questAdminRouter.post('/slots/:id/approve',async(req,res)=>{
  if(!/^(F[12]|S[12]|T[12]|C[1-7][AB])$/.test(req.params.id)||req.body?.confirmed!==true)return res.status(400).json({error:'Explicit approval required'});
  try {

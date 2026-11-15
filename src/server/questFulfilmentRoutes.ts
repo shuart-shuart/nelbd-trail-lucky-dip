@@ -116,7 +116,7 @@ questFulfilmentAdminRouter.post('/slots/:id/send',async(req,res)=>{
   job=await withTransaction(async c=>{
    const found=await c.query('SELECT * FROM quest_prize_slots WHERE slot_id=$1 FOR UPDATE',[req.params.id]);
    const slot=found.rows[0];
-   if(!slot||slot.state!=='approved'||!slot.winner_email||!slot.winner_name)throw new Error('NOT_APPROVED');
+   if(!slot||slot.state!=='approved'||!slot.winner_email||!slot.winner_name||slot.viewer_token_hash||slot.delivery_status)throw new Error('NOT_APPROVED');
    const existing=await c.query('SELECT id FROM quest_vouchers WHERE slot_id=$1 FOR UPDATE',[slot.slot_id]);
    if(existing.rowCount&&existing.rowCount!==slot.voucher_quantity)throw new Error('INCOMPLETE_ALLOCATION');
    if(!existing.rowCount){
@@ -142,7 +142,7 @@ questFulfilmentAdminRouter.post('/slots/:id/send',async(req,res)=>{
 questFulfilmentAdminRouter.post('/slots/:id/cancel',async(req,res)=>{
  if(!idPattern.test(req.params.id)||req.body?.confirmed!==true)return res.status(400).json({error:'Explicit cancellation required'});
  try{
-  const {rows}=await getPool().query("UPDATE quest_prize_slots SET state='cancelled',updated_at=now() WHERE slot_id=$1 AND state='approved' RETURNING slot_id",[req.params.id]);
+  const {rows}=await getPool().query("UPDATE quest_prize_slots SET state='cancelled',updated_at=now() WHERE slot_id=$1 AND state='approved' AND viewer_token_hash IS NULL AND delivery_status IS NULL RETURNING slot_id",[req.params.id]);
   if(!rows.length)return res.status(409).json({error:'Only a not-yet-sent approved claim can be cancelled'});
   await getPool().query("INSERT INTO quest_events(slot_id,event,actor) VALUES($1,'send_cancelled',$2)",[req.params.id,res.locals.admin.email]);
   return res.json({cancelled:true});
@@ -161,7 +161,7 @@ questViewRouter.get('/vouchers/:token',async(req,res)=>{
  res.setHeader('Cache-Control','no-store, private');res.setHeader('Referrer-Policy','no-referrer');res.setHeader('X-Robots-Tag','noindex, nofollow');
  if(!tokenPattern.test(req.params.token))return res.status(404).json({error:'Secure link unavailable'});
  try{
-  const {rows}=await getPool().query("SELECT slot_id,tier,prize_cents,voucher_quantity,state FROM quest_prize_slots WHERE viewer_token_hash=$1 AND viewer_revoked_at IS NULL AND viewer_expires_at>now() AND state IN ('processing','sent')",[hash(req.params.token)]);
+  const {rows}=await getPool().query("SELECT slot_id,tier,prize_cents,voucher_quantity,state FROM quest_prize_slots WHERE viewer_token_hash=$1 AND viewer_revoked_at IS NULL AND viewer_expires_at>now() AND (state IN ('processing','sent') OR (state='approved' AND delivery_status='MANUAL_READY'))",[hash(req.params.token)]);
   const slot=rows[0];if(!slot)return res.status(404).json({error:'This private voucher link is unavailable or has expired'});
   const vouchers=await getPool().query('SELECT denomination_cents,code_ciphertext,url_ciphertext,starts_at,expires_at FROM quest_vouchers WHERE slot_id=$1 ORDER BY id',[slot.slot_id]);
   if(vouchers.rowCount!==slot.voucher_quantity)return res.status(503).json({error:'Voucher allocation incomplete'});

@@ -83,7 +83,7 @@ export function QuestDeliveryControls({slots,onRefresh}:{slots:Slot[];onRefresh:
   <div className="space-y-2">{slots.filter(s=>['approved','processing','sent','needs_review','cancelled'].includes(s.state)).map(s=><div key={s.slotId} className="border rounded-lg p-3 flex flex-wrap items-center justify-between gap-2">
    <div className="text-sm"><strong>{s.slotId}</strong> · S${s.amountCents/100} · {s.name}<span className="block text-xs">{s.email} · {s.state} · {s.deliveryStatus||'No delivery yet'}</span></div>
    <div className="flex gap-2">
-    {s.state==='approved'&&<><button disabled={busy||!config?.sendEnabled} className="bg-[#270342] text-white px-3 py-2 rounded-lg disabled:opacity-40" onClick={()=>void action(s,'send')}>Approve & send now</button><button disabled={busy} className="border px-3 py-2 rounded-lg" onClick={()=>void action(s,'cancel')}>Cancel pending</button></>}
+    {s.state==='approved'&&!s.deliveryStatus&&<><button disabled={busy||!config?.sendEnabled} className="bg-[#270342] text-white px-3 py-2 rounded-lg disabled:opacity-40" onClick={()=>void action(s,'send')}>Approve & send now</button><button disabled={busy} className="border px-3 py-2 rounded-lg" onClick={()=>void action(s,'cancel')}>Cancel pending</button></>}
     {['processing','sent','needs_review'].includes(s.state)&&<button disabled={busy} className="border px-3 py-2 rounded-lg" onClick={()=>void action(s,'revoke')}>Revoke access</button>}
    </div>
   </div>)}</div>
