@@ -116,7 +116,7 @@ questFulfilmentAdminRouter.post('/slots/:id/send',async(req,res)=>{
   job=await withTransaction(async c=>{
    const found=await c.query('SELECT * FROM quest_prize_slots WHERE slot_id=$1 FOR UPDATE',[req.params.id]);
    const slot=found.rows[0];
-   if(!slot||slot.state!=='approved'||!slot.winner_email||!slot.winner_name)throw new Error('NOT_APPROVED');
+   if(!slot||slot.state!=='approved'||!slot.winner_email||!slot.winner_name||slot.viewer_token_hash||slot.delivery_status)throw new Error('NOT_APPROVED');
    const existing=await c.query('SELECT id FROM quest_vouchers WHERE slot_id=$1 FOR UPDATE',[slot.slot_id]);
    if(existing.rowCount&&existing.rowCount!==slot.voucher_quantity)throw new Error('INCOMPLETE_ALLOCATION');
    if(!existing.rowCount){
