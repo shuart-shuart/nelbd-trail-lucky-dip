@@ -39,6 +39,8 @@ export default function App() {
                 </KioskLayout>
               }
             />
+            <Route path="/redeem" element={<KioskLayout><RedemptionChoicePage /></KioskLayout>} />
+            <Route path="/returning" element={<KioskLayout><ReturningRewardPage /></KioskLayout>} />
             <Route
               path="/details"
               element={
