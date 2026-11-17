@@ -4,7 +4,7 @@ import {AdminLayout} from '../../components/admin/AdminLayout';
 type Scenario='8_only'|'17_fresh'|'17_returning';
 type Stock={total:number;redeemed:number;remaining:number};
 type Found={found:true;nickname:string;site:'PDD'|'PS';prizeName:string;ezlinkRedeemed:boolean;mobileNumber:string};
-type Draw={success:boolean;recovered?:boolean;prize?:{name:string};error?:string;ticketNumber?:string};
+type Draw={success:boolean;recovered?:boolean;prize?:{name:string};error?:string;ticketNumber?:string;voucherClaimToken?:string};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
  const response=await fetch('/api/admin/ezlink'+path,{...init,credentials:'same-origin',cache:'no-store',
   headers:{'Content-Type':'application/json',...init?.headers}});
@@ -20,7 +20,7 @@ export function AdminEzlinkPage(){
   [found,setFound]=useState<Found|null>(null),[draw,setDraw]=useState<Draw|null>(null),
   [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),
   [history,setHistory]=useState<Array<{id:string;site:string;scenario:string;phoneLast4:string;redeemedAt:string;issuedBy:string}>>([]),
-  [ticket,setTicket]=useState(()=>newTicket('PDD'));
+  [ticket,setTicket]=useState(()=>newTicket('PDD')),[grabEmail,setGrabEmail]=useState(''),[grabConfirmed,setGrabConfirmed]=useState(false);
  const refresh=async()=>{
   try{const [inventory,records]=await Promise.all([api<Stock>('/inventory'),api<typeof history>('/history')]);
    setStock(inventory);setHistory(records);setNewTotal(String(inventory.total));}
@@ -31,7 +31,7 @@ export function AdminEzlinkPage(){
  const reset=(next:Scenario)=>{
   setScenario(next);setName('');setPhone('');setFound(null);setDraw(null);setError('');setNotice('');
   setChecks({stamps:false,punch1:false,punch2:false,first:false,card:false,punched:false});
-  setTicket(newTicket(site));
+  setTicket(newTicket(site));setGrabEmail('');setGrabConfirmed(false);
  };
  const phoneValue='+65'+phone.replace(/\D/g,'').slice(0,8);
  const validPhone=/^[89]\d{7}$/.test(phone);
@@ -50,6 +50,19 @@ export function AdminEzlinkPage(){
    secondPunchUnused:scenario==='17_fresh'?true:undefined})});
    setDraw(data);setNotice('Lucky Dip recorded. Prize: '+(data.prize?.name||'See prize history')+'. Issue sticker and apply first hole punch.');
   }catch(e){setError(e instanceof Error?e.message:'Draw unavailable');}
+  finally{setBusy(false);}
+ };
+
+ const submitGrabEmail=async()=>{
+  if(!draw?.voucherClaimToken||!grabEmail.trim()||grabConfirmed)return;
+  setBusy(true);setError('');
+  try{
+   const response=await fetch('/api/grab/submit-email',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({claimToken:draw.voucherClaimToken,email:grabEmail.trim()})});
+   const result=await response.json();
+   if(!response.ok||!result.accepted)throw new Error(result.error||'Unable to register Grab email');
+   setGrabConfirmed(true);setNotice('Grab voucher recipient email recorded successfully.');
+  }catch(e){setError(e instanceof Error?e.message:'Grab voucher email unavailable');}
   finally{setBusy(false);}
  };
  const redeem=async()=>{
@@ -124,6 +137,15 @@ export function AdminEzlinkPage(){
     <p className="font-bold text-lg">Lucky Dip: {draw.prize?.name||'Prize recorded'}</p>
     <p className="text-sm">Hand over prize and sticker, then apply first hole punch. Ticket {draw.ticketNumber}.</p>
     {scenario==='17_fresh'&&<p className="text-sm font-medium">Now complete the second reward below.</p>}
+   </div>}
+
+   {draw?.voucherClaimToken&&<div className="border rounded-xl p-4 space-y-2">
+    <h3 className="font-bold">Grab voucher prize · recipient email required</h3>
+    {grabConfirmed?<p role="status" className="text-sm">Recipient email recorded.</p>:<>
+     <p className="text-sm">This Lucky Dip awarded a Grab voucher. Ask the participant for their email to receive it.</p>
+     <input type="email" maxLength={254} placeholder="Participant email" className="w-full rounded-lg border p-3" value={grabEmail} onChange={e=>setGrabEmail(e.target.value)}/>
+     <button disabled={busy||!grabEmail.includes('@')} onClick={()=>void submitGrabEmail()} className="rounded-lg bg-[#270342] text-white px-4 py-2 disabled:opacity-40">Record Grab voucher email</button>
+    </>}
    </div>}
    {scenario!=='8_only'&&<div className="border rounded-xl p-4 space-y-3">
     <h3 className="font-bold">ez-link Card · 17-stamp reward</h3>
