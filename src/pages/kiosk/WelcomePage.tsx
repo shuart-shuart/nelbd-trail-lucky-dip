@@ -42,7 +42,7 @@ export const WelcomePage: React.FC = () => {
       {/* Primary action */}
       <button
         type="button"
-        onClick={() => navigate('/details')}
+        onClick={() => navigate('/redeem')}
         className="kiosk-start-button kiosk-inset-frame w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[52px] sm:min-h-[62px] px-3 sm:px-6 py-2 flex items-center justify-center font-dm font-bold text-[clamp(0.9rem,2.5vw,1.6rem)] leading-tight tracking-tight text-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
         aria-label="Tap here to win your exclusive NELBD merchandise and vouchers"
       >

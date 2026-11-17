@@ -27,6 +27,7 @@ import {
 import { processPngUpload } from '../../utils/imageUpload';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { InventoryPrizeLimits } from '../../components/admin/InventoryPrizeLimits';
+import { EzlinkInventoryPanel } from '../../components/admin/EzlinkInventoryPanel';
 import {
   subscribeToPrizesWithInventory,
   subscribeToInventoryAdjustments,
@@ -899,6 +900,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
       }
     >
+      <EzlinkInventoryPanel />
       {/* Toast Notification Banner */}
       {feedbackMessage && (
         <div

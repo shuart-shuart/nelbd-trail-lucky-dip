@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import nelbdLogo from '../../assets/img/nelbd-logo.png';
 import { useKiosk } from '../../context/KioskContext';
+import { EzlinkCompletion } from '../../components/kiosk/EzlinkCompletion';
 import { db } from '../../firebase/config';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 
@@ -61,6 +62,7 @@ export const ResultPage: React.FC = () => {
   }, [drawResult]);
 
   useEffect(() => {
+    if(session.scenario==='17_fresh')return;
     // Retain automatic kiosk reset countdown
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -75,7 +77,7 @@ export const ResultPage: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, [navigate,session.scenario]);
 
   const submitGrabEmail = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -171,12 +173,17 @@ export const ResultPage: React.FC = () => {
           {ticketNumber && <p className="font-dm font-medium text-nel-violet/80">Ticket: {ticketNumber}</p>}
         </div>
 
+        {session.scenario==='17_fresh'&&<div className="w-full mt-3">
+          {drawResult?.voucherClaimToken&&!isEmailRecorded
+            ?<p className="bg-nel-pink text-nel-violet rounded-lg p-3 text-sm font-bold">Please submit the Grab voucher recipient email above before completing the ez-link reward.</p>
+            :<EzlinkCompletion scenario="17_fresh" mobile={session.mobileNumber}/>}
+        </div>}
         <p className="kiosk-result-disclaimer font-dm text-nel-violet">
           Prizes are subject to availability. Limited to one redemption per person.
         </p>
-        <p className="kiosk-result-countdown text-nel-violet/75 font-medium font-dm" aria-live="off">
+        {session.scenario!=='17_fresh'&&<p className="kiosk-result-countdown text-nel-violet/75 font-medium font-dm" aria-live="off">
           Resetting in {countdown}s
-        </p>
+        </p>}
       </div>
     </div>
   );

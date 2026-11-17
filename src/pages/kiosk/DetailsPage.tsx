@@ -113,7 +113,7 @@ export const DetailsPage: React.FC = () => {
           Your details
         </h1>
         <p className="mt-1 mb-3 text-sm font-dm text-nel-violet">
-          One redemption per person.
+          One Lucky Dip per mobile number. {session.scenario==='17_fresh'?'You will also be eligible for an ez-link Card after staff verification.':''}
         </p>
         <form onSubmit={handleSubmit} noValidate className="w-full space-y-3 sm:space-y-4">
           {/* Name Field */}

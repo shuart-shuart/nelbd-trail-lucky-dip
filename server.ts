@@ -1,5 +1,6 @@
 import express from 'express';
 import {questClaimRouter} from './src/server/questRoutes.ts';
+import {kioskQuestRewardsRouter} from './src/server/kioskQuestRewardsRoutes.ts';
 import {questViewRouter,questCallbackRouter} from './src/server/questFulfilmentRoutes.ts';
 import { checkPostgres } from './src/server/postgres.ts';
 import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
@@ -31,6 +32,7 @@ if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
 }
 
 app.use('/api/quest',questClaimRouter);
+app.use('/api/kiosk/quest-rewards',kioskQuestRewardsRouter);
 app.use('/api/quest',questViewRouter);
 app.use('/api/quest',questCallbackRouter);
 app.use('/api/grab',grabClaimRouter);

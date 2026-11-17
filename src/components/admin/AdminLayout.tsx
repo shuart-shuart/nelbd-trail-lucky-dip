@@ -37,7 +37,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { label: 'Prize Inventory', to: '/admin/inventory', end: false, icon: Gift },
     { label: 'Draw History', to: '/admin/history', end: false, icon: History },
     { label: 'Grab Vouchers', to: '/admin/grab-vouchers', end: false, icon: Mail },
-    { label: 'Quest Rewards', to: '/admin/ezlink', end: false, icon: Gift },
     { label: 'Kiosk Settings', to: '/admin/settings', end: false, icon: SettingsIcon },
   ];
 

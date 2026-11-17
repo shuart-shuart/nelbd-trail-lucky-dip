@@ -3,7 +3,10 @@ import { Setting, DEFAULT_SETTINGS, SiteLocation } from '../firebase/types';
 import { subscribeToKioskSettings } from '../firebase/firestoreService';
 import { DrawResponse } from '../api/luckyDipClient';
 
+export type QuestScenario = '8_only'|'17_fresh'|'17_returning';
+
 interface KioskSessionData {
+  scenario: QuestScenario;
   site: SiteLocation;
   nickname: string;
   mobileNumber: string;
@@ -17,6 +20,7 @@ interface KioskContextType {
   settings: Setting;
   session: KioskSessionData;
   setSite: (site: SiteLocation) => void;
+  setScenario: (scenario: QuestScenario) => void;
   setParticipantDetails: (nickname: string, mobileNumber: string, participantId?: string) => void;
   setTicketNumber: (code: string) => void;
   setDrawResult: (result: DrawResponse | null) => void;
@@ -25,6 +29,7 @@ interface KioskContextType {
 }
 
 const defaultSession: KioskSessionData = {
+  scenario: '8_only',
   site: 'PDD',
   nickname: '',
   mobileNumber: '',
@@ -120,6 +125,10 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const setScenario=useCallback((scenario:QuestScenario)=>{
+    setSession(prev=>({...prev,scenario}));
+  },[]);
+
   const setTicketNumber = useCallback((code: string) => {
     setSession((prev) => {
       if (prev.ticketNumber === code) return prev;
@@ -159,6 +168,7 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
       settings,
       session,
       setSite,
+      setScenario,
       setParticipantDetails,
       setTicketNumber,
       setDrawResult,
@@ -169,6 +179,7 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
       settings,
       session,
       setSite,
+      setScenario,
       setParticipantDetails,
       setTicketNumber,
       setDrawResult,
