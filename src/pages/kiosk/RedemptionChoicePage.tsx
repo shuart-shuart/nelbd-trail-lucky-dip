@@ -20,7 +20,7 @@ export const RedemptionChoicePage:React.FC=()=>{
    .catch(()=>{if(active)setAvailable(false)});
   return()=>{active=false};
  },[]);
- const continueToDetails=()=>{setScenario(choice);navigate(choice==='17_returning'?'/returning':'/details');};
+ const continueToDetails=()=>{setScenario(choice);navigate('/welcome');};
  return <div className="w-full bg-nel-pink text-nel-violet rounded-3xl p-5 sm:p-6 space-y-4 my-auto">
   <h1 className="font-nel text-2xl sm:text-3xl font-semibold text-center">Redeem Your Quest Rewards</h1>
   <p className="font-dm text-sm text-center">Ask our booth crew to verify the stamps and hole punches in your booklet.</p>
@@ -33,7 +33,6 @@ export const RedemptionChoicePage:React.FC=()=>{
   {choice!=='8_only'&&available===false&&<p role="status" className="text-sm font-semibold">ez-link redemptions are unavailable until card stock and staff access are configured. Please ask booth staff.</p>}
   <button onClick={continueToDetails} disabled={choice!=='8_only'&&(available!==true||!configured)}
    className="w-full rounded-xl bg-nel-violet text-nel-pink p-4 font-bold text-xl disabled:opacity-50">CONTINUE</button>
-  <button onClick={()=>navigate('/')} className="w-full text-sm underline py-2">Back</button>
   <p className="sr-only">Current hub {session.site}</p>
  </div>;
 };
