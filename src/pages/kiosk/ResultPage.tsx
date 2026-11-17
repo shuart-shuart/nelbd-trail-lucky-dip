@@ -181,7 +181,7 @@ export const ResultPage: React.FC = () => {
         </p>
         {session.scenario!=='17_fresh'&&<p className="kiosk-result-countdown text-nel-violet/75 font-medium font-dm" aria-live="off">
           Resetting in {countdown}s
-        </p>
+        </p>}
       </div>
     </div>
   );
