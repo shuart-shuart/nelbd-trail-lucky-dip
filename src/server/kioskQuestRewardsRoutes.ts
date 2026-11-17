@@ -41,9 +41,9 @@ async function verifyPin(pin:unknown):Promise<boolean>{
 }
 kioskQuestRewardsRouter.get('/status',async(_req,res)=>{
  try{const [stock,pin]=await Promise.all([
-  getPool().query('SELECT (total_quantity-redeemed_quantity)>0 AS available FROM ezlink_inventory WHERE id=1'),
+  getPool().query('SELECT site,(allocated_quantity-redeemed_quantity)>0 AS available FROM ezlink_hub_inventory'),
   getPool().query('SELECT 1 FROM ezlink_staff_config WHERE id=1')]);
-  return res.json({available:Boolean(stock.rows[0]?.available),staffPinConfigured:Boolean(pin.rowCount)});
+  return res.json({available:stock.rows.some(row=>row.available),bySite:Object.fromEntries(stock.rows.map(row=>[row.site,Boolean(row.available)])),staffPinConfigured:Boolean(pin.rowCount)});
  }catch{return res.status(503).json({error:'Reward status unavailable'});}
 });
 /** Phone lookup gives only a minimal eligibility flag, not participant PII. */
@@ -59,17 +59,11 @@ kioskQuestRewardsRouter.post('/lookup',async(req,res)=>{
   return res.json({eligible:r.status==='claimed',reason:r.status==='claimed'?'READY':'LUCKY_DIP_NOT_CLAIMED'});
  }catch{return res.status(503).json({error:'Unable to verify earlier redemption'});}
 });
-/** Staff PIN is mandatory; client-visible checkboxes are only process acknowledgements. */
+/** Staff PIN authorises the physical handover; server enforces eligibility, uniqueness and local stock. */
 kioskQuestRewardsRouter.post('/redeem',async(req,res)=>{
- const scenario=req.body?.scenario,mobile=normalizeMobile(req.body?.mobileNumber);
- if(!['17_fresh','17_returning'].includes(scenario)||!mobile||
-    req.body?.seventeenStampsChecked!==true||
-    req.body?.secondPunchUnused!==true||
-    req.body?.cardHandedOver!==true||
-    req.body?.secondPunchApplied!==true||
-    (scenario==='17_fresh'&&req.body?.firstRewardCompleted!==true)||
-    (scenario==='17_returning'&&req.body?.firstPunchPresent!==true))
-   return res.status(400).json({error:'Check booklet, card handover and punch confirmations'});
+ const scenario=req.body?.scenario,mobile=normalizeMobile(req.body?.mobileNumber),site=req.body?.site;
+ if(!['17_fresh','17_returning'].includes(scenario)||!mobile||!['PDD','PS'].includes(site))
+  return res.status(400).json({error:'Invalid redemption details or hub'});
  if(!limit(req,'redeem'))return res.status(429).json({error:'Too many attempts. Ask an administrator for help'});
  let verified=false;
  try{verified=await verifyPin(req.body?.staffPin);}catch{return res.status(503).json({error:'Staff verification unavailable'});}
@@ -83,11 +77,12 @@ kioskQuestRewardsRouter.post('/redeem',async(req,res)=>{
    if(r.ezlink_id)throw new Error('ALREADY_REDEEMED');
    if(r.status!=='claimed')throw new Error('LUCKY_DIP_NOT_CLAIMED');
    const stock=await c.query(
-    'UPDATE ezlink_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE id=1 AND redeemed_quantity<total_quantity RETURNING total_quantity-redeemed_quantity AS remaining');
+    'UPDATE ezlink_hub_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE site=$1 AND redeemed_quantity<allocated_quantity RETURNING allocated_quantity-redeemed_quantity AS remaining',[site]);
    if(!stock.rowCount)throw new Error('OUT_OF_STOCK');
+   await c.query('UPDATE ezlink_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE id=1');
    await c.query(
     'INSERT INTO ezlink_redemptions(participant_id,draw_id,site,scenario,issued_by,booklet_17_verified,second_punch_confirmed) VALUES($1,$2,$3,$4,$5,true,true)',
-    [r.participant_id,r.draw_id,r.site,scenario,'kiosk_staff_pin']);
+    [r.participant_id,r.draw_id,site,scenario,'kiosk_staff_pin']);
    return {recorded:true,remaining:Number(stock.rows[0].remaining)};
   });
   return res.json(recorded);
