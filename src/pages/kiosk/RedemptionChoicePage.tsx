@@ -20,7 +20,7 @@ export const RedemptionChoicePage:React.FC=()=>{
    .catch(()=>{if(active)setAvailable(false)});
   return()=>{active=false};
  },[]);
- const continueToDetails=()=>{setScenario(choice);navigate(choice==='17_returning'?'/returning':'/details');};
+ const continueToDetails=()=>{setScenario(choice);navigate('/welcome');};
  return <div className="w-full bg-nel-pink text-nel-violet rounded-3xl p-5 sm:p-6 space-y-4 my-auto">
   <h1 className="font-nel text-2xl sm:text-3xl font-semibold text-center">Redeem Your Quest Rewards</h1>
   <p className="font-dm text-sm text-center">Ask our booth crew to verify the stamps and hole punches in your booklet.</p>
