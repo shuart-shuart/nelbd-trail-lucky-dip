@@ -44,7 +44,7 @@ export const WelcomePage: React.FC = () => {
         type="button"
         onClick={() => navigate(session.scenario === '17_returning' ? '/returning' : '/details')}
         className="kiosk-start-button kiosk-inset-frame w-full rounded-[16px] sm:rounded-[20px] bg-nel-pink text-nel-violet min-h-[52px] sm:min-h-[62px] px-3 sm:px-6 py-2 flex items-center justify-center font-dm font-bold text-[clamp(0.9rem,2.5vw,1.6rem)] leading-tight tracking-tight text-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white cursor-pointer"
-        aria-label="Tap here to win your exclusive NELBD merchandise and vouchers"
+        aria-label={session.scenario === '17_returning' ? 'Tap here to redeem your ez-link card' : 'Tap here to start your Lucky Dip'}
       >
         <div className="flex flex-col items-center justify-center w-full max-w-full gap-1 text-center px-2">
           <span className="block font-dm font-bold !text-[clamp(1.25rem,4vw,2rem)] leading-tight text-nel-violet">
