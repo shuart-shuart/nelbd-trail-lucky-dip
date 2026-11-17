@@ -35,7 +35,7 @@ export default function App() {
               path="/"
               element={
                 <KioskLayout>
-                  <WelcomePage />
+                  <RedemptionChoicePage />
                 </KioskLayout>
               }
             />
