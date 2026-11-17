@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import nelbdLogo from '../../assets/img/nelbd-logo.png';
 import { useKiosk } from '../../context/KioskContext';
+import { EzlinkCompletion } from '../../components/kiosk/EzlinkCompletion';
 import { db } from '../../firebase/config';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 
