@@ -21,15 +21,15 @@ kioskQuestRewardsRouter.use((req,res,next)=>{
  }
  next();
 });
-const limit=(req:any):boolean=>{
- const key=req.ip||req.socket.remoteAddress||'unknown';
+const limit=(req:any,operation:'lookup'|'redeem'):boolean=>{
+ const key=operation+':'+(req.ip||req.socket.remoteAddress||'unknown');
  const now=Date.now();
  if(attempts.size>5000)for(const [k,v] of attempts)if(v.until<now)attempts.delete(k);
  const old=attempts.get(key);
  const current=old&&old.until>now?old:{count:0,until:now+15*60_000};
  current.count++;
  attempts.set(key,current);
- return current.count<=15;
+ return current.count<=(operation==='lookup'?400:100);
 };
 async function verifyPin(pin:unknown):Promise<boolean>{
  if(typeof pin!=='string'||!/^\d{6,12}$/.test(pin))return false;
@@ -50,7 +50,7 @@ kioskQuestRewardsRouter.get('/status',async(_req,res)=>{
 kioskQuestRewardsRouter.post('/lookup',async(req,res)=>{
  const mobile=normalizeMobile(req.body?.mobileNumber);
  if(!mobile)return res.status(400).json({error:'Enter a valid Singapore mobile number'});
- if(!limit(req))return res.status(429).json({error:'Too many requests. Ask booth staff for help'});
+ if(!limit(req,'lookup'))return res.status(429).json({error:'Too many requests. Ask booth staff for help'});
  try{
   const {rows:[r]}=await getPool().query(
    'SELECT d.status,(e.id IS NOT NULL) AS already_redeemed FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id WHERE p.mobile_number=$1 LIMIT 1',[mobile]);
@@ -70,7 +70,7 @@ kioskQuestRewardsRouter.post('/redeem',async(req,res)=>{
     (scenario==='17_fresh'&&req.body?.firstRewardCompleted!==true)||
     (scenario==='17_returning'&&req.body?.firstPunchPresent!==true))
    return res.status(400).json({error:'Check booklet, card handover and punch confirmations'});
- if(!limit(req))return res.status(429).json({error:'Too many attempts. Ask an administrator for help'});
+ if(!limit(req,'redeem'))return res.status(429).json({error:'Too many attempts. Ask an administrator for help'});
  let verified=false;
  try{verified=await verifyPin(req.body?.staffPin);}catch{return res.status(503).json({error:'Staff verification unavailable'});}
  if(!verified)return res.status(403).json({error:'Invalid staff PIN or staff PIN not configured'});
