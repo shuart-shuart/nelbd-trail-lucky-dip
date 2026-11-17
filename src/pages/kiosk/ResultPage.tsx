@@ -179,7 +179,7 @@ export const ResultPage: React.FC = () => {
         <p className="kiosk-result-disclaimer font-dm text-nel-violet">
           Prizes are subject to availability. Limited to one redemption per person.
         </p>
-        <p className="kiosk-result-countdown text-nel-violet/75 font-medium font-dm" aria-live="off">
+        {session.scenario!=='17_fresh'&&<p className="kiosk-result-countdown text-nel-violet/75 font-medium font-dm" aria-live="off">
           Resetting in {countdown}s
         </p>
       </div>
