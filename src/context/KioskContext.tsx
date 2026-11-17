@@ -29,6 +29,7 @@ interface KioskContextType {
 }
 
 const defaultSession: KioskSessionData = {
+  scenario: '8_only',
   site: 'PDD',
   nickname: '',
   mobileNumber: '',
