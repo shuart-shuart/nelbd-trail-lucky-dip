@@ -5,7 +5,7 @@ export function EzlinkCompletion({scenario,mobile,site,onDone}:{scenario:Scenari
  const navigate=useNavigate();
  const [pin,setPin]=useState(''),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[error,setError]=useState('');
  const complete=async()=>{
-  if(busy||done||!verified||!unused||!handed||!punched||!first||!/^\d{6,12}$/.test(pin))return;
+  if(busy||done||!/^\d{6,12}$/.test(pin))return;
   if(!window.confirm('Staff: Confirm the physical ez-link card was handed over and hole punch 2 was applied? This records one card against the selected hub.'))return;
   setBusy(true);setError('');
   try{
