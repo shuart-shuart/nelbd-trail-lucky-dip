@@ -77,7 +77,7 @@ export const ResultPage: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, [navigate,session.scenario]);
 
   const submitGrabEmail = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
