@@ -3,7 +3,10 @@ import { Setting, DEFAULT_SETTINGS, SiteLocation } from '../firebase/types';
 import { subscribeToKioskSettings } from '../firebase/firestoreService';
 import { DrawResponse } from '../api/luckyDipClient';
 
+export type QuestScenario = '8_only'|'17_fresh'|'17_returning';
+
 interface KioskSessionData {
+  scenario: QuestScenario;
   site: SiteLocation;
   nickname: string;
   mobileNumber: string;
