@@ -27,7 +27,7 @@ export const ReturningRewardPage:React.FC=()=>{
   <div className="bg-nel-pink text-nel-violet p-5 rounded-3xl space-y-3">
    <h1 className="font-nel text-2xl font-semibold">17 Stamps · Returning</h1>
    <p className="text-sm">Already completed the Lucky Dip? Enter the same mobile number used previously. No name or email is needed.</p>
-   {!complete&&<><label className="block font-bold text-sm">Singapore mobile number
+   <><label className="block font-bold text-sm">Singapore mobile number
     <div className="flex items-center border-2 border-nel-violet rounded-xl bg-white mt-1"><span className="pl-3">+65</span>
      <input type="tel" inputMode="numeric" maxLength={8} disabled={eligible||busy} placeholder="81234567" value={phone}
       onChange={e=>{setPhone(e.target.value.replace(/\D/g,'').slice(0,8));setEligible(false);setError('');}}
