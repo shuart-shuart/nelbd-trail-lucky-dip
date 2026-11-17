@@ -23,6 +23,11 @@ async function main() {
     await run(['scripts/apply-quest-migrations.ts']);
     console.log('Quest schema verified. Starting existing app.');
   }
+  if (process.env.APPLY_NELBD_EZLINK_MIGRATIONS === 'YES') {
+    console.log('Explicitly authorized isolated ez-link migration starting.');
+    await run(['scripts/apply-ezlink-migrations.ts']);
+    console.log('ez-link schema verified.');
+  }
   if (process.env.CONFIRM_NELBD_ADMIN_BOOTSTRAP === 'YES') {
     console.log('One-time PostgreSQL administrator bootstrap requested.');
     await run(['scripts/bootstrap-postgres-admin.ts']);

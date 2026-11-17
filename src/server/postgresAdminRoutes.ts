@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {questManualOutlookRouter} from './questManualOutlookRoutes.ts';
+import {ezlinkAdminRouter} from './ezlinkAdminRoutes.ts';
 import {questAdminRouter} from './questRoutes.ts';
 import {questFulfilmentAdminRouter} from './questFulfilmentRoutes.ts';
 import {encryptVoucher,fingerprint} from './grabVoucherCrypto.ts';
@@ -18,6 +19,7 @@ postgresAdminRouter.use(async (req,res,next) => {
 postgresAdminRouter.use('/quest',questAdminRouter);
 postgresAdminRouter.use('/quest',questFulfilmentAdminRouter);
 postgresAdminRouter.use('/quest',questManualOutlookRouter);
+postgresAdminRouter.use('/ezlink',ezlinkAdminRouter);
 postgresAdminRouter.post('/logout', async (req,res) => {
   try { await logoutAdmin(req,res); } catch { res.status(503).json({error:'Logout unavailable'}); }
 });

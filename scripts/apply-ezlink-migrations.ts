@@ -1,0 +1,16 @@
+/** Opt-in additive ez-link schema migration. Does not alter Lucky Dip or Quest inventory. */
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {getPool} from '../src/server/postgres.ts';
+async function main(){
+ if(process.env.APPLY_NELBD_EZLINK_MIGRATIONS!=='YES')throw new Error('ez-link migration disabled');
+ const pool=getPool();
+ try{
+  const sql=readFileSync(resolve(process.cwd(),'migrations','011_ezlink_redemption.sql'),'utf8');
+  await pool.query(sql);
+  const {rows}=await pool.query('SELECT total_quantity,redeemed_quantity FROM ezlink_inventory WHERE id=1');
+  if(rows.length!==1)throw new Error('ez-link stock row missing');
+  console.log('Applied additive ez-link schema. Current total:',rows[0].total_quantity,'redeemed:',rows[0].redeemed_quantity);
+ }finally{await pool.end();}
+}
+main().catch(e=>{console.error(e instanceof Error?e.message:'Migration failed');process.exitCode=1;});
