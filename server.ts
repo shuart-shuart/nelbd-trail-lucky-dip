@@ -32,6 +32,7 @@ if (process.env.ENABLE_POSTGRES_ADMIN_API === 'true') {
 }
 
 app.use('/api/quest',questClaimRouter);
+app.use('/api/kiosk/quest-rewards',kioskQuestRewardsRouter);
 app.use('/api/quest',questViewRouter);
 app.use('/api/quest',questCallbackRouter);
 app.use('/api/grab',grabClaimRouter);
