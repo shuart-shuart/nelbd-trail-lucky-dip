@@ -43,7 +43,7 @@ kioskQuestRewardsRouter.get('/status',async(_req,res)=>{
  try{const [stock,pin]=await Promise.all([
   getPool().query('SELECT site,(allocated_quantity-redeemed_quantity)>0 AS available FROM ezlink_hub_inventory'),
   getPool().query('SELECT 1 FROM ezlink_staff_config WHERE id=1')]);
-  return res.json({bySite:Object.fromEntries(stock.rows.map(row=>[row.site,Boolean(row.available)])),staffPinConfigured:Boolean(pin.rowCount)});
+  return res.json({available:stock.rows.some(row=>row.available),bySite:Object.fromEntries(stock.rows.map(row=>[row.site,Boolean(row.available)])),staffPinConfigured:Boolean(pin.rowCount)});
  }catch{return res.status(503).json({error:'Reward status unavailable'});}
 });
 /** Phone lookup gives only a minimal eligibility flag, not participant PII. */
