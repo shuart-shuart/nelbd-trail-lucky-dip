@@ -38,8 +38,7 @@ export const ReturningRewardPage:React.FC=()=>{
     {error&&<p role="alert" className="text-sm font-semibold">{error}</p>}</>
   </div>
   {eligible&&<EzlinkCompletion scenario="17_returning" mobile={'+65'+phone}/>}
-  {complete&&<div className="bg-nel-pink text-nel-violet rounded-xl p-4 text-center">Reward recorded successfully.</div>}
-  {!eligible&&!complete&&<button onClick={()=>{resetSession();navigate('/');}} className="w-full text-sm underline py-2">Back</button>}
+  {!eligible&&<button onClick={()=>{resetSession();navigate('/');}} className="w-full text-sm underline py-2">Back</button>}
   <p className="sr-only">Hub {session.site}</p>
  </div>;
 };
