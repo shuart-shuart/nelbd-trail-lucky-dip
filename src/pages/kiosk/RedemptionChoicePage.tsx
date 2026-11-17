@@ -11,15 +11,16 @@ export const RedemptionChoicePage:React.FC=()=>{
  const navigate=useNavigate();
  const {setScenario,session}=useKiosk();
  const [choice,setChoice]=React.useState<QuestScenario>('8_only');
- const [available,setAvailable]=React.useState<boolean|null>(null);
+ const [availableBySite,setAvailableBySite]=React.useState<Record<'PDD'|'PS',boolean>|null>(null);
  const [configured,setConfigured]=React.useState(false);
  React.useEffect(()=>{
   let active=true;
   fetch('/api/kiosk/quest-rewards/status',{cache:'no-store'}).then(r=>r.json())
-   .then(d=>{if(active){setAvailable(Boolean(d.available));setConfigured(Boolean(d.staffPinConfigured));}})
-   .catch(()=>{if(active)setAvailable(false)});
+   .then(d=>{if(active){setAvailableBySite({PDD:Boolean(d.bySite?.PDD),PS:Boolean(d.bySite?.PS)});setConfigured(Boolean(d.staffPinConfigured));}})
+   .catch(()=>{if(active)setAvailableBySite({PDD:false,PS:false})});
   return()=>{active=false};
  },[]);
+ const available=availableBySite?.[session.site]??null;
  const continueToDetails=()=>{setScenario(choice);navigate('/welcome');};
  return <div className="w-full bg-nel-pink text-nel-violet rounded-3xl p-5 sm:p-6 space-y-4 my-auto">
   <h1 className="font-nel text-2xl sm:text-3xl font-semibold text-center">Redeem Your Quest Rewards</h1>
