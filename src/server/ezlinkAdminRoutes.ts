@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import {Router} from 'express';
 import {getPool,withTransaction} from './postgres.ts';
 import {executePostgresLuckyDipDraw} from './postgresDrawEngine.ts';
@@ -119,4 +120,27 @@ ezlinkAdminRouter.get('/history',async(_req,res)=>{
     JOIN draws d ON d.id=e.draw_id ORDER BY e.redeemed_at DESC LIMIT 100`);
   return res.json(rows);
  }catch{return res.status(503).json({error:'ez-link redemption history unavailable'});}
+});
+
+/** Super-admin configures an unpredictable six-or-more digit staff handover PIN.
+ * No default PIN. It is never returned to any client.
+ */
+ezlinkAdminRouter.put('/staff-pin',async(req,res)=>{
+ if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+ const pin=req.body?.pin;
+ if(typeof pin!=='string'||!/^\d{6,12}$/.test(pin)||new Set(pin).size<3)
+  return res.status(400).json({error:'Use 6–12 digits with at least three different digits'});
+ try{
+  const salt=crypto.randomBytes(24).toString('hex');
+  const hash=crypto.scryptSync(pin,salt,64).toString('hex');
+  await getPool().query(`INSERT INTO ezlink_staff_config(id,pin_salt,pin_hash,updated_by)
+   VALUES(1,$1,$2,$3) ON CONFLICT(id) DO UPDATE SET pin_salt=$1,pin_hash=$2,updated_by=$3,updated_at=now()`,
+   [salt,hash,res.locals.admin.email]);
+  return res.json({configured:true});
+ }catch{return res.status(503).json({error:'Unable to set staff PIN; check migration 012'});}
+});
+ezlinkAdminRouter.get('/staff-pin/status',async(_req,res)=>{
+ try{const {rowCount}=await getPool().query('SELECT 1 FROM ezlink_staff_config WHERE id=1');
+  return res.json({configured:Boolean(rowCount)});
+ }catch{return res.status(503).json({error:'Staff PIN configuration unavailable'});}
 });
