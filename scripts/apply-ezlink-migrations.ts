@@ -6,8 +6,10 @@ async function main(){
  if(process.env.APPLY_NELBD_EZLINK_MIGRATIONS!=='YES')throw new Error('ez-link migration disabled');
  const pool=getPool();
  try{
-  const sql=readFileSync(resolve(process.cwd(),'migrations','011_ezlink_redemption.sql'),'utf8');
-  await pool.query(sql);
+  for(const file of ['011_ezlink_redemption.sql','012_ezlink_staff_pin.sql']){
+   const sql=readFileSync(resolve(process.cwd(),'migrations',file),'utf8');
+   await pool.query(sql);
+  }
   const {rows}=await pool.query('SELECT total_quantity,redeemed_quantity FROM ezlink_inventory WHERE id=1');
   if(rows.length!==1)throw new Error('ez-link stock row missing');
   console.log('Applied additive ez-link schema. Current total:',rows[0].total_quantity,'redeemed:',rows[0].redeemed_quantity);
