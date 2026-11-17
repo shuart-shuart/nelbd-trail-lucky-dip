@@ -5,7 +5,7 @@ import {EzlinkCompletion} from '../../components/kiosk/EzlinkCompletion';
 export const ReturningRewardPage:React.FC=()=>{
  const navigate=useNavigate(),{session,resetSession}=useKiosk();
  const [phone,setPhone]=useState(''),[eligible,setEligible]=useState(false),[busy,setBusy]=useState(false),
-  [error,setError]=useState(''),[complete,setComplete]=useState(false);
+  [error,setError]=useState('');
  const lookup=async()=>{
   if(!/^[89]\d{7}$/.test(phone)||busy)return;
   setBusy(true);setEligible(false);setError('');
