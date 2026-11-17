@@ -52,7 +52,7 @@ export const WelcomePage: React.FC = () => {
           </span>
         
           <span className="block font-dm font-normal !text-[clamp(0.7rem,2vw,0.95rem)] leading-snug text-nel-violet whitespace-normal break-words">
-            to win your exclusive NELBD merchandise and vouchers!
+            {session.scenario === '17_returning' ? 'to collect your 17-stamp ez-link reward!' : 'to win your exclusive NELBD merchandise and vouchers!'}
           </span>
         </div>
       </button>
