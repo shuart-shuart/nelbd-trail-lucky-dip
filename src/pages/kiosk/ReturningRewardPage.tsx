@@ -35,7 +35,7 @@ export const ReturningRewardPage:React.FC=()=>{
     {!eligible&&<button onClick={()=>void lookup()} disabled={busy||!/^[89]\d{7}$/.test(phone)}
       className="w-full bg-nel-violet text-nel-pink p-3 rounded-xl font-bold disabled:opacity-50">
       {busy?'CHECKING…':'FIND MY EARLIER REDEMPTION'}</button>}
-    {error&&<p role="alert" className="text-sm font-semibold">{error}</p>}</>}
+    {error&&<p role="alert" className="text-sm font-semibold">{error}</p>}</>
   </div>
   {eligible&&!complete&&<EzlinkCompletion scenario="17_returning" mobile={'+65'+phone} onDone={()=>setComplete(true)}/>}
   {complete&&<div className="bg-nel-pink text-nel-violet rounded-xl p-4 text-center">Reward recorded successfully.</div>}
