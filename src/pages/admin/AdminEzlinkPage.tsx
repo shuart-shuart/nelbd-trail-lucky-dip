@@ -84,7 +84,7 @@ export function AdminEzlinkPage(){
  const changeStock=async()=>{
   if(!stock||!stockNote.trim()||Number(newTotal)===stock.total||!window.confirm('Change shared ez-link stock to '+newTotal+'? Note: '+stockNote.trim()))return;
   setBusy(true);setError('');
-  try{await api('/inventory',{method:'PUT',body:JSON.stringify({total:Number(newTotal),note:stockNote.trim()})});setStockNote('');setNotice('Shared stock and adjustment note updated.');await refresh();}
+  try{await api('/inventory',{method:'PUT',body:JSON.stringify({total:Number(newTotal),expectedTotal:stock.total,note:stockNote.trim()})});setStockNote('');setNotice('Shared stock and adjustment note updated.');await refresh();}
   catch(e){setError(e instanceof Error?e.message:'Unable to update stock');}finally{setBusy(false);}
  };
  const verifyCard=(scenario==='17_returning'?Boolean(found&&!found.ezlinkRedeemed):Boolean(draw?.success))&&checks.stamps&&checks.punch2&&checks.card&&checks.punched&&(scenario==='17_fresh'||checks.first);
