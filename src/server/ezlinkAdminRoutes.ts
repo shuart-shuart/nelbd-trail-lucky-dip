@@ -17,57 +17,101 @@ ezlinkAdminRouter.use((_req,res,next)=>{
  if(!enabled())return res.status(423).json({error:'17-stamp redemption is not enabled'});
  next();
 });
+
+/** Shared ledger remains the canonical all-hub total; allocations represent physical custody. */
 ezlinkAdminRouter.get('/inventory',async(_req,res)=>{
  try{
-  const [stock,sites]=await Promise.all([
-   getPool().query('SELECT total_quantity AS "total",redeemed_quantity AS "redeemed",(total_quantity-redeemed_quantity) AS "remaining" FROM ezlink_inventory WHERE id=1'),
-   getPool().query("SELECT site,count(*)::int AS redeemed FROM ezlink_redemptions GROUP BY site")
-  ]);
-  if(!stock.rows[0])return res.status(503).json({error:'ez-link migration has not been applied'});
-  const bySite={PDD:0,PS:0};
-  for(const row of sites.rows){
-   if(row.site==='PDD')bySite.PDD=Number(row.redeemed);
-   if(row.site==='PS')bySite.PS=Number(row.redeemed);
+  const {rows:[global]}=await getPool().query('SELECT total_quantity AS total,redeemed_quantity AS redeemed FROM ezlink_inventory WHERE id=1');
+  const {rows}=await getPool().query('SELECT site,allocated_quantity AS total,redeemed_quantity AS redeemed FROM ezlink_hub_inventory ORDER BY site');
+  if(!global||rows.length!==2)return res.status(503).json({error:'Hub inventory migration 014 required'});
+  const bySite:{PDD:{total:number;redeemed:number;remaining:number};PS:{total:number;redeemed:number;remaining:number}}={
+   PDD:{total:0,redeemed:0,remaining:0},PS:{total:0,redeemed:0,remaining:0}};
+  for(const row of rows)if(row.site==='PDD'||row.site==='PS'){
+   const total=Number(row.total),redeemed=Number(row.redeemed);
+   bySite[row.site]={total,redeemed,remaining:total-redeemed};
   }
-  return res.json({...stock.rows[0],bySite});
- }catch{return res.status(503).json({error:'ez-link inventory unavailable'});}
+  return res.json({total:Number(global.total),redeemed:Number(global.redeemed),
+   remaining:Number(global.total)-Number(global.redeemed),
+   unallocated:Number(global.total)-bySite.PDD.total-bySite.PS.total,bySite});
+ }catch{return res.status(503).json({error:'Hub inventory unavailable; check migration 014'});}
 });
 ezlinkAdminRouter.get('/inventory/adjustments',async(_req,res)=>{
  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
  try{
-  const {rows}=await getPool().query(`SELECT id,previous_total AS "previousTotal",
-   new_total AS "newTotal",new_total-previous_total AS delta,
-   note,actor,happened_at AS "happenedAt"
-   FROM ezlink_inventory_audit ORDER BY happened_at DESC,id DESC LIMIT 100`);
+  const {rows}=await getPool().query(`SELECT id,kind,from_site AS "fromSite",to_site AS "toSite",delta,
+    previous_total AS "previousTotal",new_total AS "newTotal",actor,note,happened_at AS "happenedAt"
+    FROM ezlink_hub_stock_audit ORDER BY happened_at DESC,id DESC LIMIT 100`);
   return res.json(rows);
- }catch{return res.status(503).json({error:'ez-link stock adjustment history unavailable; check migration 013'});}
+ }catch{return res.status(503).json({error:'Hub stock audit unavailable; check migration 014'});}
 });
-ezlinkAdminRouter.put('/inventory',async(req,res)=>{
+/** Disable old pooled edit API: it would bypass physical custody accounting. */
+ezlinkAdminRouter.put('/inventory',(_req,res)=>res.status(410).json({error:'Use hub-specific stock adjustment instead'}));
+ezlinkAdminRouter.put('/inventory/hub',async(req,res)=>{
  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
- const total=req.body?.total;
- const expectedTotal=req.body?.expectedTotal;
+ const {site,total,expectedTotal}=req.body||{};
  const note=typeof req.body?.note==='string'?req.body.note.trim():'';
- if(!Number.isSafeInteger(total)||total<0||total>100000)return res.status(400).json({error:'Enter a valid total stock'});
- if(!Number.isSafeInteger(expectedTotal)||expectedTotal<0)return res.status(400).json({error:'Refresh the stock total before editing'});
- if(!note||note.length>500)return res.status(400).json({error:'Enter a stock adjustment note (1–500 characters)'});
+ if(!['PDD','PS'].includes(site)||!Number.isSafeInteger(total)||total<0||total>100000||
+   !Number.isSafeInteger(expectedTotal)||expectedTotal<0||!note||note.length>500)
+  return res.status(400).json({error:'Enter hub, valid total, current revision and adjustment note'});
  try{
   const result=await withTransaction(async c=>{
-   const {rows:[before]}=await c.query('SELECT total_quantity,redeemed_quantity FROM ezlink_inventory WHERE id=1 FOR UPDATE');
-   if(!before)throw new Error('NOT_READY');
-   if(before.total_quantity!==expectedTotal)throw new Error('STOCK_CHANGED');
-   if(total<before.redeemed_quantity)throw new Error('BELOW_REDEEMED');
-   if(total===before.total_quantity)throw new Error('NO_CHANGE');
-   await c.query('UPDATE ezlink_inventory SET total_quantity=$1,updated_at=now() WHERE id=1',[total]);
-   await c.query('INSERT INTO ezlink_inventory_audit(previous_total,new_total,actor,note) VALUES($1,$2,$3,$4)',[before.total_quantity,total,res.locals.admin.email,note]);
-   return {total,redeemed:before.redeemed_quantity,remaining:total-before.redeemed_quantity,delta:total-before.total_quantity,note};
+   await c.query('SELECT pg_advisory_xact_lock($1)',[7102027]);
+   const {rows:[global]}=await c.query('SELECT total_quantity,redeemed_quantity FROM ezlink_inventory WHERE id=1 FOR UPDATE');
+   const {rows:[hub]}=await c.query('SELECT allocated_quantity,redeemed_quantity FROM ezlink_hub_inventory WHERE site=$1 FOR UPDATE',[site]);
+   if(!global||!hub)throw new Error('NOT_READY');
+   if(hub.allocated_quantity!==expectedTotal)throw new Error('STOCK_CHANGED');
+   if(total<hub.redeemed_quantity)throw new Error('BELOW_REDEEMED');
+   const delta=total-hub.allocated_quantity;
+   if(!delta)throw new Error('NO_CHANGE');
+   // A local adjustment represents received/removed physical cards, not a transfer.
+   const globalTotal=global.total_quantity+delta;
+   if(globalTotal<global.redeemed_quantity||globalTotal<0||globalTotal>100000)throw new Error('INVALID_TOTAL');
+   await c.query('UPDATE ezlink_hub_inventory SET allocated_quantity=$2,updated_at=now() WHERE site=$1',[site,total]);
+   await c.query('UPDATE ezlink_inventory SET total_quantity=$1,updated_at=now() WHERE id=1',[globalTotal]);
+   await c.query(`INSERT INTO ezlink_hub_stock_audit(kind,to_site,delta,previous_total,new_total,actor,note)
+      VALUES('ADJUST',$1,$2,$3,$4,$5,$6)`,[site,delta,hub.allocated_quantity,total,res.locals.admin.email,note]);
+   return {site,total,remaining:total-hub.redeemed_quantity};
   });
   return res.json(result);
- }catch(e){
-  const reason=e instanceof Error?e.message:'';
-  if(reason==='STOCK_CHANGED')return res.status(409).json({error:'Shared stock changed since you opened this page. Refresh before editing to avoid overwriting another hub’s adjustment'});
-  if(reason==='BELOW_REDEEMED')return res.status(409).json({error:'Total cannot be lower than cards already issued'});
-  if(reason==='NO_CHANGE')return res.status(409).json({error:'Stock total has not changed'});
-  return res.status(503).json({error:'Inventory update unavailable; check migration 013'});
+ }catch(e){const reason=e instanceof Error?e.message:'';
+  return res.status(reason==='NOT_READY'?503:409).json({error:
+   reason==='STOCK_CHANGED'?'Stock changed at this hub. Refresh before editing':
+   reason==='BELOW_REDEEMED'?'Cannot lower stock below already issued cards':
+   reason==='NO_CHANGE'?'No stock change entered':
+   reason==='INVALID_TOTAL'?'Overall stock limit exceeded':'Hub inventory unavailable'});
+ }
+});
+ezlinkAdminRouter.post('/inventory/transfer',async(req,res)=>{
+ if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+ const {from,to,quantity,expectedFrom,expectedTo}=req.body||{};
+ const note=typeof req.body?.note==='string'?req.body.note.trim():'';
+ if(!['PDD','PS','UNALLOCATED'].includes(from)||!['PDD','PS'].includes(to)||from===to||
+   !Number.isSafeInteger(quantity)||quantity<=0||quantity>100000||
+   !Number.isSafeInteger(expectedFrom)||expectedFrom<0||
+   !Number.isSafeInteger(expectedTo)||expectedTo<0||!note||note.length>500)
+   return res.status(400).json({error:'Invalid source, destination, amount, revision or transfer note'});
+ try{
+  const result=await withTransaction(async c=>{
+   await c.query('SELECT pg_advisory_xact_lock($1)',[7102027]);
+   const {rows:[global]}=await c.query('SELECT total_quantity FROM ezlink_inventory WHERE id=1 FOR UPDATE');
+   const {rows}=await c.query('SELECT site,allocated_quantity,redeemed_quantity FROM ezlink_hub_inventory ORDER BY site FOR UPDATE');
+   if(!global||rows.length!==2)throw new Error('NOT_READY');
+   const hubs=Object.fromEntries(rows.map(r=>[r.site,r]));
+   const free=global.total_quantity-rows.reduce((sum,r)=>sum+r.allocated_quantity,0);
+   const source=from==='UNALLOCATED'?free:hubs[from].allocated_quantity-hubs[from].redeemed_quantity;
+   if(source!==expectedFrom||hubs[to].allocated_quantity!==expectedTo)throw new Error('STOCK_CHANGED');
+   if(source<quantity)throw new Error('INSUFFICIENT');
+   if(from!=='UNALLOCATED')await c.query('UPDATE ezlink_hub_inventory SET allocated_quantity=allocated_quantity-$2,updated_at=now() WHERE site=$1',[from,quantity]);
+   await c.query('UPDATE ezlink_hub_inventory SET allocated_quantity=allocated_quantity+$2,updated_at=now() WHERE site=$1',[to,quantity]);
+   await c.query(`INSERT INTO ezlink_hub_stock_audit(kind,from_site,to_site,delta,actor,note)
+      VALUES('TRANSFER',$1,$2,$3,$4,$5)`,[from,to,quantity,res.locals.admin.email,note]);
+   return {transferred:true,from,to,quantity};
+  });
+  return res.json(result);
+ }catch(e){const reason=e instanceof Error?e.message:'';
+  return res.status(reason==='NOT_READY'?503:409).json({error:
+   reason==='STOCK_CHANGED'?'Stock changed; refresh before transferring':
+   reason==='INSUFFICIENT'?'Insufficient unissued cards at source hub':'Unable to transfer stock'});
  }
 });
 ezlinkAdminRouter.post('/lookup',async(req,res)=>{
@@ -128,8 +172,10 @@ ezlinkAdminRouter.post('/redeem',async(req,res)=>{
    if(!siteAllowed(res.locals.admin,row.site))throw new Error('WRONG_SITE');
    if(row.redeemed_id)throw new Error('ALREADY_REDEEMED');
    if(row.status!=='claimed')throw new Error('DRAW_NOT_CLAIMED');
-   const stock=await c.query('UPDATE ezlink_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE id=1 AND redeemed_quantity<total_quantity RETURNING total_quantity-redeemed_quantity AS remaining');
-   if(!stock.rowCount)throw new Error('NO_EZLINK_STOCK');
+   const hub=await c.query('UPDATE ezlink_hub_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE site=$1 AND redeemed_quantity<allocated_quantity RETURNING allocated_quantity-redeemed_quantity AS remaining',[row.site]);
+   if(!hub.rowCount)throw new Error('NO_EZLINK_STOCK');
+   await c.query('UPDATE ezlink_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE id=1');
+   const stock=hub;
    await c.query(
     'INSERT INTO ezlink_redemptions(participant_id,draw_id,site,scenario,issued_by,booklet_17_verified,second_punch_confirmed) VALUES($1,$2,$3,$4,$5,true,true)',
     [row.participant_id,row.draw_id,row.site,scenario,res.locals.admin.email]);
