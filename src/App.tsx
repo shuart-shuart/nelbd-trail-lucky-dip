@@ -39,7 +39,8 @@ export default function App() {
                 </KioskLayout>
               }
             />
-            <Route path="/redeem" element={<KioskLayout><RedemptionChoicePage /></KioskLayout>} />
+            <Route path="/redeem" element={<Navigate to="/" replace />} />
+            <Route path="/welcome" element={<KioskLayout><WelcomePage /></KioskLayout>} />
             <Route path="/returning" element={<KioskLayout><ReturningRewardPage /></KioskLayout>} />
             <Route
               path="/details"
