@@ -2,7 +2,7 @@ import React,{useEffect,useState} from 'react';
 import {AdminLayout} from '../../components/admin/AdminLayout';
 
 type Scenario='8_only'|'17_fresh'|'17_returning';
-type Stock={total:number;redeemed:number;remaining:number};
+type Stock={total:number;redeemed:number;remaining:number;bySite:{PDD:{total:number;redeemed:number;remaining:number};PS:{total:number;redeemed:number;remaining:number}}};
 type Found={found:true;nickname:string;site:'PDD'|'PS';prizeName:string;ezlinkRedeemed:boolean;mobileNumber:string};
 type Draw={success:boolean;recovered?:boolean;prize?:{name:string};error?:string;ticketNumber?:string;voucherClaimToken?:string};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
@@ -16,14 +16,14 @@ const newTicket=(site:string)=>'NELBD-'+site+'-'+String(Math.floor(100000+Math.r
 export function AdminEzlinkPage(){
  const [scenario,setScenario]=useState<Scenario>('8_only'),[name,setName]=useState(''),[phone,setPhone]=useState(''),
   [site,setSite]=useState<'PDD'|'PS'>('PDD'),[checks,setChecks]=useState({stamps:false,punch1:false,punch2:false,first:false,card:false,punched:false}),
-  [stock,setStock]=useState<Stock|null>(null),[newTotal,setNewTotal]=useState(''),[stockNote,setStockNote]=useState(''),[superAdmin,setSuperAdmin]=useState(false),
+  [stock,setStock]=useState<Stock|null>(null),[superAdmin,setSuperAdmin]=useState(false),
   [found,setFound]=useState<Found|null>(null),[draw,setDraw]=useState<Draw|null>(null),
   [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),
   [history,setHistory]=useState<Array<{id:string;site:string;scenario:string;phoneLast4:string;redeemedAt:string;issuedBy:string}>>([]),
   [ticket,setTicket]=useState(()=>newTicket('PDD')),[grabEmail,setGrabEmail]=useState(''),[grabConfirmed,setGrabConfirmed]=useState(false);
  const refresh=async()=>{
   try{const [inventory,records]=await Promise.all([api<Stock>('/inventory'),api<typeof history>('/history')]);
-   setStock(inventory);setHistory(records);setNewTotal(String(inventory.total));}
+   setStock(inventory);setHistory(records);}
   catch(e){setError(e instanceof Error?e.message:'Unable to load ez-link inventory');}
  };
  useEffect(()=>{void refresh();fetch('/api/admin/me',{credentials:'same-origin'})
@@ -72,7 +72,7 @@ export function AdminEzlinkPage(){
   if(!window.confirm('CONFIRM: one physical ez-link card has been handed over, and hole punch 2 applied. This cannot be undone automatically.'))return;
   setBusy(true);setError('');
   try{await api('/redeem',{method:'POST',body:JSON.stringify({
-   scenario,mobileNumber:phoneValue,stampsVerified:true,secondPunchUnused:true,
+   scenario,mobileNumber:phoneValue,site,stampsVerified:true,secondPunchUnused:true,
    firstPunchPresent:scenario==='17_returning'?true:undefined,
    firstRewardCompleted:scenario==='17_fresh'?true:undefined,cardHandedOver:true,secondPunchApplied:true})});
    setNotice('ez-link card redemption successfully recorded. No additional Lucky Dip has been issued.');
@@ -80,12 +80,6 @@ export function AdminEzlinkPage(){
    await refresh();setScenario('8_only');setPhone('');setName('');setDraw(null);setTicket(newTicket(site));
   }catch(e){setError(e instanceof Error?e.message:'Unable to record card issuance. Check history before trying again');}
   finally{setBusy(false);}
- };
- const changeStock=async()=>{
-  if(!stock||!stockNote.trim()||Number(newTotal)===stock.total||!window.confirm('Change shared ez-link stock to '+newTotal+'? Note: '+stockNote.trim()))return;
-  setBusy(true);setError('');
-  try{await api('/inventory',{method:'PUT',body:JSON.stringify({total:Number(newTotal),expectedTotal:stock.total,note:stockNote.trim()})});setStockNote('');setNotice('Shared stock and adjustment note updated.');await refresh();}
-  catch(e){setError(e instanceof Error?e.message:'Unable to update stock');}finally{setBusy(false);}
  };
  const verifyCard=(scenario==='17_returning'?Boolean(found&&!found.ezlinkRedeemed):Boolean(draw?.success))&&checks.stamps&&checks.punch2&&checks.card&&checks.punched&&(scenario==='17_fresh'||checks.first);
  return <AdminLayout title="NELBD Quest · Reward Redemption" subtitle="8 stamps: Lucky Dip + Sticker · 17 stamps: ez-link card · one redemption per phone number">
@@ -99,14 +93,9 @@ export function AdminEzlinkPage(){
    </div>
    <p className="text-sm">Staff must inspect physical booklet before redemption. Hole punch 1 marks the 8-stamp reward; hole punch 2 marks the 17-stamp reward.</p>
    <div className="rounded-xl bg-[#F6F0FB] p-3 text-sm">
-    ez-link stock: <strong>{stock?.remaining??'—'} available</strong> · {stock?.redeemed??'—'} redeemed · {stock?.total??'—'} total
+    ez-link stock at {site}: <strong>{stock?.bySite[site]?.remaining??'—'} available</strong> · {stock?.bySite[site]?.redeemed??'—'} redeemed · {stock?.bySite[site]?.total??'—'} allocated
    </div>
-   {superAdmin&&<div className="flex flex-wrap gap-2 items-center text-sm">
-    <label className="font-medium">Total ez-link cards received</label>
-    <input className="border rounded-lg p-2 w-28" type="number" min={0} value={newTotal} onChange={e=>setNewTotal(e.target.value)} />
-    <label className="text-sm font-medium">Stock adjustment note (required)<input maxLength={500} value={stockNote} onChange={e=>setStockNote(e.target.value)} className="border rounded-lg p-2 block" placeholder="Reason for change"/></label>
-    <button disabled={busy||!/^\d+$/.test(newTotal)||!stockNote.trim()||!stock||Number(newTotal)<stock.redeemed||Number(newTotal)===stock.total} onClick={()=>void changeStock()} className="border rounded-lg px-3 py-2 disabled:opacity-50">Save stock + note</button>
-   </div>}
+   {superAdmin&&<p className="text-sm">Adjust PDD/PS stock and record transfers under Prize Inventory.</p>}
    {error&&<p role="alert" className="text-red-700 font-medium">{error}</p>}
    {notice&&<p role="status" className="bg-[#E9E0F4] rounded-lg p-3 text-sm">{notice}</p>}
    <div className="border-t pt-4 space-y-3">
@@ -115,6 +104,10 @@ export function AdminEzlinkPage(){
     <label className="block text-sm font-semibold">Singapore mobile number
      <div className="flex gap-2 items-center mt-1"><span>+65</span><input disabled={!!draw||busy} inputMode="numeric" maxLength={8} className="w-full border rounded-lg p-3" value={phone} onChange={e=>{setPhone(e.target.value.replace(/\D/g,'').slice(0,8));setFound(null);}} placeholder="81234567"/></div>
     </label>
+    {scenario==='17_returning'&&<label className="block text-sm font-semibold">Handover hub
+     <select className="block w-full border rounded-lg p-3 mt-1" value={site} onChange={e=>setSite(e.target.value as 'PDD'|'PS')}>
+      <option value="PDD">PDD — Innovation Hub</option><option value="PS">PS — Impact Hub</option>
+     </select></label>}
     {scenario!=='17_returning'&&<label className="block text-sm font-semibold">Hub
      <select disabled={!!draw||busy} className="block w-full border rounded-lg p-3 mt-1" value={site} onChange={e=>{const next=e.target.value as 'PDD'|'PS';setSite(next);setTicket(newTicket(next));}}>
       <option value="PDD">PDD — Innovation Hub</option><option value="PS">PS — Impact Hub</option>
@@ -153,7 +146,7 @@ export function AdminEzlinkPage(){
     <p className="text-sm">{scenario==='17_returning'?'Phone lookup must show an earlier Lucky Dip and no ez-link redemption.':'Complete Lucky Dip and punch 1 first.'}</p>
     <label className="flex gap-2"><input type="checkbox" checked={checks.card} onChange={e=>setCheck('card',e.target.checked)}/>I have handed over one ez-link card</label>
     <label className="flex gap-2"><input type="checkbox" checked={checks.punched} onChange={e=>setCheck('punched',e.target.checked)}/>I have applied the second hole punch</label>
-    <button disabled={busy||!validPhone||!verifyCard||!stock?.remaining} onClick={()=>void redeem()} className="bg-[#270342] text-white w-full rounded-xl p-3 font-bold disabled:opacity-40">Record ez-link Card Redemption</button>
+    <button disabled={busy||!validPhone||!verifyCard||!stock?.bySite[site]?.remaining} onClick={()=>void redeem()} className="bg-[#270342] text-white w-full rounded-xl p-3 font-bold disabled:opacity-40">Record ez-link Card Redemption</button>
    </div>}
   </section>
   <section className="mt-5 bg-white rounded-2xl p-4 sm:p-6">
