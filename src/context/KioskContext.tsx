@@ -179,6 +179,7 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
       settings,
       session,
       setSite,
+      setScenario,
       setParticipantDetails,
       setTicketNumber,
       setDrawResult,
