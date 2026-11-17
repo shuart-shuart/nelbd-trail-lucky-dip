@@ -5,9 +5,9 @@ import {executePostgresLuckyDipDraw} from './postgresDrawEngine.ts';
 export const ezlinkAdminRouter=Router();
 const validPhone=(v:unknown):string|null=>{
  if(typeof v!=='string'||v.length>24)return null;
- const digits=v.replace(/[\\s()-]/g,'');
+ const digits=v.replace(/[\s()-]/g,'');
  const mobile=digits.startsWith('+65')?digits:digits.startsWith('65')&&digits.length===10?'+'+digits:'+65'+digits;
- return /^\\+65[89]\\d{7}$/.test(mobile)?mobile:null;
+ return /^\+65[89]\d{7}$/.test(mobile)?mobile:null;
 };
 const siteAllowed=(admin:any,site:string)=>admin.role==='super_admin'||admin.site_access==='ALL'||admin.site_access===site;
 const enabled=()=>process.env.NELBD_EZLINK_ENABLED==='YES'&&process.env.DRAW_BACKEND==='postgres';
