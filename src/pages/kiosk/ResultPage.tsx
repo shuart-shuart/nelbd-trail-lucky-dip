@@ -62,6 +62,7 @@ export const ResultPage: React.FC = () => {
   }, [drawResult]);
 
   useEffect(() => {
+    if(session.scenario==='17_fresh')return;
     // Retain automatic kiosk reset countdown
     const timer = setInterval(() => {
       setCountdown((prev) => {
