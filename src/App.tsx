@@ -18,6 +18,7 @@ import { AdminHistory } from './pages/admin/AdminHistory';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminEmailCentre } from './pages/admin/AdminEmailCentre';
 import { AdminQuestPage } from './pages/admin/AdminQuestPage';
+import { AdminEzlinkPage } from './pages/admin/AdminEzlinkPage';
 import { QuestClaimPage } from './pages/QuestClaimPage';
 import { QuestVouchersPage } from './pages/QuestVouchersPage';
 
