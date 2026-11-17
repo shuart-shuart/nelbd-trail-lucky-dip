@@ -125,6 +125,10 @@ export function KioskProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const setScenario=useCallback((scenario:QuestScenario)=>{
+    setSession(prev=>({...prev,scenario}));
+  },[]);
+
   const setTicketNumber = useCallback((code: string) => {
     setSession((prev) => {
       if (prev.ticketNumber === code) return prev;
