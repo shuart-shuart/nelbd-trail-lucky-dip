@@ -28,7 +28,7 @@ export function EzlinkInventoryPanel(){
   if(!/^\d+$/.test(total)||!note.trim()||!stock||Number(total)===stock.total||
     !window.confirm('Change shared ez-link stock total from '+stock.total+' to '+total+'? Note: '+note.trim()))return;
   setBusy(true);setError('');setNotice('');
-  try{await call('/inventory',{method:'PUT',body:JSON.stringify({total:Number(total),note:note.trim()})});
+  try{await call('/inventory',{method:'PUT',body:JSON.stringify({total:Number(total),expectedTotal:stock.total,note:note.trim()})});
    setNotice('Shared ez-link stock updated and adjustment note saved.');setNote('');await refresh();}
   catch(e){setError(e instanceof Error?e.message:'Unable to update stock');}
   finally{setBusy(false);}
