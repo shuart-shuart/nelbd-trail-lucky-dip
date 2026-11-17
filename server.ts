@@ -1,5 +1,6 @@
 import express from 'express';
 import {questClaimRouter} from './src/server/questRoutes.ts';
+import {kioskQuestRewardsRouter} from './src/server/kioskQuestRewardsRoutes.ts';
 import {questViewRouter,questCallbackRouter} from './src/server/questFulfilmentRoutes.ts';
 import { checkPostgres } from './src/server/postgres.ts';
 import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
