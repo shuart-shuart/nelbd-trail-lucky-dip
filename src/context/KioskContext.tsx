@@ -20,6 +20,7 @@ interface KioskContextType {
   settings: Setting;
   session: KioskSessionData;
   setSite: (site: SiteLocation) => void;
+  setScenario: (scenario: QuestScenario) => void;
   setParticipantDetails: (nickname: string, mobileNumber: string, participantId?: string) => void;
   setTicketNumber: (code: string) => void;
   setDrawResult: (result: DrawResponse | null) => void;
