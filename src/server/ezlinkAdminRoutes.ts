@@ -152,8 +152,8 @@ ezlinkAdminRouter.post('/draw',async(req,res)=>{
  }catch{return res.status(503).json({error:'Lucky Dip unavailable; do not repeat issuance without checking history'});}
 });
 ezlinkAdminRouter.post('/redeem',async(req,res)=>{
- const scenario=req.body?.scenario, mobile=validPhone(req.body?.mobileNumber);
- if(!['17_fresh','17_returning'].includes(scenario)||!mobile||
+ const scenario=req.body?.scenario, mobile=validPhone(req.body?.mobileNumber),site=req.body?.site;
+ if(!['17_fresh','17_returning'].includes(scenario)||!mobile||!['PDD','PS'].includes(site)||!siteAllowed(res.locals.admin,site)||
     req.body?.stampsVerified!==true||req.body?.secondPunchUnused!==true||
     (scenario==='17_returning'&&req.body?.firstPunchPresent!==true)||
     (scenario==='17_fresh'&&req.body?.firstRewardCompleted!==true)||
@@ -169,17 +169,16 @@ ezlinkAdminRouter.post('/redeem',async(req,res)=>{
      LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id
      WHERE p.mobile_number=$1 FOR UPDATE OF p,d`,[mobile]);
    if(!row)throw new Error('NO_LUCKY_DIP');
-   if(!siteAllowed(res.locals.admin,row.site))throw new Error('WRONG_SITE');
    if(row.redeemed_id)throw new Error('ALREADY_REDEEMED');
    if(row.status!=='claimed')throw new Error('DRAW_NOT_CLAIMED');
-   const hub=await c.query('UPDATE ezlink_hub_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE site=$1 AND redeemed_quantity<allocated_quantity RETURNING allocated_quantity-redeemed_quantity AS remaining',[row.site]);
+   const hub=await c.query('UPDATE ezlink_hub_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE site=$1 AND redeemed_quantity<allocated_quantity RETURNING allocated_quantity-redeemed_quantity AS remaining',[site]);
    if(!hub.rowCount)throw new Error('NO_EZLINK_STOCK');
    await c.query('UPDATE ezlink_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE id=1');
    const stock=hub;
    await c.query(
     'INSERT INTO ezlink_redemptions(participant_id,draw_id,site,scenario,issued_by,booklet_17_verified,second_punch_confirmed) VALUES($1,$2,$3,$4,$5,true,true)',
-    [row.participant_id,row.draw_id,row.site,scenario,res.locals.admin.email]);
-   return {recorded:true,remaining:stock.rows[0].remaining,site:row.site};
+    [row.participant_id,row.draw_id,site,scenario,res.locals.admin.email]);
+   return {recorded:true,remaining:stock.rows[0].remaining,site};
   });
   return res.json(result);
  }catch(e){const msg=e instanceof Error?e.message:'';
