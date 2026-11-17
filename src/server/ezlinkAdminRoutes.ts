@@ -42,13 +42,16 @@ ezlinkAdminRouter.get('/inventory/adjustments',async(_req,res)=>{
 ezlinkAdminRouter.put('/inventory',async(req,res)=>{
  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
  const total=req.body?.total;
+ const expectedTotal=req.body?.expectedTotal;
  const note=typeof req.body?.note==='string'?req.body.note.trim():'';
  if(!Number.isSafeInteger(total)||total<0||total>100000)return res.status(400).json({error:'Enter a valid total stock'});
+ if(!Number.isSafeInteger(expectedTotal)||expectedTotal<0)return res.status(400).json({error:'Refresh the stock total before editing'});
  if(!note||note.length>500)return res.status(400).json({error:'Enter a stock adjustment note (1–500 characters)'});
  try{
   const result=await withTransaction(async c=>{
    const {rows:[before]}=await c.query('SELECT total_quantity,redeemed_quantity FROM ezlink_inventory WHERE id=1 FOR UPDATE');
    if(!before)throw new Error('NOT_READY');
+   if(before.total_quantity!==expectedTotal)throw new Error('STOCK_CHANGED');
    if(total<before.redeemed_quantity)throw new Error('BELOW_REDEEMED');
    if(total===before.total_quantity)throw new Error('NO_CHANGE');
    await c.query('UPDATE ezlink_inventory SET total_quantity=$1,updated_at=now() WHERE id=1',[total]);
@@ -58,6 +61,7 @@ ezlinkAdminRouter.put('/inventory',async(req,res)=>{
   return res.json(result);
  }catch(e){
   const reason=e instanceof Error?e.message:'';
+  if(reason==='STOCK_CHANGED')return res.status(409).json({error:'Shared stock changed since you opened this page. Refresh before editing to avoid overwriting another hub’s adjustment'});
   if(reason==='BELOW_REDEEMED')return res.status(409).json({error:'Total cannot be lower than cards already issued'});
   if(reason==='NO_CHANGE')return res.status(409).json({error:'Stock total has not changed'});
   return res.status(503).json({error:'Inventory update unavailable; check migration 013'});
