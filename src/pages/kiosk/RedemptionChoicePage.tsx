@@ -33,7 +33,6 @@ export const RedemptionChoicePage:React.FC=()=>{
   {choice!=='8_only'&&available===false&&<p role="status" className="text-sm font-semibold">ez-link redemptions are unavailable until card stock and staff access are configured. Please ask booth staff.</p>}
   <button onClick={continueToDetails} disabled={choice!=='8_only'&&(available!==true||!configured)}
    className="w-full rounded-xl bg-nel-violet text-nel-pink p-4 font-bold text-xl disabled:opacity-50">CONTINUE</button>
-  <button onClick={()=>navigate('/')} className="w-full text-sm underline py-2">Back</button>
   <p className="sr-only">Current hub {session.site}</p>
  </div>;
 };
