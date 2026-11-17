@@ -25,7 +25,10 @@ ezlinkAdminRouter.get('/inventory',async(_req,res)=>{
   ]);
   if(!stock.rows[0])return res.status(503).json({error:'ez-link migration has not been applied'});
   const bySite={PDD:0,PS:0};
-  for(const row of sites.rows)if(row.site==='PDD'||row.site==='PS')bySite[row.site]=Number(row.redeemed);
+  for(const row of sites.rows){
+   if(row.site==='PDD')bySite.PDD=Number(row.redeemed);
+   if(row.site==='PS')bySite.PS=Number(row.redeemed);
+  }
   return res.json({...stock.rows[0],bySite});
  }catch{return res.status(503).json({error:'ez-link inventory unavailable'});}
 });
