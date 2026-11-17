@@ -173,6 +173,9 @@ export const ResultPage: React.FC = () => {
           {ticketNumber && <p className="font-dm font-medium text-nel-violet/80">Ticket: {ticketNumber}</p>}
         </div>
 
+        {session.scenario==='17_fresh'&&<div className="w-full mt-3">
+          <EzlinkCompletion scenario="17_fresh" mobile={session.mobileNumber}/>
+        </div>}
         <p className="kiosk-result-disclaimer font-dm text-nel-violet">
           Prizes are subject to availability. Limited to one redemption per person.
         </p>
