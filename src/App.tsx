@@ -7,6 +7,8 @@ import { AdminAuthGuard } from './components/admin/AdminAuthGuard';
 
 // Kiosk Screens
 import { WelcomePage } from './pages/kiosk/WelcomePage';
+import { RedemptionChoicePage } from './pages/kiosk/RedemptionChoicePage';
+import { ReturningRewardPage } from './pages/kiosk/ReturningRewardPage';
 import { DetailsPage } from './pages/kiosk/DetailsPage';
 import { DrawPage } from './pages/kiosk/DrawPage';
 import { ResultPage } from './pages/kiosk/ResultPage';
