@@ -16,7 +16,7 @@ const newTicket=(site:string)=>'NELBD-'+site+'-'+String(Math.floor(100000+Math.r
 export function AdminEzlinkPage(){
  const [scenario,setScenario]=useState<Scenario>('8_only'),[name,setName]=useState(''),[phone,setPhone]=useState(''),
   [site,setSite]=useState<'PDD'|'PS'>('PDD'),[checks,setChecks]=useState({stamps:false,punch1:false,punch2:false,first:false,card:false,punched:false}),
-  [stock,setStock]=useState<Stock|null>(null),[newTotal,setNewTotal]=useState(''),[superAdmin,setSuperAdmin]=useState(false),
+  [stock,setStock]=useState<Stock|null>(null),[newTotal,setNewTotal]=useState(''),[stockNote,setStockNote]=useState(''),[superAdmin,setSuperAdmin]=useState(false),
   [found,setFound]=useState<Found|null>(null),[draw,setDraw]=useState<Draw|null>(null),
   [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),
   [history,setHistory]=useState<Array<{id:string;site:string;scenario:string;phoneLast4:string;redeemedAt:string;issuedBy:string}>>([]),
@@ -82,9 +82,9 @@ export function AdminEzlinkPage(){
   finally{setBusy(false);}
  };
  const changeStock=async()=>{
-  if(!window.confirm('Set total ez-link stock to '+newTotal+'? This changes available stock, not existing redemptions.'))return;
+  if(!stock||!stockNote.trim()||Number(newTotal)===stock.total||!window.confirm('Change shared ez-link stock to '+newTotal+'? Note: '+stockNote.trim()))return;
   setBusy(true);setError('');
-  try{await api('/inventory',{method:'PUT',body:JSON.stringify({total:Number(newTotal)})});setNotice('Stock total updated.');await refresh();}
+  try{await api('/inventory',{method:'PUT',body:JSON.stringify({total:Number(newTotal),expectedTotal:stock.total,note:stockNote.trim()})});setStockNote('');setNotice('Shared stock and adjustment note updated.');await refresh();}
   catch(e){setError(e instanceof Error?e.message:'Unable to update stock');}finally{setBusy(false);}
  };
  const verifyCard=(scenario==='17_returning'?Boolean(found&&!found.ezlinkRedeemed):Boolean(draw?.success))&&checks.stamps&&checks.punch2&&checks.card&&checks.punched&&(scenario==='17_fresh'||checks.first);
@@ -104,7 +104,8 @@ export function AdminEzlinkPage(){
    {superAdmin&&<div className="flex flex-wrap gap-2 items-center text-sm">
     <label className="font-medium">Total ez-link cards received</label>
     <input className="border rounded-lg p-2 w-28" type="number" min={0} value={newTotal} onChange={e=>setNewTotal(e.target.value)} />
-    <button disabled={busy||!/^\d+$/.test(newTotal)} onClick={()=>void changeStock()} className="border rounded-lg px-3 py-2 disabled:opacity-50">Save stock total</button>
+    <label className="text-sm font-medium">Stock adjustment note (required)<input maxLength={500} value={stockNote} onChange={e=>setStockNote(e.target.value)} className="border rounded-lg p-2 block" placeholder="Reason for change"/></label>
+    <button disabled={busy||!/^\d+$/.test(newTotal)||!stockNote.trim()||!stock||Number(newTotal)<stock.redeemed||Number(newTotal)===stock.total} onClick={()=>void changeStock()} className="border rounded-lg px-3 py-2 disabled:opacity-50">Save stock + note</button>
    </div>}
    {error&&<p role="alert" className="text-red-700 font-medium">{error}</p>}
    {notice&&<p role="status" className="bg-[#E9E0F4] rounded-lg p-3 text-sm">{notice}</p>}

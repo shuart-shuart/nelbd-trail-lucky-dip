@@ -19,26 +19,56 @@ ezlinkAdminRouter.use((_req,res,next)=>{
 });
 ezlinkAdminRouter.get('/inventory',async(_req,res)=>{
  try{
-  const {rows}=await getPool().query('SELECT total_quantity AS "total",redeemed_quantity AS "redeemed",(total_quantity-redeemed_quantity) AS "remaining" FROM ezlink_inventory WHERE id=1');
-  if(!rows[0])return res.status(503).json({error:'ez-link migration has not been applied'});
-  return res.json(rows[0]);
+  const [stock,sites]=await Promise.all([
+   getPool().query('SELECT total_quantity AS "total",redeemed_quantity AS "redeemed",(total_quantity-redeemed_quantity) AS "remaining" FROM ezlink_inventory WHERE id=1'),
+   getPool().query("SELECT site,count(*)::int AS redeemed FROM ezlink_redemptions GROUP BY site")
+  ]);
+  if(!stock.rows[0])return res.status(503).json({error:'ez-link migration has not been applied'});
+  const bySite={PDD:0,PS:0};
+  for(const row of sites.rows){
+   if(row.site==='PDD')bySite.PDD=Number(row.redeemed);
+   if(row.site==='PS')bySite.PS=Number(row.redeemed);
+  }
+  return res.json({...stock.rows[0],bySite});
  }catch{return res.status(503).json({error:'ez-link inventory unavailable'});}
+});
+ezlinkAdminRouter.get('/inventory/adjustments',async(_req,res)=>{
+ if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+ try{
+  const {rows}=await getPool().query(`SELECT id,previous_total AS "previousTotal",
+   new_total AS "newTotal",new_total-previous_total AS delta,
+   note,actor,happened_at AS "happenedAt"
+   FROM ezlink_inventory_audit ORDER BY happened_at DESC,id DESC LIMIT 100`);
+  return res.json(rows);
+ }catch{return res.status(503).json({error:'ez-link stock adjustment history unavailable; check migration 013'});}
 });
 ezlinkAdminRouter.put('/inventory',async(req,res)=>{
  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
  const total=req.body?.total;
+ const expectedTotal=req.body?.expectedTotal;
+ const note=typeof req.body?.note==='string'?req.body.note.trim():'';
  if(!Number.isSafeInteger(total)||total<0||total>100000)return res.status(400).json({error:'Enter a valid total stock'});
+ if(!Number.isSafeInteger(expectedTotal)||expectedTotal<0)return res.status(400).json({error:'Refresh the stock total before editing'});
+ if(!note||note.length>500)return res.status(400).json({error:'Enter a stock adjustment note (1–500 characters)'});
  try{
   const result=await withTransaction(async c=>{
    const {rows:[before]}=await c.query('SELECT total_quantity,redeemed_quantity FROM ezlink_inventory WHERE id=1 FOR UPDATE');
    if(!before)throw new Error('NOT_READY');
+   if(before.total_quantity!==expectedTotal)throw new Error('STOCK_CHANGED');
    if(total<before.redeemed_quantity)throw new Error('BELOW_REDEEMED');
+   if(total===before.total_quantity)throw new Error('NO_CHANGE');
    await c.query('UPDATE ezlink_inventory SET total_quantity=$1,updated_at=now() WHERE id=1',[total]);
-   await c.query('INSERT INTO ezlink_inventory_audit(previous_total,new_total,actor) VALUES($1,$2,$3)',[before.total_quantity,total,res.locals.admin.email]);
-   return {total,redeemed:before.redeemed_quantity,remaining:total-before.redeemed_quantity};
+   await c.query('INSERT INTO ezlink_inventory_audit(previous_total,new_total,actor,note) VALUES($1,$2,$3,$4)',[before.total_quantity,total,res.locals.admin.email,note]);
+   return {total,redeemed:before.redeemed_quantity,remaining:total-before.redeemed_quantity,delta:total-before.total_quantity,note};
   });
   return res.json(result);
- }catch(e){return res.status(409).json({error:e instanceof Error&&e.message==='BELOW_REDEEMED'?'Total cannot be lower than cards already issued':'Inventory update unavailable'});}
+ }catch(e){
+  const reason=e instanceof Error?e.message:'';
+  if(reason==='STOCK_CHANGED')return res.status(409).json({error:'Shared stock changed since you opened this page. Refresh before editing to avoid overwriting another hub’s adjustment'});
+  if(reason==='BELOW_REDEEMED')return res.status(409).json({error:'Total cannot be lower than cards already issued'});
+  if(reason==='NO_CHANGE')return res.status(409).json({error:'Stock total has not changed'});
+  return res.status(503).json({error:'Inventory update unavailable; check migration 013'});
+ }
 });
 ezlinkAdminRouter.post('/lookup',async(req,res)=>{
  const mobile=validPhone(req.body?.mobileNumber);
