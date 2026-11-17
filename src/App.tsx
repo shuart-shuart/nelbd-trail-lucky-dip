@@ -93,6 +93,7 @@ export default function App() {
             <Route path="/admin/grab-vouchers" element={<AdminAuthGuard><AdminEmailCentre /></AdminAuthGuard>} />
             <Route path="/admin/email" element={<Navigate to="/admin/grab-vouchers" replace />} />
             <Route path="/admin/quest" element={<AdminAuthGuard><AdminQuestPage /></AdminAuthGuard>} />
+            <Route path="/admin/ezlink" element={<AdminAuthGuard><AdminEzlinkPage /></AdminAuthGuard>} />
             <Route
               path="/admin/settings"
               element={
