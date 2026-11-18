@@ -43,8 +43,8 @@ async function verifyPin(pin:unknown):Promise<boolean>{
 kioskQuestRewardsRouter.get('/status',async(_req,res)=>{
  try{const [stock,pin]=await Promise.all([
   getPool().query(goodieBagMode()? 'SELECT site,(total_quantity-redeemed_quantity)>0 AS available FROM goodie_bag_inventory':'SELECT site,(allocated_quantity-redeemed_quantity)>0 AS available FROM ezlink_hub_inventory'),
-  getPool().query('SELECT 1 FROM ezlink_staff_config WHERE id=1')]);
-  return res.json({available:stock.rows.some(row=>row.available),bySite:Object.fromEntries(stock.rows.map(row=>[row.site,Boolean(row.available)])),staffPinConfigured:Boolean(pin.rowCount),rewardName:goodieBagMode()?'NELBD Goodie Bag':'ez-link Card'});
+  goodieBagMode()?Promise.resolve({rowCount:0}):getPool().query('SELECT 1 FROM ezlink_staff_config WHERE id=1')]);
+  return res.json({available:stock.rows.some(row=>row.available),bySite:Object.fromEntries(stock.rows.map(row=>[row.site,Boolean(row.available)])),staffPinConfigured:goodieBagMode()||Boolean(pin.rowCount),staffPinRequired:!goodieBagMode(),rewardName:goodieBagMode()?'NELBD Goodie Bag':'ez-link Card'});
  }catch{return res.status(503).json({error:'Reward status unavailable'});}
 });
 /** Phone lookup gives only a minimal eligibility flag, not participant PII. */
@@ -60,15 +60,19 @@ kioskQuestRewardsRouter.post('/lookup',async(req,res)=>{
   return res.json({eligible:r.status==='claimed',reason:r.status==='claimed'?'READY':'LUCKY_DIP_NOT_CLAIMED'});
  }catch{return res.status(503).json({error:'Unable to verify earlier redemption'});}
 });
-/** Staff PIN authorises the physical handover; server enforces eligibility, uniqueness and local stock. */
+/** Goodie Bag handover is a staff-confirmed physical action with no PIN. Legacy card mode retains its PIN. Server still enforces eligibility, unique claims and hub stock. */
 kioskQuestRewardsRouter.post('/redeem',async(req,res)=>{
  const scenario=req.body?.scenario,mobile=normalizeMobile(req.body?.mobileNumber),site=req.body?.site;
  if(!['17_fresh','17_returning'].includes(scenario)||!mobile||!['PDD','PS'].includes(site))
   return res.status(400).json({error:'Invalid redemption details or hub'});
  if(!limit(req,'redeem'))return res.status(429).json({error:'Too many attempts. Ask an administrator for help'});
- let verified=false;
- try{verified=await verifyPin(req.body?.staffPin);}catch{return res.status(503).json({error:'Staff verification unavailable'});}
- if(!verified)return res.status(403).json({error:'Invalid staff PIN or staff PIN not configured'});
+ if(goodieBagMode()){
+  if(req.body?.handoverConfirmed!==true)return res.status(400).json({error:'Staff must confirm the physical Goodie Bag handover'});
+ }else{
+  let verified=false;
+  try{verified=await verifyPin(req.body?.staffPin);}catch{return res.status(503).json({error:'Staff verification unavailable'});}
+  if(!verified)return res.status(403).json({error:'Invalid staff PIN or staff PIN not configured'});
+ }
  try{
   const recorded=await withTransaction(async c=>{
    await c.query('SELECT pg_advisory_xact_lock($1)',[7102027]);
@@ -84,7 +88,7 @@ kioskQuestRewardsRouter.post('/redeem',async(req,res)=>{
    if(!stock.rowCount)throw new Error('OUT_OF_STOCK');
    if(useBag){
     await c.query('INSERT INTO goodie_bag_redemptions(participant_id,draw_id,site,scenario,issued_by) VALUES($1,$2,$3,$4,$5)',
-      [r.participant_id,r.draw_id,site,scenario,'kiosk_staff_pin']);
+      [r.participant_id,r.draw_id,site,scenario,'kiosk_staff_confirmation']);
    }else{
     await c.query('UPDATE ezlink_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE id=1');
     await c.query('INSERT INTO ezlink_redemptions(participant_id,draw_id,site,scenario,issued_by,booklet_17_verified,second_punch_confirmed) VALUES($1,$2,$3,$4,$5,true,true)',
