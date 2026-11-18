@@ -39,37 +39,51 @@ export function DailyDrawsByHubChart(){
     </button>)}
    </div>
   </div>
-  <div className="flex flex-wrap gap-x-5 gap-y-2 mt-4 text-sm">
-   <span className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-sm bg-[#7716B5]"/>PDD Innovation Hub <strong>{pdd}</strong></span>
-   <span className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-sm bg-[#FF8DC6] border border-[#270342]/30"/>PS Impact Hub <strong>{ps}</strong></span>
-   <span className="text-[#756782]">Combined: <strong className="text-[#270342]">{pdd+ps}</strong></span>
+  <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4" aria-label="Draw totals for selected period">
+   <div className="rounded-xl border border-[#E8DEF1] bg-[#F8F4FC] p-2.5 sm:p-3">
+    <p className="text-[11px] sm:text-xs text-[#756782] flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#7716B5]"/>PDD</p>
+    <p className="text-xl sm:text-2xl font-bold font-mono tabular-nums">{pdd.toLocaleString('en-SG')}</p>
+   </div>
+   <div className="rounded-xl border border-[#E8DEF1] bg-[#F8F4FC] p-2.5 sm:p-3">
+    <p className="text-[11px] sm:text-xs text-[#756782] flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#FF8DC6] border border-[#270342]/30"/>PS</p>
+    <p className="text-xl sm:text-2xl font-bold font-mono tabular-nums">{ps.toLocaleString('en-SG')}</p>
+   </div>
+   <div className="rounded-xl border border-[#E8DEF1] bg-[#F8F4FC] p-2.5 sm:p-3">
+    <p className="text-[11px] sm:text-xs text-[#756782]">Both hubs</p>
+    <p className="text-xl sm:text-2xl font-bold font-mono tabular-nums">{(pdd+ps).toLocaleString('en-SG')}</p>
+   </div>
   </div>
   {error?<p className="mt-4 text-sm text-red-700" role="alert">{error}</p>:loading&&rows.length===0?
    <p className="mt-5 text-sm" role="status">Loading daily draws…</p>:
    <div className="mt-4">
     <div className="overflow-x-auto" tabIndex={0} aria-label="Scrollable chart showing daily draws at both hubs">
-     <div style={{minWidth:Math.max(500,rows.length*32)}} className="relative">
+     <div style={{minWidth:Math.max(500,rows.length*58)}} className="relative">
       <div className="h-[212px] relative border-b border-[#D9CBE5]">
        {[0,0.25,0.5,0.75,1].map(frac=><div key={frac}
         className="absolute w-full border-t border-[#EAE2F1]" style={{bottom:(frac*100)+'%'}}>
          <span className="absolute left-0 -top-3 text-[10px] text-[#76678A] bg-white pr-1">{Math.round(max*frac)}</span>
         </div>)}
        <div className="absolute inset-0 flex items-end pl-8 gap-1">
-        {rows.map(row=><div key={row.date} className="flex-1 min-w-[22px] h-full flex items-end justify-center gap-[2px]" title={row.date+': PDD '+row.pdd+'; PS '+row.ps}>
-         <div className="w-[45%] max-w-5 bg-[#7716B5] rounded-t-sm" style={{height:(row.pdd/max*100)+'%'}}/>
-         <div className="w-[45%] max-w-5 bg-[#FF8DC6] border border-[#270342]/20 rounded-t-sm" style={{height:(row.ps/max*100)+'%'}}/>
+        {rows.map(row=><div key={row.date} className="flex-1 min-w-[46px] h-full flex items-end justify-center gap-1" title={row.date+': PDD '+row.pdd+'; PS '+row.ps}>
+         {(['pdd','ps'] as const).map(hub=><div key={hub} className="relative w-[44%] max-w-7 h-[82%] flex items-end justify-center">
+          <div className={'w-full relative rounded-t-sm '+(hub==='pdd'?'bg-[#7716B5]':'bg-[#FF8DC6] border border-[#270342]/20')}
+           style={{height:row[hub]===0?'0px':Math.max(2,row[hub]/max*100)+'%'}}>
+           {row[hub]>0&&<span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-bold font-mono tabular-nums text-[#270342] whitespace-nowrap">{row[hub]}</span>}
+          </div>
+          {row[hub]===0&&<span className="absolute bottom-0 text-[10px] font-semibold text-[#76678A]">0</span>}
+         </div>)}
         </div>)}
        </div>
       </div>
       <div className="flex pl-8 gap-1 pt-2">
-       {rows.map((row,i)=><div key={row.date} className="flex-1 min-w-[22px] text-[10px] text-[#756782] text-center whitespace-nowrap">
+       {rows.map((row,i)=><div key={row.date} className="flex-1 min-w-[46px] text-[10px] text-[#756782] text-center whitespace-nowrap">
         {rows.length<=14||i%Math.ceil(rows.length/12)===0||i===rows.length-1?label(row.date):'\u00a0'}
        </div>)}
       </div>
      </div>
     </div>
     {rows.every(r=>r.pdd===0&&r.ps===0)&&<p className="text-sm text-[#756782] mt-3">No qualifying draws in this period.</p>}
-    <p className="text-[11px] text-[#756782] mt-2">Scroll horizontally for more days. Updated approximately every minute.</p>
+    <p className="text-[11px] text-[#756782] mt-2">Numbers above each bar are the exact daily counts (PDD purple, PS pink). Scroll horizontally for more days. Updated approximately every minute.</p>
     <table className="sr-only">
      <caption>Accessible daily draw counts by hub, Singapore time</caption>
      <thead><tr><th>Date</th><th>PDD</th><th>PS</th><th>Total</th></tr></thead>
