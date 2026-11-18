@@ -59,8 +59,10 @@ export function GoodieBagInventoryPanel(){
    </div>)}
   </div>
   {superAdmin&&<>
+   <details className="border-t pt-3 space-y-2">
+    <summary className="cursor-pointer font-bold py-2">Adjust Goodie Bag stock</summary>
+    <p className="text-xs text-[#756782] mb-2">Update verified physical quantities at one hub. Every change requires a reason and is audited.</p>
    <div className="border-t pt-3 space-y-2">
-    <h3 className="font-bold">Adjust Goodie Bag stock</h3>
     <label className="block text-sm">Hub
      <select className="block w-full border rounded-lg p-2" value={site} onChange={e=>{const s=e.target.value as Site;setSite(s);setTotal(String(stock?.[s].total??0));setNote('')}}>
       <option value="PDD">PDD Innovation Hub</option><option value="PS">PS Impact Hub</option>
@@ -71,6 +73,7 @@ export function GoodieBagInventoryPanel(){
      <textarea className="block w-full border rounded-lg p-2" maxLength={500} value={note} onChange={e=>setNote(e.target.value)}/></label>
     <button className="rounded-xl bg-[#270342] text-white px-4 py-3 disabled:opacity-40" disabled={busy||!stock||!note.trim()||!/^\d+$/.test(total)||Number(total)<stock[site].redeemed||Number(total)===stock[site].total} onClick={()=>void save()}>Save stock adjustment</button>
    </div>
+   </details>
    <div className="border-t pt-3 space-y-2">
     <h3 className="font-bold">Staff handover PIN</h3>
     <p className="text-xs">Status: {pinConfigured?'Configured':'Not configured'}. Enter a new PIN only when changing it.</p>
