@@ -97,16 +97,16 @@ export function AdminEzlinkPage(){
   <section className="bg-white rounded-2xl p-4 sm:p-6 text-[#270342] space-y-4">
    <h2 className="font-bold text-lg">Choose redemption scenario</h2>
    <div className="grid gap-2 sm:grid-cols-3">
-    {([['8_only','1. 8 stamps only','Lucky Dip + Sticker'],['17_fresh','2. 17 stamps · fresh booklet','Both rewards'],['17_returning','3. 17 stamps · returning','ez-link card only']] as const).map(([key,title,desc])=>
+    {([['8_only','1. 8 stamps only','Lucky Dip + Sticker'],['17_fresh','2. 17 stamps · fresh booklet','Both rewards'],['17_returning','3. 17 stamps · returning','17-stamp reward at kiosk']] as const).map(([key,title,desc])=>
      <button key={key} onClick={()=>reset(key)} className={'rounded-xl text-left border-2 p-3 '+(scenario===key?'border-[#270342] bg-[#F6F0FB]':'border-[#E8DDED]')}>
       <strong className="block">{title}</strong><span className="text-sm">{desc}</span>
      </button>)}
    </div>
    <p className="text-sm">Staff must inspect physical booklet before redemption. Hole punch 1 marks the 8-stamp reward; hole punch 2 marks the 17-stamp reward.</p>
-   <div className="rounded-xl bg-[#F6F0FB] p-3 text-sm">
+   {!goodieMode&&<div className="rounded-xl bg-[#F6F0FB] p-3 text-sm">
     ez-link stock at {site}: <strong>{stock?.bySite[site]?.remaining??'—'} available</strong> · {stock?.bySite[site]?.redeemed??'—'} redeemed · {stock?.bySite[site]?.total??'—'} allocated
-   </div>
-   {superAdmin&&<p className="text-sm">Adjust PDD/PS stock and record transfers under Prize Inventory.</p>}
+   </div>}
+   {superAdmin&&<p className="text-sm">Manage 17-stamp reward inventory under Prize Inventory.</p>}
    {error&&<p role="alert" className="text-red-700 font-medium">{error}</p>}
    {notice&&<p role="status" className="bg-[#E9E0F4] rounded-lg p-3 text-sm">{notice}</p>}
    <div className="border-t pt-4 space-y-3">
