@@ -171,3 +171,8 @@ export async function setPostgresDrawReview(id:string,classification:'test'|'err
   method:'PUT',body:JSON.stringify({classification,note})
  });
 }
+
+export interface DailyDrawCount {date:string;pdd:number;ps:number}
+export function getPostgresDailyDraws(period:'7'|'14'|'30'|'all'='30'):Promise<DailyDrawCount[]> {
+ return json('/draws/daily?period='+encodeURIComponent(period));
+}
