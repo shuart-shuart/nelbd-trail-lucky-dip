@@ -327,6 +327,46 @@ postgresAdminRouter.get('/draws/daily',async(req,res)=>{
   return res.status(503).json({error:'Daily draw summary unavailable'});
  }
 });
+/** Completed Goodie Bag handovers by Singapore calendar day and hub.
+ * Uses the dedicated reward ledger, never historical ez-link redemptions.
+ * Separate from Lucky Dip draw counts; no double-counting.
+ */
+postgresAdminRouter.get('/goodie-bag/daily',async(req,res)=>{
+ const period=String(req.query.period||'30');
+ if(!['7','14','30','all'].includes(period))
+  return res.status(400).json({error:'Invalid chart period'});
+ if(process.env.NELBD_GOODIE_BAG_ENABLED!=='YES')
+  return res.status(423).json({error:'Goodie Bag reward is not enabled'});
+ try{
+  const {rows}=await getPool().query(`
+   WITH limits AS (
+     SELECT (now() AT TIME ZONE 'Asia/Singapore')::date AS today,
+       (SELECT min((redeemed_at AT TIME ZONE 'Asia/Singapore')::date)
+        FROM goodie_bag_redemptions) AS first_day
+   ), days AS (
+     SELECT generate_series(
+       CASE WHEN $1::boolean THEN coalesce(first_day,today)
+        ELSE today-($2::int-1) END,
+       today, interval '1 day')::date AS day
+     FROM limits
+   ), counts AS (
+     SELECT (redeemed_at AT TIME ZONE 'Asia/Singapore')::date AS day,
+       site,count(*)::int AS total
+     FROM goodie_bag_redemptions
+     GROUP BY 1,2
+   )
+   SELECT to_char(days.day,'YYYY-MM-DD') AS date,
+     coalesce(max(counts.total) FILTER (WHERE counts.site='PDD'),0)::int AS pdd,
+     coalesce(max(counts.total) FILTER (WHERE counts.site='PS'),0)::int AS ps
+   FROM days LEFT JOIN counts ON counts.day=days.day
+   GROUP BY days.day ORDER BY days.day
+  `,[period==='all',period==='all'?30:Number(period)]);
+  res.setHeader('Cache-Control','no-store, private');
+  return res.json(rows);
+ }catch{
+  return res.status(503).json({error:'Daily Goodie Bag redemptions unavailable'});
+ }
+});
 postgresAdminRouter.get('/draws',async (req,res)=>{
   try {
     const limit=Math.min(500,Math.max(1,Number(req.query.limit)||50));
