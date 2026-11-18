@@ -1,10 +1,11 @@
 import React,{useEffect,useMemo,useState} from 'react';
-import {getPostgresDailyDraws,type DailyDrawCount} from '../../api/postgresAdminClient';
+import {getPostgresDailyDraws,getPostgresDailyGoodieBags,type DailyDrawCount} from '../../api/postgresAdminClient';
 
 type Period='7'|'14'|'30'|'all';
 const periods:Period[]=['7','14','30','all'];
 const label=(d:string)=>d.slice(8,10)+'/'+d.slice(5,7);
-export function DailyDrawsByHubChart(){
+export function DailyDrawsByHubChart({kind='draws'}:{kind?:'draws'|'goodie-bags'}){
+ const goodie=kind==='goodie-bags';
  const [period,setPeriod]=useState<Period>('30');
  const [rows,setRows]=useState<DailyDrawCount[]>([]);
  const [loading,setLoading]=useState(true);
@@ -13,7 +14,7 @@ export function DailyDrawsByHubChart(){
   let active=true;
   const load=async()=>{
    try{
-    const data=await getPostgresDailyDraws(period);
+    const data=await (goodie?getPostgresDailyGoodieBags(period):getPostgresDailyDraws(period));
     if(active){setRows([...data].sort((a,b)=>b.date.localeCompare(a.date)));setError('');}
    }catch(e){
     if(active)setError(e instanceof Error?e.message:'Unable to load daily draw counts');
@@ -23,14 +24,14 @@ export function DailyDrawsByHubChart(){
   void load();
   const timer=setInterval(()=>void load(),60000);
   return()=>{active=false;clearInterval(timer);};
- },[period]);
+ },[period,goodie]);
  const max=useMemo(()=>Math.max(1,...rows.map(r=>Math.max(r.pdd,r.ps))),[rows]);
  const pdd=rows.reduce((sum,r)=>sum+r.pdd,0),ps=rows.reduce((sum,r)=>sum+r.ps,0);
- return <section className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl p-4 sm:p-5 mb-6 shadow-sm text-[#270342]" aria-label="Daily Lucky Dip draws by hub">
+ return <section className="bg-white border border-[#E8DEF1] rounded-2xl sm:rounded-3xl p-4 sm:p-5 mb-6 shadow-sm text-[#270342]" aria-label={goodie?"Daily NELBD Goodie Bag redemptions by hub":"Daily Lucky Dip draws by hub"}>
   <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:items-start">
    <div>
-    <h2 className="font-nel text-lg sm:text-xl font-semibold">Daily Draws by Hub</h2>
-    <p className="text-xs text-[#756782] mt-1">Lucky Dip draws by Singapore calendar day (SGT), newest first to match the records below. Marked test/error records excluded.</p>
+    <h2 className="font-nel text-lg sm:text-xl font-semibold">{goodie?"Daily NELBD Goodie Bag Redemptions":"Daily Lucky Dip Draws by Hub"}</h2>
+    <p className="text-xs text-[#756782] mt-1">{goodie?'Completed physical Goodie Bag handovers by Singapore calendar day (SGT), newest first. Only confirmed redemptions are counted.':'Lucky Dip draws by Singapore calendar day (SGT), newest first. Marked test/error records excluded.'}</p>
    </div>
    <div role="group" aria-label="Chart date range" className="flex gap-1 rounded-xl bg-[#F1EAF9] p-1 self-start">
     {periods.map(p=><button key={p} type="button" aria-pressed={period===p} onClick={()=>setPeriod(p)}
@@ -39,7 +40,7 @@ export function DailyDrawsByHubChart(){
     </button>)}
    </div>
   </div>
-  <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4" aria-label="Draw totals for selected period">
+  <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4" aria-label={goodie?"Goodie Bag redemption totals for selected period":"Lucky Dip draw totals for selected period"}>
    <div className="rounded-xl border border-[#E8DEF1] bg-[#F8F4FC] p-2.5 sm:p-3">
     <p className="text-[11px] sm:text-xs text-[#756782] flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#7716B5]"/>PDD</p>
     <p className="text-xl sm:text-2xl font-bold font-mono tabular-nums">{pdd.toLocaleString('en-SG')}</p>
@@ -54,9 +55,9 @@ export function DailyDrawsByHubChart(){
    </div>
   </div>
   {error?<p className="mt-4 text-sm text-red-700" role="alert">{error}</p>:loading&&rows.length===0?
-   <p className="mt-5 text-sm" role="status">Loading daily draws…</p>:
+   <p className="mt-5 text-sm" role="status">Loading daily counts…</p>:
    <div className="mt-4">
-    <div className="overflow-x-auto" tabIndex={0} aria-label="Scrollable chart showing daily draws at both hubs">
+    <div className="overflow-x-auto" tabIndex={0} aria-label={goodie?"Scrollable chart showing daily Goodie Bag redemptions at both hubs":"Scrollable chart showing daily Lucky Dip draws at both hubs"}>
      <div style={{minWidth:Math.max(500,rows.length*58)}} className="relative">
       <div className="h-[240px] relative border-b border-[#D9CBE5]">
        {[0,0.25,0.5,0.75,1].map(frac=><div key={frac}
@@ -82,10 +83,10 @@ export function DailyDrawsByHubChart(){
       </div>
      </div>
     </div>
-    {rows.every(r=>r.pdd===0&&r.ps===0)&&<p className="text-sm text-[#756782] mt-3">No qualifying draws in this period.</p>}
-    <p className="text-[11px] text-[#756782] mt-2">Numbers above each bar show exact daily claims (PDD purple, PS pink); bar heights use a shared, linear count scale. Newest dates appear first, as in the records below. Scroll horizontally for more days. Updated approximately every minute.</p>
+    {rows.every(r=>r.pdd===0&&r.ps===0)&&<p className="text-sm text-[#756782] mt-3">{goodie?'No Goodie Bag handovers recorded in this period.':'No qualifying Lucky Dip draws in this period.'}</p>}
+    <p className="text-[11px] text-[#756782] mt-2">Numbers above each bar show exact daily {goodie?"Goodie Bag handovers":"Lucky Dip draws"} (PDD purple, PS pink). Bar heights share a linear count scale. Newest first; scroll for more days. Updated approximately every minute.</p>
     <table className="sr-only">
-     <caption>Accessible daily draw counts by hub, Singapore time</caption>
+     <caption>{goodie?"Accessible daily Goodie Bag redemptions":"Accessible daily Lucky Dip draws"} by hub, Singapore time</caption>
      <thead><tr><th>Date</th><th>PDD</th><th>PS</th><th>Total</th></tr></thead>
      <tbody>{rows.map(r=><tr key={r.date}><td>{r.date}</td><td>{r.pdd}</td><td>{r.ps}</td><td>{r.pdd+r.ps}</td></tr>)}</tbody>
     </table>
