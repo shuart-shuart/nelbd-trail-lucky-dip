@@ -4,8 +4,8 @@ import {useKiosk,type QuestScenario} from '../../context/KioskContext';
 
 const choices:{id:QuestScenario;title:string;description:string}[]=[
  {id:'8_only',title:'8 stamps only',description:'Lucky Dip + Sticker'},
- {id:'17_fresh',title:'17 stamps · First Redemption',description:'Lucky Dip + Sticker + ez-link Card'},
- {id:'17_returning',title:'17 stamps · Returning Participant',description:'ez-link Card only (Lucky Dip already claimed)'}
+ {id:'17_fresh',title:'17 stamps · First Redemption',description:'Lucky Dip + Sticker + 17-stamp reward'},
+ {id:'17_returning',title:'17 stamps · Returning Participant',description:'17-stamp reward only (Lucky Dip already claimed)'}
 ];
 export const RedemptionChoicePage:React.FC=()=>{
  const navigate=useNavigate();
@@ -13,10 +13,11 @@ export const RedemptionChoicePage:React.FC=()=>{
  const [choice,setChoice]=React.useState<QuestScenario>('8_only');
  const [availableBySite,setAvailableBySite]=React.useState<Record<'PDD'|'PS',boolean>|null>(null);
  const [configured,setConfigured]=React.useState(false);
+ const [rewardName,setRewardName]=React.useState('17-stamp reward');
  React.useEffect(()=>{
   let active=true;
   fetch('/api/kiosk/quest-rewards/status',{cache:'no-store'}).then(r=>r.json())
-   .then(d=>{if(active){setAvailableBySite({PDD:Boolean(d.bySite?.PDD),PS:Boolean(d.bySite?.PS)});setConfigured(Boolean(d.staffPinConfigured));}})
+   .then(d=>{if(active){setAvailableBySite({PDD:Boolean(d.bySite?.PDD),PS:Boolean(d.bySite?.PS)});setConfigured(Boolean(d.staffPinConfigured));if(typeof d.rewardName==='string')setRewardName(d.rewardName);}})
    .catch(()=>{if(active)setAvailableBySite({PDD:false,PS:false})});
   return()=>{active=false};
  },[]);
@@ -28,10 +29,10 @@ export const RedemptionChoicePage:React.FC=()=>{
   <div role="radiogroup" aria-label="Redemption type" className="space-y-2">
    {choices.map(item=><button type="button" role="radio" aria-checked={choice===item.id} key={item.id}
     onClick={()=>setChoice(item.id)} className={'w-full rounded-xl p-4 border-2 text-left font-dm '+(choice===item.id?'border-nel-violet bg-white':'border-nel-violet/30 bg-nel-pink')}>
-    <strong className="block text-lg">{item.title}</strong><span className="text-sm">{item.description}</span>
+    <strong className="block text-lg">{item.title}</strong><span className="text-sm">{item.description.replace('17-stamp reward',rewardName)}</span>
    </button>)}
   </div>
-  {choice!=='8_only'&&available===false&&<p role="status" className="text-sm font-semibold">ez-link redemptions are unavailable until card stock and staff access are configured. Please ask booth staff.</p>}
+  {choice!=='8_only'&&available===false&&<p role="status" className="text-sm font-semibold">17-stamp reward redemptions are unavailable until card stock and staff access are configured. Please ask booth staff.</p>}
   <button onClick={continueToDetails} disabled={choice!=='8_only'&&(available!==true||!configured)}
    className="w-full rounded-xl bg-nel-violet text-nel-pink p-4 font-bold text-xl disabled:opacity-50">CONTINUE</button>
   <p className="sr-only">Current hub {session.site}</p>
