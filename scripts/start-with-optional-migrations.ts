@@ -38,6 +38,10 @@ async function main() {
     await run(['scripts/apply-ezlink-lucky-dip-migration.ts']);
     console.log('ez-link Lucky Dip physical stock conversion checked.');
   }
+  if (process.env.APPLY_NELBD_DAILY_REPORT_MIGRATION === 'YES') {
+    console.log('Explicitly authorized daily report ledger migration starting.');
+    await run(['scripts/apply-daily-report-migration.ts']);
+  }
   if (process.env.CONFIRM_NELBD_ADMIN_BOOTSTRAP === 'YES') {
     console.log('One-time PostgreSQL administrator bootstrap requested.');
     await run(['scripts/bootstrap-postgres-admin.ts']);

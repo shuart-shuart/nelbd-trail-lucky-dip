@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import {buildDailyReport,reportEmail,singaporeDate} from './dailyLuckyDipReport.ts';
 import {questManualOutlookRouter} from './questManualOutlookRoutes.ts';
 import {ezlinkAdminRouter} from './ezlinkAdminRoutes.ts';
 import {goodieBagAdminRouter} from './goodieBagAdminRoutes.ts';
@@ -26,6 +27,19 @@ postgresAdminRouter.post('/logout', async (req,res) => {
   try { await logoutAdmin(req,res); } catch { res.status(503).json({error:'Logout unavailable'}); }
 });
 postgresAdminRouter.get('/me',(req,res)=>res.json(res.locals.admin));
+/** Super-admin report preview. No participant PII, no email side effects. */
+postgresAdminRouter.get('/daily-report/preview',async(_req,res)=>{
+ if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+ try{
+  const report=await buildDailyReport(singaporeDate());
+  res.setHeader('Cache-Control','no-store, private');
+  return res.json({report,text:reportEmail(report),scheduledAt:'22:30 Asia/Singapore',
+   recipients:['nelbd2026@gmail.com','bernando@farm.sg'],
+   deliveryEnabled:process.env.NELBD_DAILY_REPORT_ENABLED==='YES'});
+ }catch(e){console.error('Daily report preview error',e instanceof Error?e.message:'unknown');
+  return res.status(503).json({error:'Daily report preview unavailable'});}
+});
+
 
 /** Prize-site throttles. NULL daily_cap means unlimited; zero means no awards. */
 postgresAdminRouter.get('/prize-limits',async (_req,res)=>{
