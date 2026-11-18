@@ -302,8 +302,8 @@ postgresAdminRouter.get('/draws/daily',async(req,res)=>{
        WHERE r.classification IS NULL OR r.classification NOT IN ('test','error')) AS first_day
    ), days AS (
     SELECT generate_series(
-      CASE WHEN $1='all' THEN coalesce(first_day,today)
-       ELSE today-($1::int-1) END,
+      CASE WHEN $1::boolean THEN coalesce(first_day,today)
+       ELSE today-($2::int-1) END,
       today, interval '1 day')::date AS day
     FROM limits
    ), counts AS (
@@ -318,7 +318,7 @@ postgresAdminRouter.get('/draws/daily',async(req,res)=>{
     coalesce(max(counts.total) FILTER (WHERE counts.site='PS'),0)::int AS ps
    FROM days LEFT JOIN counts ON counts.day=days.day
    GROUP BY days.day ORDER BY days.day
-  `,[period]);
+  `,[period==='all',period==='all'?30:Number(period)]);
   res.setHeader('Cache-Control','no-store, private');
   return res.json(rows);
  }catch {
