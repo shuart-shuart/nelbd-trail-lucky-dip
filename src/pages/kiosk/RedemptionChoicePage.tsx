@@ -32,7 +32,7 @@ export const RedemptionChoicePage:React.FC=()=>{
     <strong className="block text-lg">{item.title}</strong><span className="text-sm">{item.description.replace('17-stamp reward',rewardName)}</span>
    </button>)}
   </div>
-  {choice!=='8_only'&&available===false&&<p role="status" className="text-sm font-semibold">17-stamp reward redemptions are unavailable until card stock and staff access are configured. Please ask booth staff.</p>}
+  {choice!=='8_only'&&available===false&&<p role="status" className="text-sm font-semibold">17-stamp reward redemptions are unavailable until '+rewardName+' stock and staff access are configured. Please ask booth staff.</p>}
   <button onClick={continueToDetails} disabled={choice!=='8_only'&&(available!==true||!configured)}
    className="w-full rounded-xl bg-nel-violet text-nel-pink p-4 font-bold text-xl disabled:opacity-50">CONTINUE</button>
   <p className="sr-only">Current hub {session.site}</p>
