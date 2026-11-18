@@ -152,6 +152,7 @@ ezlinkAdminRouter.post('/draw',async(req,res)=>{
  }catch{return res.status(503).json({error:'Lucky Dip unavailable; do not repeat issuance without checking history'});}
 });
 ezlinkAdminRouter.post('/redeem',async(req,res)=>{
+ if(process.env.NELBD_GOODIE_BAG_ENABLED==='YES')return res.status(410).json({error:'17-stamp reward is now NELBD Goodie Bag; use the staff-PIN kiosk handover'});
  const scenario=req.body?.scenario, mobile=validPhone(req.body?.mobileNumber),site=req.body?.site;
  if(!['17_fresh','17_returning'].includes(scenario)||!mobile||!['PDD','PS'].includes(site)||!siteAllowed(res.locals.admin,site)||
     req.body?.stampsVerified!==true||req.body?.secondPunchUnused!==true||
