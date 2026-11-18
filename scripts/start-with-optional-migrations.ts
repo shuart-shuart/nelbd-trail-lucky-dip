@@ -28,6 +28,11 @@ async function main() {
     await run(['scripts/apply-ezlink-migrations.ts']);
     console.log('ez-link schema verified.');
   }
+  if (process.env.APPLY_NELBD_GOODIE_BAG_MIGRATION === 'YES') {
+    console.log('Explicitly authorized Goodie Bag-only migration starting.');
+    await run(['scripts/apply-goodie-bag-migration.ts']);
+    console.log('Goodie Bag stock initialized; historical ez-link inventory unchanged.');
+  }
   if (process.env.CONFIRM_NELBD_ADMIN_BOOTSTRAP === 'YES') {
     console.log('One-time PostgreSQL administrator bootstrap requested.');
     await run(['scripts/bootstrap-postgres-admin.ts']);
