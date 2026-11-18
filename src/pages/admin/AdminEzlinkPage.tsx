@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {AdminLayout} from '../../components/admin/AdminLayout';
+import {Link} from 'react-router-dom';
 
 type Scenario='8_only'|'17_fresh'|'17_returning';
 type Stock={total:number;redeemed:number;remaining:number;bySite:{PDD:{total:number;redeemed:number;remaining:number};PS:{total:number;redeemed:number;remaining:number}}};
@@ -14,6 +15,8 @@ async function api<T>(path:string,init?:RequestInit):Promise<T>{
 }
 const newTicket=(site:string)=>'NELBD-'+site+'-'+String(Math.floor(100000+Math.random()*900000));
 export function AdminEzlinkPage(){
+ const [goodieMode,setGoodieMode]=useState(false);
+ useEffect(()=>{fetch('/api/kiosk/quest-rewards/status',{cache:'no-store'}).then(r=>r.json()).then(d=>setGoodieMode(d.rewardName==='NELBD Goodie Bag')).catch(()=>{});},[]);
  const [scenario,setScenario]=useState<Scenario>('8_only'),[name,setName]=useState(''),[phone,setPhone]=useState(''),
   [site,setSite]=useState<'PDD'|'PS'>('PDD'),[checks,setChecks]=useState({stamps:false,punch1:false,punch2:false,first:false,card:false,punched:false}),
   [stock,setStock]=useState<Stock|null>(null),[superAdmin,setSuperAdmin]=useState(false),
@@ -82,6 +85,13 @@ export function AdminEzlinkPage(){
   finally{setBusy(false);}
  };
  const verifyCard=(scenario==='17_returning'?Boolean(found&&!found.ezlinkRedeemed):Boolean(draw?.success))&&checks.stamps&&checks.punch2&&checks.card&&checks.punched&&(scenario==='17_fresh'||checks.first);
+ if(goodieMode)return <AdminLayout title="NELBD Quest · Reward Redemption" subtitle="17-stamp Goodie Bag reward management">
+  <section className="rounded-2xl bg-white border p-6 space-y-3 text-[#270342]">
+   <h2 className="text-xl font-bold">17-stamp reward changed to NELBD Goodie Bag</h2>
+   <p>The previous ez-link Card handover interface is retired. Staff can complete Goodie Bag handovers in the public kiosk using the existing staff-only PIN. Existing ez-link redemption history is preserved.</p>
+   <Link to="/admin/inventory" className="inline-block rounded-xl bg-[#270342] text-white px-4 py-3">Manage Goodie Bag stock and staff PIN</Link>
+  </section>
+ </AdminLayout>;
  return <AdminLayout title="NELBD Quest · Reward Redemption" subtitle="8 stamps: Lucky Dip + Sticker · 17 stamps: ez-link card · one redemption per phone number">
   <section className="bg-white rounded-2xl p-4 sm:p-6 text-[#270342] space-y-4">
    <h2 className="font-bold text-lg">Choose redemption scenario</h2>

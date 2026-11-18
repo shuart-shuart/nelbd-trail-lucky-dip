@@ -6,7 +6,7 @@ async function main(){
  if(process.env.APPLY_NELBD_EZLINK_MIGRATIONS!=='YES')throw new Error('ez-link migration disabled');
  const pool=getPool();
  try{
-  for(const file of ['011_ezlink_redemption.sql','012_ezlink_staff_pin.sql','013_ezlink_inventory_notes.sql','014_ezlink_hub_inventory.sql']){
+  for(const file of ['011_ezlink_redemption.sql','012_ezlink_staff_pin.sql','013_ezlink_inventory_notes.sql','014_ezlink_hub_inventory.sql','015_goodie_bag_reward_ezlink_lucky_dip.sql']){
    const sql=readFileSync(resolve(process.cwd(),'migrations',file),'utf8');
    await pool.query(sql);
   }
