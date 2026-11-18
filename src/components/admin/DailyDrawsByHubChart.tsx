@@ -14,7 +14,7 @@ export function DailyDrawsByHubChart(){
   const load=async()=>{
    try{
     const data=await getPostgresDailyDraws(period);
-    if(active){setRows(data);setError('');}
+    if(active){setRows([...data].sort((a,b)=>b.date.localeCompare(a.date)));setError('');}
    }catch(e){
     if(active)setError(e instanceof Error?e.message:'Unable to load daily draw counts');
    }finally{if(active)setLoading(false);}
@@ -30,7 +30,7 @@ export function DailyDrawsByHubChart(){
   <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:items-start">
    <div>
     <h2 className="font-nel text-lg sm:text-xl font-semibold">Daily Draws by Hub</h2>
-    <p className="text-xs text-[#756782] mt-1">Lucky Dip draws by Singapore calendar day (SGT). Marked test/error records excluded.</p>
+    <p className="text-xs text-[#756782] mt-1">Lucky Dip draws by Singapore calendar day (SGT), newest first to match the records below. Marked test/error records excluded.</p>
    </div>
    <div role="group" aria-label="Chart date range" className="flex gap-1 rounded-xl bg-[#F1EAF9] p-1 self-start">
     {periods.map(p=><button key={p} type="button" aria-pressed={period===p} onClick={()=>setPeriod(p)}
@@ -58,16 +58,16 @@ export function DailyDrawsByHubChart(){
    <div className="mt-4">
     <div className="overflow-x-auto" tabIndex={0} aria-label="Scrollable chart showing daily draws at both hubs">
      <div style={{minWidth:Math.max(500,rows.length*58)}} className="relative">
-      <div className="h-[212px] relative border-b border-[#D9CBE5]">
+      <div className="h-[240px] relative border-b border-[#D9CBE5]">
        {[0,0.25,0.5,0.75,1].map(frac=><div key={frac}
-        className="absolute w-full border-t border-[#EAE2F1]" style={{bottom:(frac*100)+'%'}}>
+        className="absolute left-0 right-0 border-t border-[#EAE2F1]" style={{bottom:(frac*85)+'%'}}>
          <span className="absolute left-0 -top-3 text-[10px] text-[#76678A] bg-white pr-1">{Math.round(max*frac)}</span>
         </div>)}
-       <div className="absolute inset-0 flex items-end pl-8 gap-1">
+       <div className="absolute left-0 right-0 bottom-0 h-[85%] flex items-end pl-8 gap-1">
         {rows.map(row=><div key={row.date} className="flex-1 min-w-[46px] h-full flex items-end justify-center gap-1" title={row.date+': PDD '+row.pdd+'; PS '+row.ps}>
-         {(['pdd','ps'] as const).map(hub=><div key={hub} className="relative w-[44%] max-w-7 h-[82%] flex items-end justify-center">
+         {(['pdd','ps'] as const).map(hub=><div key={hub} className="relative w-[44%] max-w-7 h-full flex items-end justify-center">
           <div className={'w-full relative rounded-t-sm '+(hub==='pdd'?'bg-[#7716B5]':'bg-[#FF8DC6] border border-[#270342]/20')}
-           style={{height:row[hub]===0?'0px':Math.max(2,row[hub]/max*100)+'%'}}>
+           style={{height:(row[hub]/max*100)+'%'}}>
            {row[hub]>0&&<span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-bold font-mono tabular-nums text-[#270342] whitespace-nowrap">{row[hub]}</span>}
           </div>
           {row[hub]===0&&<span className="absolute bottom-0 text-[10px] font-semibold text-[#76678A]">0</span>}
@@ -83,7 +83,7 @@ export function DailyDrawsByHubChart(){
      </div>
     </div>
     {rows.every(r=>r.pdd===0&&r.ps===0)&&<p className="text-sm text-[#756782] mt-3">No qualifying draws in this period.</p>}
-    <p className="text-[11px] text-[#756782] mt-2">Numbers above each bar are the exact daily counts (PDD purple, PS pink). Scroll horizontally for more days. Updated approximately every minute.</p>
+    <p className="text-[11px] text-[#756782] mt-2">Numbers above each bar show exact daily claims (PDD purple, PS pink); bar heights use a shared, linear count scale. Newest dates appear first, as in the records below. Scroll horizontally for more days. Updated approximately every minute.</p>
     <table className="sr-only">
      <caption>Accessible daily draw counts by hub, Singapore time</caption>
      <thead><tr><th>Date</th><th>PDD</th><th>PS</th><th>Total</th></tr></thead>
