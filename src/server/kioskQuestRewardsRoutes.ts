@@ -10,6 +10,7 @@ const normalizeMobile=(value:unknown):string|null=>{
  const mobile=digits.startsWith('+65')?digits:digits.startsWith('65')&&digits.length===10?'+'+digits:'+65'+digits;
  return /^\+65[89]\d{7}$/.test(mobile)?mobile:null;
 };
+const goodieBagMode=()=>process.env.NELBD_GOODIE_BAG_ENABLED==='YES';
 const enabled=()=>process.env.NELBD_EZLINK_ENABLED==='YES'&&process.env.DRAW_BACKEND==='postgres';
 kioskQuestRewardsRouter.use((req,res,next)=>{
  res.setHeader('Cache-Control','no-store, private');
@@ -41,9 +42,9 @@ async function verifyPin(pin:unknown):Promise<boolean>{
 }
 kioskQuestRewardsRouter.get('/status',async(_req,res)=>{
  try{const [stock,pin]=await Promise.all([
-  getPool().query('SELECT site,(allocated_quantity-redeemed_quantity)>0 AS available FROM ezlink_hub_inventory'),
+  getPool().query(goodieBagMode()? 'SELECT site,(total_quantity-redeemed_quantity)>0 AS available FROM goodie_bag_inventory':'SELECT site,(allocated_quantity-redeemed_quantity)>0 AS available FROM ezlink_hub_inventory'),
   getPool().query('SELECT 1 FROM ezlink_staff_config WHERE id=1')]);
-  return res.json({available:stock.rows.some(row=>row.available),bySite:Object.fromEntries(stock.rows.map(row=>[row.site,Boolean(row.available)])),staffPinConfigured:Boolean(pin.rowCount)});
+  return res.json({available:stock.rows.some(row=>row.available),bySite:Object.fromEntries(stock.rows.map(row=>[row.site,Boolean(row.available)])),staffPinConfigured:Boolean(pin.rowCount),rewardName:goodieBagMode()?'NELBD Goodie Bag':'ez-link Card'});
  }catch{return res.status(503).json({error:'Reward status unavailable'});}
 });
 /** Phone lookup gives only a minimal eligibility flag, not participant PII. */
@@ -53,7 +54,7 @@ kioskQuestRewardsRouter.post('/lookup',async(req,res)=>{
  if(!limit(req,'lookup'))return res.status(429).json({error:'Too many requests. Ask booth staff for help'});
  try{
   const {rows:[r]}=await getPool().query(
-   'SELECT d.status,(e.id IS NOT NULL) AS already_redeemed FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id WHERE p.mobile_number=$1 LIMIT 1',[mobile]);
+   goodieBagMode()?'SELECT d.status,((e.id IS NOT NULL) OR (g.id IS NOT NULL)) AS already_redeemed FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id LEFT JOIN goodie_bag_redemptions g ON g.participant_id=p.id WHERE p.mobile_number=$1 LIMIT 1':'SELECT d.status,(e.id IS NOT NULL) AS already_redeemed FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id WHERE p.mobile_number=$1 LIMIT 1',[mobile]);
   if(!r)return res.json({eligible:false,reason:'NO_PREVIOUS_LUCKY_DIP'});
   if(r.already_redeemed)return res.json({eligible:false,reason:'ALREADY_REDEEMED'});
   return res.json({eligible:r.status==='claimed',reason:r.status==='claimed'?'READY':'LUCKY_DIP_NOT_CLAIMED'});
@@ -72,17 +73,23 @@ kioskQuestRewardsRouter.post('/redeem',async(req,res)=>{
   const recorded=await withTransaction(async c=>{
    await c.query('SELECT pg_advisory_xact_lock($1)',[7102027]);
    const {rows:[r]}=await c.query(
-    'SELECT p.id AS participant_id,d.id AS draw_id,d.site,d.status,e.id AS ezlink_id FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id WHERE p.mobile_number=$1 FOR UPDATE OF p,d',[mobile]);
+    goodieBagMode()?'SELECT p.id AS participant_id,d.id AS draw_id,d.site,d.status,e.id AS ezlink_id,g.id AS goodie_bag_id FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id LEFT JOIN goodie_bag_redemptions g ON g.participant_id=p.id WHERE p.mobile_number=$1 FOR UPDATE OF p,d':'SELECT p.id AS participant_id,d.id AS draw_id,d.site,d.status,e.id AS ezlink_id FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id WHERE p.mobile_number=$1 FOR UPDATE OF p,d',[mobile]);
    if(!r)throw new Error('NO_PREVIOUS_LUCKY_DIP');
-   if(r.ezlink_id)throw new Error('ALREADY_REDEEMED');
+   if(r.ezlink_id||r.goodie_bag_id)throw new Error('ALREADY_REDEEMED');
    if(r.status!=='claimed')throw new Error('LUCKY_DIP_NOT_CLAIMED');
-   const stock=await c.query(
-    'UPDATE ezlink_hub_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE site=$1 AND redeemed_quantity<allocated_quantity RETURNING allocated_quantity-redeemed_quantity AS remaining',[site]);
+   const useBag=goodieBagMode();
+   const stock=useBag
+    ?await c.query('UPDATE goodie_bag_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE site=$1 AND redeemed_quantity<total_quantity RETURNING total_quantity-redeemed_quantity AS remaining',[site])
+    :await c.query('UPDATE ezlink_hub_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE site=$1 AND redeemed_quantity<allocated_quantity RETURNING allocated_quantity-redeemed_quantity AS remaining',[site]);
    if(!stock.rowCount)throw new Error('OUT_OF_STOCK');
-   await c.query('UPDATE ezlink_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE id=1');
-   await c.query(
-    'INSERT INTO ezlink_redemptions(participant_id,draw_id,site,scenario,issued_by,booklet_17_verified,second_punch_confirmed) VALUES($1,$2,$3,$4,$5,true,true)',
-    [r.participant_id,r.draw_id,site,scenario,'kiosk_staff_pin']);
+   if(useBag){
+    await c.query('INSERT INTO goodie_bag_redemptions(participant_id,draw_id,site,scenario,issued_by) VALUES($1,$2,$3,$4,$5)',
+      [r.participant_id,r.draw_id,site,scenario,'kiosk_staff_pin']);
+   }else{
+    await c.query('UPDATE ezlink_inventory SET redeemed_quantity=redeemed_quantity+1,updated_at=now() WHERE id=1');
+    await c.query('INSERT INTO ezlink_redemptions(participant_id,draw_id,site,scenario,issued_by,booklet_17_verified,second_punch_confirmed) VALUES($1,$2,$3,$4,$5,true,true)',
+      [r.participant_id,r.draw_id,site,scenario,'kiosk_staff_pin']);
+   }
    return {recorded:true,remaining:Number(stock.rows[0].remaining)};
   });
   return res.json(recorded);
