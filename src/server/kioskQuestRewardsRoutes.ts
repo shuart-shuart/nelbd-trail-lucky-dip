@@ -54,7 +54,7 @@ kioskQuestRewardsRouter.post('/lookup',async(req,res)=>{
  if(!limit(req,'lookup'))return res.status(429).json({error:'Too many requests. Ask booth staff for help'});
  try{
   const {rows:[r]}=await getPool().query(
-   'SELECT d.status,((e.id IS NOT NULL) OR (g.id IS NOT NULL)) AS already_redeemed FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id LEFT JOIN goodie_bag_redemptions g ON g.participant_id=p.id WHERE p.mobile_number=$1 LIMIT 1',[mobile]);
+   goodieBagMode()?'SELECT d.status,((e.id IS NOT NULL) OR (g.id IS NOT NULL)) AS already_redeemed FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id LEFT JOIN goodie_bag_redemptions g ON g.participant_id=p.id WHERE p.mobile_number=$1 LIMIT 1':'SELECT d.status,(e.id IS NOT NULL) AS already_redeemed FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id WHERE p.mobile_number=$1 LIMIT 1',[mobile]);
   if(!r)return res.json({eligible:false,reason:'NO_PREVIOUS_LUCKY_DIP'});
   if(r.already_redeemed)return res.json({eligible:false,reason:'ALREADY_REDEEMED'});
   return res.json({eligible:r.status==='claimed',reason:r.status==='claimed'?'READY':'LUCKY_DIP_NOT_CLAIMED'});
@@ -73,7 +73,7 @@ kioskQuestRewardsRouter.post('/redeem',async(req,res)=>{
   const recorded=await withTransaction(async c=>{
    await c.query('SELECT pg_advisory_xact_lock($1)',[7102027]);
    const {rows:[r]}=await c.query(
-    'SELECT p.id AS participant_id,d.id AS draw_id,d.site,d.status,e.id AS ezlink_id,g.id AS goodie_bag_id FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id LEFT JOIN goodie_bag_redemptions g ON g.participant_id=p.id WHERE p.mobile_number=$1 FOR UPDATE OF p,d',[mobile]);
+    goodieBagMode()?'SELECT p.id AS participant_id,d.id AS draw_id,d.site,d.status,e.id AS ezlink_id,g.id AS goodie_bag_id FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id LEFT JOIN goodie_bag_redemptions g ON g.participant_id=p.id WHERE p.mobile_number=$1 FOR UPDATE OF p,d':'SELECT p.id AS participant_id,d.id AS draw_id,d.site,d.status,e.id AS ezlink_id FROM participants p JOIN draws d ON d.participant_id=p.id LEFT JOIN ezlink_redemptions e ON e.participant_id=p.id WHERE p.mobile_number=$1 FOR UPDATE OF p,d',[mobile]);
    if(!r)throw new Error('NO_PREVIOUS_LUCKY_DIP');
    if(r.ezlink_id||r.goodie_bag_id)throw new Error('ALREADY_REDEEMED');
    if(r.status!=='claimed')throw new Error('LUCKY_DIP_NOT_CLAIMED');
