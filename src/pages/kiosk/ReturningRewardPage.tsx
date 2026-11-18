@@ -15,7 +15,7 @@ export const ReturningRewardPage:React.FC=()=>{
    if(!res.ok)throw new Error(data.error||'Unable to verify phone');
    if(!data.eligible){
     const reason=data.reason;
-    setError(reason==='ALREADY_REDEEMED'?'This phone number has already redeemed an ez-link card.':
+    setError(reason==='ALREADY_REDEEMED'?'This phone number has already redeemed the 17-stamp reward.':
      reason==='NO_PREVIOUS_LUCKY_DIP'?'We could not find a previous Lucky Dip using this number. Ask staff for help.':
      'The earlier Lucky Dip has not been completed. Please ask staff.');
     return;

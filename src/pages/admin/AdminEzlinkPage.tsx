@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {AdminLayout} from '../../components/admin/AdminLayout';
+import {Link} from 'react-router-dom';
 
 type Scenario='8_only'|'17_fresh'|'17_returning';
 type Stock={total:number;redeemed:number;remaining:number;bySite:{PDD:{total:number;redeemed:number;remaining:number};PS:{total:number;redeemed:number;remaining:number}}};
@@ -14,6 +15,8 @@ async function api<T>(path:string,init?:RequestInit):Promise<T>{
 }
 const newTicket=(site:string)=>'NELBD-'+site+'-'+String(Math.floor(100000+Math.random()*900000));
 export function AdminEzlinkPage(){
+ const [goodieMode,setGoodieMode]=useState(false);
+ useEffect(()=>{fetch('/api/kiosk/quest-rewards/status',{cache:'no-store'}).then(r=>r.json()).then(d=>setGoodieMode(d.rewardName==='NELBD Goodie Bag')).catch(()=>{});},[]);
  const [scenario,setScenario]=useState<Scenario>('8_only'),[name,setName]=useState(''),[phone,setPhone]=useState(''),
   [site,setSite]=useState<'PDD'|'PS'>('PDD'),[checks,setChecks]=useState({stamps:false,punch1:false,punch2:false,first:false,card:false,punched:false}),
   [stock,setStock]=useState<Stock|null>(null),[superAdmin,setSuperAdmin]=useState(false),
@@ -82,20 +85,28 @@ export function AdminEzlinkPage(){
   finally{setBusy(false);}
  };
  const verifyCard=(scenario==='17_returning'?Boolean(found&&!found.ezlinkRedeemed):Boolean(draw?.success))&&checks.stamps&&checks.punch2&&checks.card&&checks.punched&&(scenario==='17_fresh'||checks.first);
- return <AdminLayout title="NELBD Quest · Reward Redemption" subtitle="8 stamps: Lucky Dip + Sticker · 17 stamps: ez-link card · one redemption per phone number">
+ if(goodieMode&&scenario!=='8_only')return <AdminLayout title="NELBD Quest · Reward Redemption" subtitle="17-stamp Goodie Bag reward management">
+  <section className="rounded-2xl bg-white border p-6 space-y-3 text-[#270342]">
+   <h2 className="text-xl font-bold">17-stamp reward changed to NELBD Goodie Bag</h2>
+   <p>The previous ez-link Card handover interface is retired. Staff can complete Goodie Bag handovers in the public kiosk using the existing staff-only PIN. Existing ez-link redemption history is preserved.</p>
+   <button type="button" className="inline-block rounded-xl bg-[#F6F0FB] px-4 py-3" onClick={()=>reset("8_only")}>Back to 8-stamp Lucky Dip</button>
+   <Link to="/admin/inventory" className="inline-block rounded-xl bg-[#270342] text-white px-4 py-3">Manage Goodie Bag stock and staff PIN</Link>
+  </section>
+ </AdminLayout>;
+ return <AdminLayout title="NELBD Quest · Reward Redemption" subtitle={goodieMode?"8 stamps: Lucky Dip + Sticker · 17 stamps: NELBD Goodie Bag at kiosk":"8 stamps: Lucky Dip + Sticker · 17 stamps: ez-link card · one redemption per phone number"}>
   <section className="bg-white rounded-2xl p-4 sm:p-6 text-[#270342] space-y-4">
    <h2 className="font-bold text-lg">Choose redemption scenario</h2>
    <div className="grid gap-2 sm:grid-cols-3">
-    {([['8_only','1. 8 stamps only','Lucky Dip + Sticker'],['17_fresh','2. 17 stamps · fresh booklet','Both rewards'],['17_returning','3. 17 stamps · returning','ez-link card only']] as const).map(([key,title,desc])=>
+    {([['8_only','1. 8 stamps only','Lucky Dip + Sticker'],['17_fresh','2. 17 stamps · fresh booklet','Both rewards'],['17_returning','3. 17 stamps · returning','17-stamp reward at kiosk']] as const).map(([key,title,desc])=>
      <button key={key} onClick={()=>reset(key)} className={'rounded-xl text-left border-2 p-3 '+(scenario===key?'border-[#270342] bg-[#F6F0FB]':'border-[#E8DDED]')}>
       <strong className="block">{title}</strong><span className="text-sm">{desc}</span>
      </button>)}
    </div>
    <p className="text-sm">Staff must inspect physical booklet before redemption. Hole punch 1 marks the 8-stamp reward; hole punch 2 marks the 17-stamp reward.</p>
-   <div className="rounded-xl bg-[#F6F0FB] p-3 text-sm">
+   {!goodieMode&&<div className="rounded-xl bg-[#F6F0FB] p-3 text-sm">
     ez-link stock at {site}: <strong>{stock?.bySite[site]?.remaining??'—'} available</strong> · {stock?.bySite[site]?.redeemed??'—'} redeemed · {stock?.bySite[site]?.total??'—'} allocated
-   </div>
-   {superAdmin&&<p className="text-sm">Adjust PDD/PS stock and record transfers under Prize Inventory.</p>}
+   </div>}
+   {superAdmin&&<p className="text-sm">Manage 17-stamp reward inventory under Prize Inventory.</p>}
    {error&&<p role="alert" className="text-red-700 font-medium">{error}</p>}
    {notice&&<p role="status" className="bg-[#E9E0F4] rounded-lg p-3 text-sm">{notice}</p>}
    <div className="border-t pt-4 space-y-3">
