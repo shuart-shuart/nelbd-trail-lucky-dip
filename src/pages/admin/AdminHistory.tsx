@@ -16,7 +16,6 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
-import { DailyDrawsByHubChart } from '../../components/admin/DailyDrawsByHubChart';
 import {
   subscribeToLatestDraws,
   fetchOlderDraws,
@@ -462,7 +461,6 @@ export const AdminHistory: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'draws' && import.meta.env.VITE_DATA_BACKEND === 'postgres' && <DailyDrawsByHubChart />}
 
       {activeTab === 'draws' ? (
         /* Draws Container */
