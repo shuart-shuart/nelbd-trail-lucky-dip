@@ -75,7 +75,7 @@ export const AdminInventory: React.FC = () => {
   const capLabel=(id:string,site:'PDD'|'PS')=>{const row=prizeLimits.find(x=>x.prizeId===id&&x.site===site);
     return !row?'—':row.paused?'Paused':row.dailyCap===null?'Unlimited':row.awardedToday+' / '+row.dailyCap;
   };
-  const [activeTab, setActiveTab] = useState<'inventory' | 'adjustments'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'adjustments' | 'goodie-bags'>('inventory');
 
   // Search and Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -900,7 +900,6 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
       }
     >
-      <RewardInventoryPanel />
       {/* Toast Notification Banner */}
       {feedbackMessage && (
         <div
@@ -1023,7 +1022,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
       </div>
 
-      {/* Main Tabs (Inventory Table vs Adjustments Audit Trail) */}
+      {/* Lucky Dip, audit, and guaranteed reward tabs */}
       <div className="flex flex-wrap items-center gap-2 mb-4 border-b border-nel-purple/40 pb-2">
         <button
           onClick={() => setActiveTab('inventory')}
@@ -1047,9 +1046,22 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           <HistoryIcon className="w-4 h-4 shrink-0" />
           <span>Adjustments Audit ({adjustments.length})</span>
         </button>
+        {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <button
+          onClick={() => setActiveTab('goodie-bags')}
+          className={`px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            activeTab === 'goodie-bags'
+              ? 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/40 shadow'
+              : 'text-[#8A7C96] hover:text-[#33224B]'
+          }`}
+        >
+          <Gift className="w-4 h-4 shrink-0" />
+          <span>Goodie Bags</span>
+        </button>}
       </div>
 
-      {activeTab === 'inventory' ? (
+      {activeTab === 'goodie-bags' ? (
+        <RewardInventoryPanel />
+      ) : activeTab === 'inventory' ? (
         <>
           {/* Search & Filter Toolbar */}
           <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 mb-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between shadow-sm">
