@@ -51,3 +51,17 @@ SELECT (SELECT redeemed_quantity FROM ezlink_inventory WHERE id=1) AS legacy_iss
 -- 6. The 50 + 50 Goodie Bags are new physical inventory, not old ez-link cards.
 -- 7. No allocation is approved until the source of 220 cards at each hub is
 --    reconciled; current 440 may not exist despite older logs showing 499.
+
+-- OPERATOR-VERIFIED PHYSICAL COUNT UPDATE (19 Nov 2026):
+-- 220 unissued cards are physically present at PDD, 220 at PS (440 total).
+-- One earlier card redemption was a real system-issued TEST by the operator.
+-- KEEP that historical row and do not count it as part of the 440 available.
+-- The old 500 total from migration-time logs is NOT a current physical count.
+-- If legacy inventory still reads 500 total / 1 redeemed, it implies 499
+-- available on the old ledger versus 440 confirmed onsite: a 59-card variance.
+-- DO NOT automatically treat 59 cards as lost, transferred, or available.
+-- Record its explanation in a signed inventory adjustment before retiring
+-- legacy available stock. On conversion the 440 physical cards must be
+-- available ONLY in new ez-link Lucky Dip site_inventory (220 each hub).
+-- A zero-balance legacy redemption pool may retain the 1 test as already
+-- issued for audit; don't delete it to make the inventory equations fit.
