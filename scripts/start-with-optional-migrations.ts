@@ -33,6 +33,11 @@ async function main() {
     await run(['scripts/apply-goodie-bag-migration.ts']);
     console.log('Goodie Bag stock initialized; historical ez-link inventory unchanged.');
   }
+  if (process.env.APPLY_NELBD_EZLINK_LUCKY_DIP_MIGRATION === 'YES') {
+    console.log('Explicitly authorized 440-card ez-link Lucky Dip conversion starting.');
+    await run(['scripts/apply-ezlink-lucky-dip-migration.ts']);
+    console.log('ez-link Lucky Dip physical stock conversion checked.');
+  }
   if (process.env.CONFIRM_NELBD_ADMIN_BOOTSTRAP === 'YES') {
     console.log('One-time PostgreSQL administrator bootstrap requested.');
     await run(['scripts/bootstrap-postgres-admin.ts']);
