@@ -175,7 +175,7 @@ export const ResultPage: React.FC = () => {
 
         {session.scenario==='17_fresh'&&<div className="w-full mt-3">
           {drawResult?.voucherClaimToken&&!isEmailRecorded
-            ?<p className="bg-nel-pink text-nel-violet rounded-lg p-3 text-sm font-bold">Please submit the Grab voucher recipient email above before completing the ez-link reward.</p>
+            ?<p className="bg-nel-pink text-nel-violet rounded-lg p-3 text-sm font-bold">Please submit the Grab voucher recipient email above before completing your 17-stamp reward.</p>
             :<EzlinkCompletion scenario="17_fresh" mobile={session.mobileNumber} site={session.site}/>}
         </div>}
         <p className="kiosk-result-disclaimer font-dm text-nel-violet">
