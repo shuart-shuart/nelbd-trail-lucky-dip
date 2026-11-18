@@ -285,6 +285,46 @@ postgresAdminRouter.get('/inventory',async (_req,res)=>{
     res.json(rows);
   } catch {res.status(503).json({error:'Inventory unavailable'});}
 });
+/** Complete daily Lucky Dip counts, by site and Singapore calendar day.
+ * Read-only aggregation over all draws (not the paginated history cache).
+ * Operator-labelled test/error draws are excluded from operational totals.
+ */
+postgresAdminRouter.get('/draws/daily',async(req,res)=>{
+ const period=String(req.query.period||'30');
+ if(!['7','14','30','all'].includes(period))
+  return res.status(400).json({error:'Invalid chart period'});
+ try{
+  const {rows}=await getPool().query(`
+   WITH limits AS (
+    SELECT (now() AT TIME ZONE 'Asia/Singapore')::date AS today,
+      (SELECT min((d.drawn_at AT TIME ZONE 'Asia/Singapore')::date)
+       FROM draws d LEFT JOIN draw_review_labels r ON r.draw_id=d.id
+       WHERE r.classification IS NULL OR r.classification NOT IN ('test','error')) AS first_day
+   ), days AS (
+    SELECT generate_series(
+      CASE WHEN $1='all' THEN coalesce(first_day,today)
+       ELSE today-($1::int-1) END,
+      today, interval '1 day')::date AS day
+    FROM limits
+   ), counts AS (
+    SELECT (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date AS day,d.site,
+      count(*)::int AS total
+    FROM draws d LEFT JOIN draw_review_labels r ON r.draw_id=d.id
+    WHERE r.classification IS NULL OR r.classification NOT IN ('test','error')
+    GROUP BY 1,2
+   )
+   SELECT to_char(days.day,'YYYY-MM-DD') AS date,
+    coalesce(max(counts.total) FILTER (WHERE counts.site='PDD'),0)::int AS pdd,
+    coalesce(max(counts.total) FILTER (WHERE counts.site='PS'),0)::int AS ps
+   FROM days LEFT JOIN counts ON counts.day=days.day
+   GROUP BY days.day ORDER BY days.day
+  `,[period]);
+  res.setHeader('Cache-Control','no-store, private');
+  return res.json(rows);
+ }catch {
+  return res.status(503).json({error:'Daily draw summary unavailable'});
+ }
+});
 postgresAdminRouter.get('/draws',async (req,res)=>{
   try {
     const limit=Math.min(500,Math.max(1,Number(req.query.limit)||50));
