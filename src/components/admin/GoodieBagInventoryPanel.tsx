@@ -12,14 +12,12 @@ async function call<T>(path:string,init?:RequestInit):Promise<T>{
 }
 export function GoodieBagInventoryPanel(){
  const [stock,setStock]=useState<Inventory|null>(null),[history,setHistory]=useState<Audit[]>([]);
- const [pinConfigured,setPinConfigured]=useState(false);
  const [site,setSite]=useState<Site>('PDD'),[total,setTotal]=useState(''),[note,setNote]=useState('');
  const [from,setFrom]=useState<Site>('PDD'),[to,setTo]=useState<Site>('PS'),[quantity,setQuantity]=useState(''),[transferNote,setTransferNote]=useState('');
- const [pin,setPin]=useState(''),[pinConfirm,setPinConfirm]=useState('');
  const [superAdmin,setSuperAdmin]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const refresh=async()=>{
-  const [balances,audit,pinStatus]=await Promise.all([call<Inventory>('/inventory'),call<Audit[]>('/adjustments').catch(()=>[]),fetch('/api/admin/ezlink/staff-pin/status',{credentials:'same-origin',cache:'no-store'}).then(r=>r.json()).catch(()=>({configured:false}))]);
-  setStock(balances);setHistory(audit);setTotal(String(balances[site].total));setPinConfigured(Boolean(pinStatus.configured));
+  const [balances,audit]=await Promise.all([call<Inventory>('/inventory'),call<Audit[]>('/adjustments').catch(()=>[])]);
+  setStock(balances);setHistory(audit);setTotal(String(balances[site].total));
  };
  useEffect(()=>{void refresh().catch(e=>setError(String(e)));fetch('/api/admin/me',{credentials:'same-origin'}).then(r=>r.json()).then(d=>setSuperAdmin(d.role==='super_admin')).catch(()=>{});},[]);
  const save=async()=>{
@@ -38,19 +36,9 @@ export function GoodieBagInventoryPanel(){
    setQuantity('');setTransferNote('');await refresh();setNotice('Goodie Bag transfer recorded.');}
   catch(e){setError(e instanceof Error?e.message:'Transfer failed')}finally{setBusy(false)}
  };
- const savePin=async()=>{
-  if(!/^\d{6,12}$/.test(pin)||pin!==pinConfirm||new Set(pin).size<3||busy)return;
-  if(!window.confirm('Change the staff handover PIN?'))return;
-  setBusy(true);setError('');setNotice('');
-  try{
-   const r=await fetch('/api/admin/ezlink/staff-pin',{method:'PUT',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin})});
-   const d=await r.json();if(!r.ok)throw Error(d.error||'PIN update failed');
-   setPin('');setPinConfirm('');setNotice('Staff PIN updated.');
-  }catch(e){setError(e instanceof Error?e.message:'PIN update failed')}finally{setBusy(false)}
- };
  return <section className="rounded-2xl bg-white border border-[#DDD2E8] p-4 sm:p-6 text-[#270342] space-y-4 mb-5">
   <h2 className="text-xl font-bold">NELBD Goodie Bag · Guaranteed 17-Stamp Reward</h2>
-  <p className="text-sm">Manage the guaranteed 17-stamp Goodie Bag stock at each hub. Previous reward records are preserved separately.</p>
+  <p className="text-sm">Manage the guaranteed 17-stamp Goodie Bag stock at each hub. Handover requires an onsite booklet check and confirmation, without a PIN. Previous reward records are preserved separately.</p>
   <div className="grid gap-3 sm:grid-cols-2">
    {(['PDD','PS'] as const).map(h=><div key={h} className="rounded-xl border border-[#DDD2E8] bg-[#F6F0FB] p-3">
     <h3 className="font-bold">{h==='PDD'?'Innovation Hub (PDD)':'Impact Hub (PS)'}</h3>
@@ -74,15 +62,6 @@ export function GoodieBagInventoryPanel(){
     <button className="rounded-xl bg-[#270342] text-white px-4 py-3 disabled:opacity-40" disabled={busy||!stock||!note.trim()||!/^\d+$/.test(total)||Number(total)<stock[site].redeemed||Number(total)===stock[site].total} onClick={()=>void save()}>Save stock adjustment</button>
    </div>
    </details>
-   <div className="border-t pt-3 space-y-2">
-    <h3 className="font-bold">Staff handover PIN</h3>
-    <p className="text-xs">Status: {pinConfigured?'Configured':'Not configured'}. Enter a new PIN only when changing it.</p>
-    <div className="grid sm:grid-cols-2 gap-2">
-     <input aria-label="New staff PIN" type="password" inputMode="numeric" placeholder="New 6–12-digit PIN" value={pin} maxLength={12} onChange={e=>setPin(e.target.value.replace(/\D/g,''))} className="border rounded-lg p-3"/>
-     <input aria-label="Confirm staff PIN" type="password" inputMode="numeric" placeholder="Confirm PIN" value={pinConfirm} maxLength={12} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,''))} className="border rounded-lg p-3"/>
-    </div>
-    <button className="border rounded-xl px-4 py-2 disabled:opacity-40" disabled={busy||pin!==pinConfirm||pin.length<6||new Set(pin).size<3} onClick={()=>void savePin()}>Change staff PIN</button>
-   </div>
    <details className="border-t pt-3 space-y-3 group">
     <summary className="cursor-pointer font-bold py-2">Advanced · Transfers & audit history</summary>
     <p className="text-xs text-[#756782]">Only use transfers when moving existing physical Goodie Bags between hubs. Every stock change is audited.</p>
