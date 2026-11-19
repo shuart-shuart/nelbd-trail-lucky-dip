@@ -20,14 +20,15 @@ export function EzlinkCompletion({scenario,mobile,site,onDone}:{scenario:Scenari
   }catch(e){setError(e instanceof Error?e.message:'Please ask staff for assistance');}
   finally{setBusy(false);}
  };
- if(done)return <section className="rounded-2xl bg-nel-pink text-nel-violet p-5 space-y-3 text-center">
-  <h2 className="text-xl font-bold">{rewardName} Redeemed!</h2>
-  <p>Both milestones are now recorded. Thank you for exploring New Everyday Life, By Design.</p>
-  <button onClick={()=>navigate('/')} className="w-full bg-nel-violet text-nel-pink rounded-xl p-3 font-bold">Finish</button>
+ // The parent replaces its whole page with the unified Goodie Bag success screen.
+ if(done&&onDone)return null;
+ if(done)return <section className="rounded-2xl bg-nel-pink text-nel-violet p-5 space-y-3 text-center" role="status">
+  <h2 className="font-nel text-2xl font-semibold">{rewardName} collected!</h2>
+  <button onClick={()=>navigate('/',{replace:true})} className="w-full bg-nel-violet text-nel-pink rounded-xl p-3 font-bold">Finish</button>
  </section>;
  return <section className="rounded-2xl bg-nel-pink text-nel-violet p-4 sm:p-5 space-y-3">
   <h2 className="font-nel text-xl sm:text-2xl font-semibold">Staff: {rewardName} Handover</h2>
-  <p className="text-sm">Staff must check the physical booklet and verify 17 stamps before confirming the Goodie Bag handover. Participants should not complete this step themselves.</p>
+  <p className="text-sm">Crew: check all 17 stamps and the booklet before handing over the {rewardName}.</p>
   {pinRequired&&<>
   <label className="block text-sm font-bold">Staff-only PIN
    <input type="password" autoComplete="off" inputMode="numeric" maxLength={12} value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,'').slice(0,12))}
@@ -39,6 +40,6 @@ export function EzlinkCompletion({scenario,mobile,site,onDone}:{scenario:Scenari
    className="w-full bg-nel-violet text-nel-pink p-3 rounded-xl font-bold disabled:opacity-50">
    {busy?'RECORDING…':'CONFIRM HANDOVER'}
   </button>
-  <p className="text-xs">If the network fails after handing over the reward, ask an administrator to check redemption history before attempting again.</p>
+  {error&&<p className="text-xs">If handover occurred, ask an administrator to check redemption history before retrying.</p>}
  </section>;
 }
