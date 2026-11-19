@@ -113,7 +113,7 @@ export const DetailsPage: React.FC = () => {
           Your details
         </h1>
         <p className="mt-1 mb-3 text-sm font-dm text-nel-violet">
-          One Lucky Dip per mobile number. {session.scenario==='17_fresh'?'You will also be eligible for an ez-link Card after staff verification.':''}
+          One Lucky Dip per mobile number. {session.scenario==='17_fresh'?'You can collect your 17-stamp Goodie Bag after staff verification.':''}
         </p>
         <form onSubmit={handleSubmit} noValidate className="w-full space-y-3 sm:space-y-4">
           {/* Name Field */}
@@ -194,7 +194,7 @@ export const DetailsPage: React.FC = () => {
                   if (mobileError) setMobileError(null);
                 }}
                 placeholder="81234567"
-                className="w-full py-3 px-3 bg-transparent text-base sm:text-lg font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none font-dm"
+                className="w-full py-3 px-3 border-0 rounded-none bg-nel-pink text-base sm:text-lg font-bold text-nel-violet placeholder-nel-violet/55 focus:outline-none focus:ring-0 font-dm"
               />
             </div>
             {mobileError && (
