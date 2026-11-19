@@ -39,7 +39,7 @@ export async function sendDailyLuckyDipReport(date:string){
    to:REPORT_RECIPIENTS.join(';'),
    subject:'NELBD Daily Lucky Dip Summary — '+date+' (10:30 PM SGT)',
    html:htmlReport(reportEmail(report))};
-  let response:Response|globalThis.Response;
+  let response:globalThis.Response;
   try{
    response=await fetch(flowUrl(),{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify(payload),signal:AbortSignal.timeout(20_000)});
