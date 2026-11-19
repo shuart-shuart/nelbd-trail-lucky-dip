@@ -2,10 +2,11 @@ import React,{useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useKiosk} from '../../context/KioskContext';
 import {EzlinkCompletion} from '../../components/kiosk/EzlinkCompletion';
+import {GoodieBagSuccess} from '../../components/kiosk/GoodieBagSuccess';
 export const ReturningRewardPage:React.FC=()=>{
  const navigate=useNavigate(),{session,resetSession}=useKiosk();
  const [phone,setPhone]=useState(''),[eligible,setEligible]=useState(false),[busy,setBusy]=useState(false),
-  [error,setError]=useState('');
+  [error,setError]=useState(''),[completed,setCompleted]=useState(false);
  const lookup=async()=>{
   if(!/^[89]\d{7}$/.test(phone)||busy)return;
   setBusy(true);setEligible(false);setError('');
@@ -23,6 +24,7 @@ export const ReturningRewardPage:React.FC=()=>{
    setEligible(true);
   }catch(e){setError(e instanceof Error?e.message:'Unable to verify phone');}finally{setBusy(false);}
  };
+ if(completed)return <GoodieBagSuccess />;
  return <div className="w-full my-auto space-y-3">
   <div className="bg-nel-pink text-nel-violet p-5 rounded-3xl space-y-3">
    <h1 className="font-nel text-2xl font-semibold">17 Stamps · Returning</h1>
@@ -37,7 +39,7 @@ export const ReturningRewardPage:React.FC=()=>{
       {busy?'CHECKING…':'FIND MY EARLIER REDEMPTION'}</button>}
     {error&&<p role="alert" className="text-sm font-semibold">{error}</p>}</>
   </div>
-  {eligible&&<EzlinkCompletion scenario="17_returning" mobile={'+65'+phone} site={session.site}/>}
+  {eligible&&<EzlinkCompletion scenario="17_returning" mobile={'+65'+phone} site={session.site} onDone={()=>setCompleted(true)}/>}
   {!eligible&&<button onClick={()=>{resetSession();navigate('/');}} className="w-full text-sm underline py-2">Back</button>}
   <p className="sr-only">Hub {session.site}</p>
  </div>;
