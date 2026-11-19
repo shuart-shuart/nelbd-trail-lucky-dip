@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { DailyDrawsByHubChart } from '../../components/admin/DailyDrawsByHubChart';
+import { DailyReportEmailTestPanel } from '../../components/admin/DailyReportEmailTestPanel';
 import {
   subscribeToPrizesWithInventory,
   subscribeToTodayDraws,
@@ -278,6 +279,8 @@ export const AdminDashboard: React.FC = () => {
           <DailyDrawsByHubChart kind="goodie-bags" />
         </div>
       )}
+
+      {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <DailyReportEmailTestPanel />}
 
       {/* Warnings & Operational Alerts (Low stock / Sold out) */}
       {(soldOutPrizes.length > 0 || lowStockPrizes.length > 0) && (
