@@ -9,7 +9,7 @@ export function EzlinkCompletion({scenario,mobile,site,onDone}:{scenario:Scenari
  const [pin,setPin]=useState(''),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[error,setError]=useState('');
  const complete=async()=>{
   if(busy||done||(pinRequired&&!/^\d{6,12}$/.test(pin)))return;
-  if(!window.confirm('Staff: Confirm the physical '+rewardName+' was handed over and hole punch 2 was applied? This records one reward against the selected hub.'))return;
+  if(!window.confirm('Staff: Confirm the '+rewardName+' was handed over and the second hole punch was applied?'))return;
   setBusy(true);setError('');
   try{
    const res=await fetch('/api/kiosk/quest-rewards/redeem',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -28,11 +28,11 @@ export function EzlinkCompletion({scenario,mobile,site,onDone}:{scenario:Scenari
  </section>;
  return <section className="rounded-2xl bg-nel-pink text-nel-violet p-4 sm:p-5 space-y-3">
   <h2 className="font-nel text-xl sm:text-2xl font-semibold">Staff: {rewardName} Handover</h2>
-  <p className="text-sm">Crew: check all 17 stamps and the booklet before handing over the {rewardName}.</p>
+  <p className="text-sm">Check the booklet for 17 stamps before handover.</p>
   {pinRequired&&<>
   <label className="block text-sm font-bold">Staff-only PIN
    <input type="password" autoComplete="off" inputMode="numeric" maxLength={12} value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,'').slice(0,12))}
-    className="mt-1 block w-full rounded-lg border-2 border-nel-violet bg-white p-3" placeholder="Enter staff PIN"/>
+    className="mt-1 block w-full rounded-lg border-2 border-nel-violet bg-nel-pink p-3 text-nel-violet" placeholder="Enter staff PIN"/>
   </label>
   </>}
   {error&&<p role="alert" className="text-sm font-bold">{error==='ALREADY_REDEEMED'?'This phone number has already redeemed the 17-stamp reward.':error==='OUT_OF_STOCK'?'No '+rewardName+' units remain. Ask an administrator.':error}</p>}
