@@ -155,7 +155,7 @@ export const ResultPage: React.FC = () => {
                   maxLength={254}
                   value={grabEmail}
                   onChange={event=>setGrabEmail(event.target.value)}
-                  className="w-full rounded-lg bg-white text-nel-violet text-base"
+                  className="w-full rounded-lg border-2 border-nel-violet bg-nel-pink text-nel-violet text-base focus:outline-none focus:ring-0"
                 />
                 <button
                   type="submit"
