@@ -1,13 +1,13 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {CheckCircle2,Gift} from 'lucide-react';
+import {CheckCircle2} from 'lucide-react';
 import {useKiosk} from '../../context/KioskContext';
 import nelbdLogo from '../../assets/img/nelbd-logo.png';
 
 const RETURN_SECONDS=45;
 
 /** Shown only after the server confirms the physical Goodie Bag handover. */
-export function GoodieBagSuccess({scenario}:{scenario:'17_fresh'|'17_returning'}){
+export function GoodieBagSuccess(){
  const navigate=useNavigate();
  const {resetSession}=useKiosk();
  const [remaining,setRemaining]=useState(RETURN_SECONDS);
@@ -30,18 +30,11 @@ export function GoodieBagSuccess({scenario}:{scenario:'17_fresh'|'17_returning'}
     <CheckCircle2 className="w-12 h-12 sm:w-14 sm:h-14" aria-hidden="true"/>
    </div>
    <div className="space-y-2">
-    <p className="font-dm text-sm font-bold uppercase tracking-widest">Collection complete</p>
-    <h1 className="font-nel text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">Your Goodie Bag is collected!</h1>
-    <p className="font-dm text-base sm:text-lg leading-relaxed">Thank you for exploring New Everyday Life, By Design.</p>
+    <h1 className="font-nel text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">Goodie Bag collected!</h1>
    </div>
-   <div className="rounded-2xl bg-white/70 px-4 py-4 flex items-center justify-center gap-3">
-    <Gift className="w-6 h-6 shrink-0" aria-hidden="true"/>
-    <span className="font-dm text-sm sm:text-base font-semibold">17-stamp NELBD Goodie Bag handover recorded</span>
-   </div>
-   {scenario==='17_fresh'&&<p className="font-dm text-sm">Your Lucky Dip has also been completed. Enjoy your rewards!</p>}
    <button type="button" onClick={finish}
     className="w-full min-h-[60px] rounded-xl bg-nel-violet text-nel-pink px-5 py-4 text-lg font-bold focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-nel-violet">
-    FINISH &amp; START NEXT PARTICIPANT
+    FINISH
    </button>
    <p className="font-dm text-xs text-nel-violet/70" aria-live="off">Returning to the start screen in {remaining}s</p>
   </section>
