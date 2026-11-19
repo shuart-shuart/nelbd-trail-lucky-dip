@@ -32,6 +32,58 @@ function htmlReport(text:string){
  '<h2 style="color:#7716B5">NELBD Daily Lucky Dip Summary</h2>'+
  '<pre style="white-space:pre-wrap;font:13px/1.65 monospace">'+esc(text)+'</pre></div>';
 }
+/** Super-admin-only smoke test. Entirely synthetic, sends to NELBD mailbox only.
+ * It does not read or write draws, vouchers, Goodie Bags or live prize stock.
+ */
+export async function sendDailyReportTestEmail(actor:string){
+ if(!configured())throw Error('POWER_AUTOMATE_EMAIL_FLOW_UNAVAILABLE');
+ const pool=getPool();
+ const deliveryId=randomUUID();
+ // Rate-limit all admins collectively: one test attempt every 60 seconds.
+ // The record is retained even when a flow fails, to prevent rapid retries.
+ const reserved=await pool.query(`INSERT INTO nelbd_daily_report_tests(delivery_attempt_id,requested_by,state)
+ SELECT $1,$2,'sending'
+ WHERE NOT EXISTS(SELECT 1 FROM nelbd_daily_report_tests
+   WHERE created_at>now()-interval '60 seconds')
+ RETURNING delivery_attempt_id`,[deliveryId,actor]);
+ if(!reserved.rowCount)throw Error('TEST_RATE_LIMITED');
+ const today=singaporeDate();
+ const html='<div style="font:14px/1.6 Arial,sans-serif;color:#270342">'+
+  '<h2>[TEST] NELBD Daily Lucky Dip Summary</h2>'+
+  '<p><strong>TEST ONLY — dummy figures. No real prize or participant data.</strong></p>'+
+  '<p>Daily report: '+today+' / 10:30 PM SGT</p>'+
+  '<p>Lucky Dip draws: PDD 2, PS 3, Total 5 (sample only)</p>'+
+  '<p>Goodie Bag redemptions: PDD 1, PS 1 (sample only)</p>'+
+  '<p>Remaining stock: not included in this test.</p>'+
+  '<p>Check that this message arrived from the existing NELBD Outlook shared mailbox.</p></div>';
+ const payload={deliveryId,ticketNumber:'NELBD-DAILY-TEST-'+deliveryId,
+  to:'nelbd2026@gmail.com',
+  subject:'[TEST ONLY] NELBD Daily Lucky Dip Email — '+today,html};
+ try{
+  const response=await fetch(flowUrl(),{method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify(payload),signal:AbortSignal.timeout(20_000)});
+  const state=response.ok?'accepted':'rejected';
+  await pool.query(`UPDATE nelbd_daily_report_tests SET state=$2,
+    last_error=CASE WHEN $2='rejected' THEN $3 ELSE NULL END
+    WHERE delivery_attempt_id=$1 AND state='sending'`,[deliveryId,state,'HTTP_'+response.status]);
+  if(!response.ok)throw Error('POWER_AUTOMATE_HTTP_'+response.status);
+  return {submitted:true,deliveryId,status:'accepted',recipient:'nelbd2026@gmail.com'};
+ }catch(e){
+  const error=e instanceof Error?e.message:'TRANSPORT_UNCERTAIN';
+  await pool.query(`UPDATE nelbd_daily_report_tests
+   SET state='uncertain',last_error=$2 WHERE delivery_attempt_id=$1 AND state='sending'`,
+   [deliveryId,error.slice(0,160)]).catch(()=>{});
+  throw e;
+ }
+}
+export async function latestDailyReportTest(){
+ const {rows}=await getPool().query(`SELECT state,created_at AS "createdAt",
+ last_error AS "lastError" FROM nelbd_daily_report_tests
+ ORDER BY created_at DESC LIMIT 1`);
+ return rows[0]||null;
+}
+
 export async function sendDailyLuckyDipReport(date:string){
  if(!enabled())throw Error('DAILY_POWER_AUTOMATE_REPORT_DISABLED');
  if(!configured())throw Error('POWER_AUTOMATE_EMAIL_FLOW_UNAVAILABLE');
@@ -98,6 +150,14 @@ export async function completeDailyReportDelivery(req:Request,res:Response){
       last_error=CASE WHEN $2='failed' THEN 'POWER_AUTOMATE_REPORTED_FAILED' ELSE NULL END
     WHERE delivery_attempt_id=$1 AND state='sending' RETURNING date`,[deliveryId,status]);
   if(rows.length)return res.json({accepted:true,status});
+  // A test uses its own ledger, not the unique per-calendar-day production ledger.
+  const test=await getPool().query(`UPDATE nelbd_daily_report_tests
+   SET state=$2,completed_at=now(),last_error=CASE WHEN $2='failed' THEN 'FLOW_REPORTED_FAILED' ELSE NULL END
+   WHERE delivery_attempt_id=$1 AND state IN ('sending','accepted','uncertain')
+   RETURNING delivery_attempt_id`,[deliveryId,status]);
+  if(test.rowCount)return res.json({accepted:true,status,test:true});
+  const oldTest=await getPool().query('SELECT state FROM nelbd_daily_report_tests WHERE delivery_attempt_id=$1',[deliveryId]);
+  if(oldTest.rows[0]?.state===status)return res.json({accepted:true,status,test:true,alreadyRecorded:true});
   const old=await getPool().query('SELECT state FROM nelbd_daily_report_delivery WHERE delivery_attempt_id=$1',[deliveryId]);
   if(old.rows[0]?.state===status)return res.json({accepted:true,status,alreadyRecorded:true});
   return res.status(409).json({error:'Unknown or conflicting daily report delivery'});
