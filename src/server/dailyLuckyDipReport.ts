@@ -1,7 +1,7 @@
 import {getPool} from './postgres.ts';
 
 export type Hub='PDD'|'PS';
-export const REPORT_RECIPIENTS=['nelbd2026@gmail.com','bernando@farm.sg'] as const;
+export const REPORT_RECIPIENTS=['nelbd2026@gmail.com','bernando@farm.sg','selwyn@farm.sg'] as const;
 const SGT='Asia/Singapore';
 const count=(n:unknown)=>Number(n)||0;
 export const singaporeDate=(d=new Date())=>new Intl.DateTimeFormat('en-CA',{timeZone:SGT,year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
