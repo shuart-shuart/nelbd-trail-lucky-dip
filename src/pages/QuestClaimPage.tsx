@@ -23,7 +23,7 @@ export function QuestClaimPage(){
   }catch(e){setMessage(e instanceof Error?e.message:'Submission failed');}
   finally{setBusy(false);}
  };
- return <main className="min-h-screen bg-[#270342] px-4 py-8 flex items-center justify-center font-dm">
+ return <main className="nel-public-form-root min-h-screen bg-[#270342] px-4 py-8 flex items-center justify-center font-dm">
   <section className="w-full max-w-lg bg-[#FF8DC6] text-[#270342] rounded-[24px] p-6 sm:p-9 border-[3px] border-[#7716B5]">
    <p className="text-xs font-bold tracking-[.2em] uppercase">NEL, BY DESIGN · QUEST</p>
    <h1 className="mt-3 text-3xl sm:text-4xl font-nel font-semibold">Congratulations, Quest Winner!</h1>

@@ -4,6 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import './styles/kiosk-responsive.css';
 import './styles/admin-responsive.css';
+import './styles/form-fields.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

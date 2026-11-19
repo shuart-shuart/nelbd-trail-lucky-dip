@@ -1,0 +1,65 @@
+/* NELBD-wide form entry system: one violet border, pink field surface.
+ * Applies to kiosk, staff portal and public Quest claim forms.
+ * Does not restyle checkboxes, radio controls, file pickers, range sliders
+ * or buttons. Imported last to override legacy global and utility styles.
+ */
+:where(.nel-kiosk-root, .nel-staff-root, .nel-public-form-root)
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select) {
+  background: #ff8dc6 !important;
+  color: #270342 !important;
+  border: 2px solid #270342 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+}
+
+/* Never add a second focus ring; change the existing border colour. */
+:where(.nel-kiosk-root, .nel-staff-root, .nel-public-form-root)
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select)
+  :is(:hover, :focus, :focus-visible, :active) {
+  background: #ff8dc6 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  border-width: 2px !important;
+}
+:where(.nel-kiosk-root, .nel-staff-root, .nel-public-form-root)
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select):focus-visible {
+  border-color: #7716b5 !important;
+}
+
+/* The +65 prefix and actual input form one combined field, not two boxes. */
+.nel-kiosk-root .kiosk-phone-field {
+  background: #ff8dc6 !important;
+  border: 2px solid #270342 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.nel-kiosk-root .kiosk-phone-field:focus-within {
+  border-color: #7716b5 !important;
+}
+.nel-kiosk-root .kiosk-phone-field input,
+.nel-kiosk-root .kiosk-phone-field input:is(:hover, :focus, :focus-visible, :active) {
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0;
+}
+
+/* Browser autofill must not introduce a white/grey rectangle. */
+:where(.nel-kiosk-root, .nel-staff-root, .nel-public-form-root)
+  input:-webkit-autofill,
+:where(.nel-kiosk-root, .nel-staff-root, .nel-public-form-root)
+  input:-webkit-autofill:is(:hover, :focus, :active) {
+  -webkit-text-fill-color: #270342 !important;
+  -webkit-box-shadow: 0 0 0 1000px #ff8dc6 inset !important;
+  caret-color: #270342;
+}
+
+/* Keep fields usable at mobile widths without Safari's input focus zoom. */
+:where(.nel-kiosk-root, .nel-staff-root, .nel-public-form-root)
+  :is(input, textarea, select) {
+  font-size: max(16px, 1rem);
+}
