@@ -9,7 +9,9 @@ async function main(){
   await pool.query(sql);
   const powerAutomateSql=readFileSync(resolve(process.cwd(),'migrations/018_daily_report_power_automate.sql'),'utf8');
   await pool.query(powerAutomateSql);
-  console.log('NELBD_DAILY_REPORT_POWER_AUTOMATE_SCHEMA_READY');
+  const testSql=readFileSync(resolve(process.cwd(),'migrations/019_daily_report_smoke_test.sql'),'utf8');
+  await pool.query(testSql);
+  console.log('NELBD_DAILY_REPORT_POWER_AUTOMATE_AND_TEST_SCHEMA_READY');
  }finally{await pool.end();}
 }
 main().catch(e=>{console.error(e instanceof Error?e.message:'Migration failed');process.exitCode=1});
