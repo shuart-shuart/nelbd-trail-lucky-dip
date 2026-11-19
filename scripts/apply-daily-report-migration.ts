@@ -7,7 +7,9 @@ async function main(){
  try{
   const sql=readFileSync(resolve(process.cwd(),'migrations/017_daily_lucky_dip_email.sql'),'utf8');
   await pool.query(sql);
-  console.log('NELBD_DAILY_REPORT_DELIVERY_SCHEMA_READY');
+  const powerAutomateSql=readFileSync(resolve(process.cwd(),'migrations/018_daily_report_power_automate.sql'),'utf8');
+  await pool.query(powerAutomateSql);
+  console.log('NELBD_DAILY_REPORT_POWER_AUTOMATE_SCHEMA_READY');
  }finally{await pool.end();}
 }
 main().catch(e=>{console.error(e instanceof Error?e.message:'Migration failed');process.exitCode=1});
