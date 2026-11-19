@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {buildDailyReport,reportEmail,singaporeDate} from './dailyLuckyDipReport.ts';
-import {FINAL_REPORT_DATE,SIGN_OFF_DATE,SIGN_OFF_MESSAGE} from './dailyLuckyDipEmail.ts';
+import {FINAL_REPORT_DATE,SIGN_OFF_DATE,SIGN_OFF_MESSAGE,sendDailyReportTestEmail,latestDailyReportTest} from './dailyLuckyDipEmail.ts';
 import {questManualOutlookRouter} from './questManualOutlookRoutes.ts';
 import {ezlinkAdminRouter} from './ezlinkAdminRoutes.ts';
 import {goodieBagAdminRouter} from './goodieBagAdminRoutes.ts';
@@ -28,6 +28,28 @@ postgresAdminRouter.post('/logout', async (req,res) => {
   try { await logoutAdmin(req,res); } catch { res.status(503).json({error:'Logout unavailable'}); }
 });
 postgresAdminRouter.get('/me',(req,res)=>res.json(res.locals.admin));
+/** Explicit super-admin smoke test, sends synthetic counts to the NELBD mailbox only. */
+postgresAdminRouter.post('/daily-report/send-test',async(req,res)=>{
+ res.setHeader('Cache-Control','no-store, private');
+ if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+ if(req.body?.confirmed!==true)return res.status(400).json({error:'Confirm sending one test email to nelbd2026@gmail.com'});
+ try{
+  const result=await sendDailyReportTestEmail(res.locals.admin.email);
+  return res.json(result);
+ }catch(e){
+  const reason=e instanceof Error?e.message:'UNKNOWN';
+  if(reason==='TEST_RATE_LIMITED')return res.status(429).json({error:'A test was attempted in the past 60 seconds. Please check Run history before trying again.'});
+  if(reason==='POWER_AUTOMATE_EMAIL_FLOW_UNAVAILABLE')return res.status(423).json({error:'Power Automate email trigger or callback secret is not configured on Render.'});
+  console.error('Daily report synthetic email test failed',reason);
+  return res.status(503).json({error:'Test handoff could not be confirmed. Check Power Automate Run history before retrying.'});
+ }
+});
+postgresAdminRouter.get('/daily-report/test-status',async(_req,res)=>{
+ res.setHeader('Cache-Control','no-store, private');
+ if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+ try{return res.json({latest:await latestDailyReportTest()});}
+ catch{return res.status(503).json({error:'Daily email test status unavailable'});}
+});
 /** Super-admin report preview. No participant PII, no email side effects. */
 postgresAdminRouter.get('/daily-report/preview',async(_req,res)=>{
  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
