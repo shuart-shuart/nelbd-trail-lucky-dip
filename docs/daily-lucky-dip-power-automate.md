@@ -49,8 +49,8 @@ After the Power Automate flow branch above is saved and tested, set both:
 - `NELBD_DAILY_REPORT_POWER_AUTOMATE_ENABLED=YES`
 
 The app checks Singapore time and attempts exactly once per date during
-22:30–22:44 SGT. Recipients are fixed to `nelbd2026@gmail.com` and
-`bernando@farm.sg`. The database ledger rejects additional attempts for a
+22:30–22:44 SGT. Recipients are fixed to `nelbd2026@gmail.com`, `bernando@farm.sg`, and
+`selwyn@farm.sg`. The database ledger rejects additional attempts for a
 date, including uncertain outcomes; investigate in Outlook and report logs
 rather than blindly resending.
 
