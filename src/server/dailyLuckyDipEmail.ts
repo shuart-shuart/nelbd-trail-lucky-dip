@@ -1,75 +1,106 @@
+import {randomUUID,createHash,timingSafeEqual} from 'node:crypto';
+import type {Request,Response} from 'express';
 import {getPool} from './postgres.ts';
 import {buildDailyReport,reportEmail,REPORT_RECIPIENTS,singaporeDate} from './dailyLuckyDipReport.ts';
 
-const recipients=[...REPORT_RECIPIENTS];
-const configured=()=>Boolean(process.env.NELBD_DAILY_REPORT_GMAIL_CLIENT_ID&&
- process.env.NELBD_DAILY_REPORT_GMAIL_CLIENT_SECRET&&process.env.NELBD_DAILY_REPORT_GMAIL_REFRESH_TOKEN);
-async function gmailSend(subject:string,body:string){
- if(!configured())throw Error('MISSING_GMAIL_SERVER_CREDENTIALS');
- const request=new URLSearchParams({
-  client_id:process.env.NELBD_DAILY_REPORT_GMAIL_CLIENT_ID!,
-  client_secret:process.env.NELBD_DAILY_REPORT_GMAIL_CLIENT_SECRET!,
-  refresh_token:process.env.NELBD_DAILY_REPORT_GMAIL_REFRESH_TOKEN!,
-  grant_type:'refresh_token'
- });
- const auth=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:request});
- if(!auth.ok)throw Error('GMAIL_OAUTH_REFRESH_FAILED:'+auth.status);
- const token=await auth.json() as {access_token?:string};
- if(!token.access_token)throw Error('GMAIL_OAUTH_TOKEN_MISSING');
- // Prevent message header injection. Gmail authenticates the From address.
- const raw=['From: NELBD Team <nelbd2026@gmail.com>',
-  'To: '+recipients.join(', '),
-  'Subject: '+subject.replace(/[\r\n]/g,''),
-  'MIME-Version: 1.0','Content-Type: text/plain; charset=utf-8',
-  'Content-Transfer-Encoding: 8bit','',''+body].join('\r\n');
- const response=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{
-  method:'POST',headers:{Authorization:'Bearer '+token.access_token,'Content-Type':'application/json'},
-  body:JSON.stringify({raw:Buffer.from(raw).toString('base64url')})
- });
- if(!response.ok)throw Error('GMAIL_SEND_FAILED:'+response.status);
- const sent=await response.json() as {id?:string};
- if(!sent.id)throw Error('GMAIL_SEND_RESPONSE_MISSING_ID');
- return sent.id;
+// Reuses the current Power Automate HTTP email-flow contract: deliveryId,
+// ticketNumber, to, subject, html. Requires a dedicated report branch in that
+// flow so voucher callbacks are not mistakenly used for operational summaries.
+const flowUrl=()=>process.env.NELBD_POWER_AUTOMATE_TRIGGER_URL||'';
+const enabled=()=>process.env.NELBD_DAILY_REPORT_ENABLED==='YES'
+ && process.env.NELBD_DAILY_REPORT_POWER_AUTOMATE_ENABLED==='YES';
+const callbackKey=()=>process.env.NELBD_POWER_AUTOMATE_CALLBACK_KEY||'';
+const configured=()=>{
+ try{
+  const url=new URL(flowUrl());
+  return url.protocol==='https:' && callbackKey().length>=32;
+ }catch{return false;}
+};
+const esc=(s:string)=>s.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'} as Record<string,string>)[ch]);
+function htmlReport(text:string){
+ return '<div style="font:14px/1.6 Arial,sans-serif;color:#270342">'+
+ '<h2 style="color:#7716B5">NELBD Daily Lucky Dip Summary</h2>'+
+ '<pre style="white-space:pre-wrap;font:13px/1.65 monospace">'+esc(text)+'</pre></div>';
 }
 export async function sendDailyLuckyDipReport(date:string){
- if(process.env.NELBD_DAILY_REPORT_ENABLED!=='YES')throw Error('DAILY_REPORT_DISABLED');
- if(!configured())throw Error('GMAIL_CREDENTIALS_NOT_CONFIGURED');
+ if(!enabled())throw Error('DAILY_POWER_AUTOMATE_REPORT_DISABLED');
+ if(!configured())throw Error('POWER_AUTOMATE_EMAIL_FLOW_UNAVAILABLE');
  const pool=getPool();
- // One row per day prevents repeated sends by restarts/concurrent instances.
- const reservation=await pool.query(`INSERT INTO nelbd_daily_report_delivery(date,state,started_at)
- VALUES($1,'sending',now())
- ON CONFLICT(date) DO UPDATE SET state='sending',started_at=now()
- WHERE nelbd_daily_report_delivery.state='failed'
- OR (nelbd_daily_report_delivery.state='sending' AND
-   nelbd_daily_report_delivery.started_at<now()-interval '20 minutes')
- RETURNING date`,[date]);
- if(!reservation.rowCount)return {skipped:true,reason:'Already sent or sending'};
+ const deliveryId=randomUUID();
+ // Never automatically retry an uncertain SMTP/flow outcome: it may duplicate
+ // emails. Deliberate reconciliation is required if the handoff was ambiguous.
+ const reserved=await pool.query(`INSERT INTO nelbd_daily_report_delivery(date,state,started_at,delivery_attempt_id)
+ VALUES($1,'sending',now(),$2)
+ ON CONFLICT(date) DO NOTHING RETURNING date`,[date,deliveryId]);
+ if(!reserved.rowCount)return {skipped:true,reason:'Already attempted daily delivery'};
  try{
   const report=await buildDailyReport(date);
-  const messageId=await gmailSend('NELBD Daily Lucky Dip Summary — '+date+' (10:30 PM SGT)',reportEmail(report));
+  const payload={deliveryId,ticketNumber:'NELBD-DAILY-'+date.replaceAll('-',''),
+   to:REPORT_RECIPIENTS.join(';'),
+   subject:'NELBD Daily Lucky Dip Summary — '+date+' (10:30 PM SGT)',
+   html:htmlReport(reportEmail(report))};
+  let response:globalThis.Response;
+  try{
+   response=await fetch(flowUrl(),{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),signal:AbortSignal.timeout(20_000)});
+  }catch{
+   await pool.query(`UPDATE nelbd_daily_report_delivery SET last_error='TRANSPORT_UNCERTAIN'
+    WHERE date=$1 AND state='sending'`,[date]);
+   throw Error('POWER_AUTOMATE_HANDOFF_UNCERTAIN');
+  }
+  if(!response.ok){
+   await pool.query(`UPDATE nelbd_daily_report_delivery SET last_error=$2
+    WHERE date=$1 AND state='sending'`,[date,'HTTP_'+response.status]);
+   throw Error('POWER_AUTOMATE_TRIGGER_REJECTED_'+response.status);
+  }
   await pool.query(`UPDATE nelbd_daily_report_delivery
-   SET state='sent',sent_at=now(),gmail_message_id=$2,last_error=NULL WHERE date=$1`,[date,messageId]);
-  console.log('NELBD_DAILY_REPORT_SENT',date);
-  return {sent:true,date};
+   SET last_error='TRIGGER_ACCEPTED_AWAITING_CALLBACK'
+   WHERE date=$1 AND state='sending'`,[date]);
+  console.info('NELBD daily report accepted by Power Automate; delivery callback pending',date);
+  return {accepted:true,date};
  }catch(e){
-  const error=e instanceof Error?e.message:'Unknown send error';
-  await pool.query(`UPDATE nelbd_daily_report_delivery SET state='failed',last_error=$2 WHERE date=$1`,[date,error.slice(0,300)]);
-  console.error('NELBD_DAILY_REPORT_FAILED',date,error);
+  // Report generation errors are retryable only by explicit operator action.
+  const message=e instanceof Error?e.message:'UNKNOWN';
+  await pool.query(`UPDATE nelbd_daily_report_delivery SET last_error=$2
+   WHERE date=$1 AND state='sending' AND last_error IS NULL`,[date,message.slice(0,200)]);
   throw e;
  }
 }
+export async function completeDailyReportDelivery(req:Request,res:Response){
+ res.setHeader('Cache-Control','no-store');
+ if(!configured())return res.status(423).json({error:'Power Automate delivery callback is not configured'});
+ const key=(req.get('authorization')||'').replace(/^Bearer /,'');
+ const expected=callbackKey();
+ if(key.length<32||expected.length<32)return res.status(401).json({error:'Unauthorized'});
+ const a=createHash('sha256').update(key).digest(),b=createHash('sha256').update(expected).digest();
+ if(!timingSafeEqual(a,b))return res.status(401).json({error:'Unauthorized'});
+ const {deliveryId,status}=req.body||{};
+ if(typeof deliveryId!=='string'||!/^[0-9a-f-]{36}$/i.test(deliveryId)||
+   !['sent','failed'].includes(status))return res.status(400).json({error:'Invalid callback'});
+ try{
+  const {rows}=await getPool().query(`UPDATE nelbd_daily_report_delivery
+    SET state=CASE WHEN $2='sent' THEN 'sent' ELSE 'failed' END,
+      sent_at=CASE WHEN $2='sent' THEN now() ELSE NULL END,
+      last_error=CASE WHEN $2='failed' THEN 'POWER_AUTOMATE_REPORTED_FAILED' ELSE NULL END
+    WHERE delivery_attempt_id=$1 AND state='sending' RETURNING date`,[deliveryId,status]);
+  if(rows.length)return res.json({accepted:true,status});
+  const old=await getPool().query('SELECT state FROM nelbd_daily_report_delivery WHERE delivery_attempt_id=$1',[deliveryId]);
+  if(old.rows[0]?.state===status)return res.json({accepted:true,status,alreadyRecorded:true});
+  return res.status(409).json({error:'Unknown or conflicting daily report delivery'});
+ }catch{return res.status(503).json({error:'Unable to record delivery callback'});}
+}
 export function startDailyLuckyDipEmailScheduler(){
- if(process.env.NELBD_DAILY_REPORT_ENABLED!=='YES'){console.log('NELBD daily email disabled');return;}
- if(!configured()){console.warn('NELBD daily email not enabled: server-side Gmail authorization missing');return;}
+ if(!enabled()){console.info('NELBD daily Power Automate summary disabled');return;}
+ if(!configured()){console.warn('NELBD daily Power Automate summary not configured; sender disabled');return;}
  let inProgress=false;
  const tick=async()=>{
   if(inProgress)return;
-  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Singapore',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
-  // Tolerate host restarts/delayed ticks for 15 minutes, but never report before cutoff.
-  if(!/^22:(3[0-9]|4[0-4])$/.test(parts))return;
+  const current=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Singapore',
+   hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
+  if(!/^22:(3[0-9]|4[0-4])$/.test(current))return;
   inProgress=true;
   try{await sendDailyLuckyDipReport(singaporeDate());}
-  catch(e){console.error('NELBD daily report tick unsuccessful',e instanceof Error?e.message:'unknown');}
+  catch(e){console.error('NELBD daily summary handoff not confirmed',e instanceof Error?e.message:'unknown');}
   finally{inProgress=false;}
  };
  void tick();const timer=setInterval(()=>void tick(),60_000);timer.unref();

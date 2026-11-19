@@ -35,7 +35,8 @@ postgresAdminRouter.get('/daily-report/preview',async(_req,res)=>{
   res.setHeader('Cache-Control','no-store, private');
   return res.json({report,text:reportEmail(report),scheduledAt:'22:30 Asia/Singapore',
    recipients:['nelbd2026@gmail.com','bernando@farm.sg'],
-   deliveryEnabled:process.env.NELBD_DAILY_REPORT_ENABLED==='YES'});
+   deliveryEnabled:process.env.NELBD_DAILY_REPORT_ENABLED==='YES' && process.env.NELBD_DAILY_REPORT_POWER_AUTOMATE_ENABLED==='YES',
+   transport:'Power Automate'});
  }catch(e){console.error('Daily report preview error',e instanceof Error?e.message:'unknown');
   return res.status(503).json({error:'Daily report preview unavailable'});}
 });
