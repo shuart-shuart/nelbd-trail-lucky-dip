@@ -216,6 +216,44 @@
   font-weight: 700;
 }
 
+/* One clean pink field surface throughout the public kiosk.
+   The field container supplies the sole border for +65 inputs; the internal
+   input has no browser inset, ring or outline. Focus is indicated by a subtle
+   violet-tinted background shift instead of adding a second outline. */
+.nel-kiosk-root input:not([type="checkbox"]):not([type="radio"]) {
+  background-color: var(--kiosk-pink);
+  color: var(--kiosk-violet);
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.nel-kiosk-root input:not([type="checkbox"]):not([type="radio"]):focus,
+.nel-kiosk-root input:not([type="checkbox"]):not([type="radio"]):focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.nel-kiosk-root .kiosk-phone-field {
+  background-color: var(--kiosk-pink);
+  border: 2px solid var(--kiosk-violet);
+  box-shadow: none;
+}
+.nel-kiosk-root .kiosk-phone-field input {
+  min-width: 0;
+  border: 0 !important;
+  border-radius: 0;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.nel-kiosk-root .kiosk-phone-field:focus-within,
+.nel-kiosk-root input:focus-visible {
+  background-color: color-mix(in srgb, var(--kiosk-pink) 87%, white);
+}
+/* Keep input backgrounds visibly pink even in autofill state. */
+.nel-kiosk-root input:-webkit-autofill {
+  -webkit-text-fill-color: var(--kiosk-violet);
+  -webkit-box-shadow: 0 0 0 1000px var(--kiosk-pink) inset;
+}
+
 /* 6. Draw screen */
 .nel-kiosk-root .kiosk-draw { gap: clamp(18px, 3dvh, 30px); }
 .nel-kiosk-root .kiosk-draw-header {
