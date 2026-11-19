@@ -3,8 +3,11 @@ import { Router } from 'express';
 import { withTransaction, getPool } from './postgres.ts';
 import { decryptGrabCredential } from './grabVoucherDecrypt.ts';
 import { GRAB_EMAIL_SUBJECT, renderGrabEmail } from './grabEmailTemplate.ts';
+import {completeDailyReportDelivery} from './dailyLuckyDipEmail.ts';
 
 export const grabDeliveryRouter = Router();
+// Separate callback from voucher fulfilment: a daily summary is never a Grab voucher.
+grabDeliveryRouter.post('/daily-report/complete',completeDailyReportDelivery);
 
 function enabled(): boolean {
   return process.env.NELBD_POWER_AUTOMATE_ENABLED === 'YES' &&
