@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {buildDailyReport,reportEmail,singaporeDate} from './dailyLuckyDipReport.ts';
 import {FINAL_REPORT_DATE,SIGN_OFF_DATE,SIGN_OFF_MESSAGE,sendDailyReportTestEmail,latestDailyReportTest} from './dailyLuckyDipEmail.ts';
+import {sendDailyCsvBackupTest} from './dailyCsvBackupEmail.ts';
 import {questManualOutlookRouter} from './questManualOutlookRoutes.ts';
 import {ezlinkAdminRouter} from './ezlinkAdminRoutes.ts';
 import {goodieBagAdminRouter} from './goodieBagAdminRoutes.ts';
@@ -49,6 +50,20 @@ postgresAdminRouter.get('/daily-report/test-status',async(_req,res)=>{
  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
  try{return res.json({latest:await latestDailyReportTest()});}
  catch{return res.status(503).json({error:'Daily email test status unavailable'});}
+});
+/** Explicit private operational CSV smoke test; only NELBD mailbox receives files. */
+postgresAdminRouter.post('/daily-report/send-csv-test',async(req,res)=>{
+ res.setHeader('Cache-Control','no-store, private');
+ if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+ if(req.body?.confirmed!==true)return res.status(400).json({error:'Confirm emailing sensitive backup CSV files to nelbd2026@gmail.com only'});
+ try{return res.json(await sendDailyCsvBackupTest(res.locals.admin.email));}
+ catch(e){
+  const reason=e instanceof Error?e.message:'UNKNOWN';
+  if(reason==='TEST_RATE_LIMITED')return res.status(429).json({error:'A test was attempted in the past 60 seconds. Check Run history before retrying.'});
+  if(reason==='CSV_BACKUP_FLOW_UNAVAILABLE')return res.status(423).json({error:'Power Automate flow is not configured'});
+  console.error('NELBD CSV backup test handoff failed',reason);
+  return res.status(503).json({error:'CSV backup email handoff not confirmed. Check Power Automate Run history before retrying.'});
+ }
 });
 /** Super-admin report preview. No participant PII, no email side effects. */
 postgresAdminRouter.get('/daily-report/preview',async(_req,res)=>{

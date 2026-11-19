@@ -31,6 +31,16 @@ export function DailyReportEmailTestPanel(){
   }catch(e){setError(e instanceof Error?e.message:'Could not submit test');await refresh();}
   finally{setBusy(false);}
  };
+ const sendCsv=async()=>{
+  if(!window.confirm('Send SIX current operational CSV exports to nelbd2026@gmail.com only? These contain participant contact information. Keep them private.'))return;
+  setBusy(true);setError('');setMessage('');
+  try{
+   const result=await api('send-csv-test',{method:'POST',body:JSON.stringify({confirmed:true})});
+   setMessage(result.accepted?'CSV backup test submitted to Power Automate. Check that six CSV ATTACHMENTS arrive in the NELBD inbox, not just the email body.':'CSV test not accepted.');
+   await refresh();
+  }catch(e){setError(e instanceof Error?e.message:'CSV test handoff failed');await refresh();}
+  finally{setBusy(false);}
+ };
  if(!authorized)return null;
  return <section className="rounded-2xl border border-[#E9E0F3] bg-white p-4 sm:p-6 shadow-sm mb-6" aria-label="Daily Lucky Dip Email Summary Test">
   <div className="flex items-center gap-2 mb-2">
@@ -43,10 +53,14 @@ export function DailyReportEmailTestPanel(){
    <button type="button" onClick={()=>void send()} disabled={busy} className="inline-flex items-center gap-2 min-h-11 rounded-xl bg-[#8B4AB2] px-4 py-2 text-sm font-bold text-white disabled:opacity-50">
     <Send className="w-4 h-4"/>{busy?'Submitting test…':'Send Test Email'}
    </button>
+   <button type="button" onClick={()=>void sendCsv()} disabled={busy} className="inline-flex items-center gap-2 min-h-11 rounded-xl border border-[#DED1E9] px-4 py-2 text-sm font-bold text-[#33224B]">
+    <Send className="w-4 h-4"/>Send CSV Backup Test
+   </button>
    <button type="button" onClick={()=>{setError('');void refresh()}} disabled={busy} className="inline-flex items-center gap-2 min-h-11 rounded-xl border border-[#DED1E9] px-4 py-2 text-sm font-bold text-[#33224B]">
     <RefreshCw className="w-4 h-4"/>Check Delivery Status
    </button>
   </div>
+  <p className="text-xs text-[#796C88] mt-3">Daily CSV email backup: pending Outlook attachment test; automatic CSV sending remains disabled. CSV exports include personal contact details and go only to the NELBD mailbox.</p>
   {status&&<p className="text-xs text-[#796C88] mt-3" role="status">Last test: <strong>{status.state}</strong> · {new Date(status.createdAt).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})} SGT
    {status.state==='accepted'?' (flow accepted request; email delivery not yet confirmed)':''}
    {status.lastError?' · '+status.lastError:''}</p>}

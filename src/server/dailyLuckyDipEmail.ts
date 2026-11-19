@@ -158,6 +158,15 @@ export async function completeDailyReportDelivery(req:Request,res:Response){
   if(test.rowCount)return res.json({accepted:true,status,test:true});
   const oldTest=await getPool().query('SELECT state FROM nelbd_daily_report_tests WHERE delivery_attempt_id=$1',[deliveryId]);
   if(oldTest.rows[0]?.state===status)return res.json({accepted:true,status,test:true,alreadyRecorded:true});
+  // CSV backup acknowledgements are tracked in a separate per-day ledger.
+  const csv=await getPool().query(`UPDATE nelbd_csv_backup_delivery SET
+    state=$2,sent_at=CASE WHEN $2='sent' THEN now() ELSE NULL END,
+    last_error=CASE WHEN $2='failed' THEN 'POWER_AUTOMATE_REPORTED_FAILED' ELSE NULL END
+    WHERE delivery_attempt_id=$1 AND state IN ('sending','accepted','uncertain')
+    RETURNING date`,[deliveryId,status]);
+  if(csv.rowCount)return res.json({accepted:true,status,csvBackup:true});
+  const oldCsv=await getPool().query('SELECT state FROM nelbd_csv_backup_delivery WHERE delivery_attempt_id=$1',[deliveryId]);
+  if(oldCsv.rows[0]?.state===status)return res.json({accepted:true,status,csvBackup:true,alreadyRecorded:true});
   const old=await getPool().query('SELECT state FROM nelbd_daily_report_delivery WHERE delivery_attempt_id=$1',[deliveryId]);
   if(old.rows[0]?.state===status)return res.json({accepted:true,status,alreadyRecorded:true});
   return res.status(409).json({error:'Unknown or conflicting daily report delivery'});

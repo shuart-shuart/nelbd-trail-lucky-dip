@@ -4,6 +4,7 @@ import {kioskQuestRewardsRouter} from './src/server/kioskQuestRewardsRoutes.ts';
 import {questViewRouter,questCallbackRouter} from './src/server/questFulfilmentRoutes.ts';
 import { checkPostgres } from './src/server/postgres.ts';
 import {startDailyLuckyDipEmailScheduler} from './src/server/dailyLuckyDipEmail.ts';
+import {startDailyCsvBackupScheduler} from './src/server/dailyCsvBackupEmail.ts';
 import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
 import { grabClaimRouter } from './src/server/grabClaimRoutes.ts';
 import { grabDeliveryRouter, startGrabDeliveryWorker } from './src/server/grabDeliveryRoutes.ts';
@@ -203,6 +204,7 @@ async function startServer() {
     console.log(`Lucky Dip server running on port ${PORT} [${isProduction ? 'production' : 'development'}]`);
     startGrabDeliveryWorker();
     startDailyLuckyDipEmailScheduler();
+  startDailyCsvBackupScheduler();
   });
 }
 
