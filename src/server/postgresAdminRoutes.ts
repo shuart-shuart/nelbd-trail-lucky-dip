@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {buildDailyReport,reportEmail,singaporeDate} from './dailyLuckyDipReport.ts';
+import {FINAL_REPORT_DATE,SIGN_OFF_DATE,SIGN_OFF_MESSAGE} from './dailyLuckyDipEmail.ts';
 import {questManualOutlookRouter} from './questManualOutlookRoutes.ts';
 import {ezlinkAdminRouter} from './ezlinkAdminRoutes.ts';
 import {goodieBagAdminRouter} from './goodieBagAdminRoutes.ts';
@@ -36,7 +37,8 @@ postgresAdminRouter.get('/daily-report/preview',async(_req,res)=>{
   return res.json({report,text:reportEmail(report),scheduledAt:'22:30 Asia/Singapore',
    recipients:['nelbd2026@gmail.com','bernando@farm.sg'],
    deliveryEnabled:process.env.NELBD_DAILY_REPORT_ENABLED==='YES' && process.env.NELBD_DAILY_REPORT_POWER_AUTOMATE_ENABLED==='YES',
-   transport:'Power Automate'});
+   transport:'Power Automate',finalReportDate:FINAL_REPORT_DATE,finalSignoffDate:SIGN_OFF_DATE,
+   finalSignoffMessage:SIGN_OFF_MESSAGE});
  }catch(e){console.error('Daily report preview error',e instanceof Error?e.message:'unknown');
   return res.status(503).json({error:'Daily report preview unavailable'});}
 });

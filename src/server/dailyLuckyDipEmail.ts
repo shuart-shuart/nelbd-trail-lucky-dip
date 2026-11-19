@@ -6,6 +6,16 @@ import {buildDailyReport,reportEmail,REPORT_RECIPIENTS,singaporeDate} from './da
 // Reuses the current Power Automate HTTP email-flow contract: deliveryId,
 // ticketNumber, to, subject, html. Requires a dedicated report branch in that
 // flow so voucher callbacks are not mistakenly used for operational summaries.
+// The event ends on 6 Dec 2026. On 7 Dec, send ONE final sign-off,
+// then never send another report from this integration.
+export const FINAL_REPORT_DATE='2026-12-06';
+export const SIGN_OFF_DATE='2026-12-07';
+export const SIGN_OFF_MESSAGE='PANG GANG LO!';
+export function dailyEmailKind(date:string):'report'|'signoff'|'off'{
+ if(date<=FINAL_REPORT_DATE)return 'report';
+ if(date===SIGN_OFF_DATE)return 'signoff';
+ return 'off';
+}
 const flowUrl=()=>process.env.NELBD_POWER_AUTOMATE_TRIGGER_URL||'';
 const enabled=()=>process.env.NELBD_DAILY_REPORT_ENABLED==='YES'
  && process.env.NELBD_DAILY_REPORT_POWER_AUTOMATE_ENABLED==='YES';
@@ -25,6 +35,9 @@ function htmlReport(text:string){
 export async function sendDailyLuckyDipReport(date:string){
  if(!enabled())throw Error('DAILY_POWER_AUTOMATE_REPORT_DISABLED');
  if(!configured())throw Error('POWER_AUTOMATE_EMAIL_FLOW_UNAVAILABLE');
+ if(date!==singaporeDate())throw Error('REPORT_DATE_MUST_BE_TODAY_IN_SGT');
+ const kind=dailyEmailKind(date);
+ if(kind==='off')return {skipped:true,reason:'Reporting ended after 7 December 2026'};
  const pool=getPool();
  const deliveryId=randomUUID();
  // Never automatically retry an uncertain SMTP/flow outcome: it may duplicate
@@ -34,11 +47,12 @@ export async function sendDailyLuckyDipReport(date:string){
  ON CONFLICT(date) DO NOTHING RETURNING date`,[date,deliveryId]);
  if(!reserved.rowCount)return {skipped:true,reason:'Already attempted daily delivery'};
  try{
-  const report=await buildDailyReport(date);
+  const isSignoff=kind==='signoff';
+  const emailText=isSignoff?SIGN_OFF_MESSAGE:reportEmail(await buildDailyReport(date));
   const payload={deliveryId,ticketNumber:'NELBD-DAILY-'+date.replaceAll('-',''),
    to:REPORT_RECIPIENTS.join(';'),
-   subject:'NELBD Daily Lucky Dip Summary — '+date+' (10:30 PM SGT)',
-   html:htmlReport(reportEmail(report))};
+   subject:isSignoff?SIGN_OFF_MESSAGE:'NELBD Daily Lucky Dip Summary — '+date+' (10:30 PM SGT)',
+   html:isSignoff?'<p>'+SIGN_OFF_MESSAGE+'</p>':htmlReport(emailText)};
   let response:globalThis.Response;
   try{
    response=await fetch(flowUrl(),{method:'POST',headers:{'Content-Type':'application/json'},
@@ -56,7 +70,7 @@ export async function sendDailyLuckyDipReport(date:string){
   await pool.query(`UPDATE nelbd_daily_report_delivery
    SET last_error='TRIGGER_ACCEPTED_AWAITING_CALLBACK'
    WHERE date=$1 AND state='sending'`,[date]);
-  console.info('NELBD daily report accepted by Power Automate; delivery callback pending',date);
+  console.info('NELBD daily email accepted by Power Automate; delivery callback pending',date,kind);
   return {accepted:true,date};
  }catch(e){
   // Report generation errors are retryable only by explicit operator action.
@@ -98,8 +112,10 @@ export function startDailyLuckyDipEmailScheduler(){
   const current=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Singapore',
    hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
   if(!/^22:(3[0-9]|4[0-4])$/.test(current))return;
+  const date=singaporeDate();
+  if(dailyEmailKind(date)==='off')return;
   inProgress=true;
-  try{await sendDailyLuckyDipReport(singaporeDate());}
+  try{await sendDailyLuckyDipReport(date);}
   catch(e){console.error('NELBD daily summary handoff not confirmed',e instanceof Error?e.message:'unknown');}
   finally{inProgress=false;}
  };
