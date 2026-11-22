@@ -210,30 +210,31 @@ postgresAdminRouter.get('/outlook-centre/:drawId/draft',async (req,res)=>{
   if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
   if(!/^[0-9a-f-]{36}$/i.test(req.params.drawId))return res.status(400).json({error:'Invalid draw'});
   try {
-    const {rows}=await getPool().query(`SELECT c.recipient_email,c.status,d.ticket_number,
-      v.code_ciphertext,v.url_ciphertext,v.expires_at
+    const {rows}=await getPool().query(`SELECT c.recipient_email,c.status,d.ticket_number,d.prize_id
       FROM grab_voucher_claim_sessions c
-      JOIN draws d ON d.id=c.draw_id
-      JOIN grab_voucher_codes v ON v.id=c.voucher_id AND v.assigned_draw_id=c.draw_id
-      WHERE c.draw_id=$1`,[req.params.drawId]);
+      JOIN draws d ON d.id=c.draw_id WHERE c.draw_id=$1`,[req.params.drawId]);
     if(!rows.length)return res.status(404).json({error:'Draft not found'});
     const row=rows[0];
     if(!row.recipient_email)return res.status(409).json({error:'Winner has not submitted an email'});
     if(row.status==='processing'||row.status==='sent'||process.env.NELBD_POWER_AUTOMATE_ENABLED==='YES')
       return res.status(409).json({error:'This voucher is managed by automatic fulfilment or has already been sent'});
-    const code=decryptGrabCredential(row.code_ciphertext);
-    const link=decryptGrabCredential(row.url_ciphertext);
-    const expires=new Intl.DateTimeFormat('en-SG',{timeZone:'Asia/Singapore',dateStyle:'long'}).format(new Date(row.expires_at));
+    const vouchers=await getPool().query(`SELECT code_ciphertext,url_ciphertext,expires_at
+      FROM grab_voucher_codes WHERE assigned_draw_id=$1 AND denomination_cents=500 ORDER BY id`,[req.params.drawId]);
+    const units=row.prize_id==='grab-voucher-50'?10:row.prize_id==='grab-voucher-10'?2:1;
+    if(vouchers.rows.length!==units)return res.status(409).json({error:'Incomplete Grab voucher bundle; ask an administrator to reconcile the codes'});
+    const lines=vouchers.rows.map((v,index)=>{
+      const code=decryptGrabCredential(v.code_ciphertext);
+      const link=decryptGrabCredential(v.url_ciphertext);
+      const expires=new Intl.DateTimeFormat('en-SG',{timeZone:'Asia/Singapore',dateStyle:'long'}).format(new Date(v.expires_at));
+      return 'S$5 voucher '+(index+1)+' of '+units+'\nGift code: '+code+
+        '\nOfficial Grab gift link: '+link+'\nExpires: '+expires+' (Singapore time)';
+    });
     res.setHeader('Cache-Control','no-store, private');
-    return res.json({to:row.recipient_email,subject:'Your NELBD S$5 Grab voucher',
-      body:`Congratulations on winning a S$5 Grab voucher at NELBD Trail Lucky Dip!
-
-Your Grab gift code: ${code}
-Your official Grab gift link: ${link}
-
-Open the link or redeem the code using the Grab app.
-Voucher expires: ${expires} (Singapore time).
-Please keep this email private. Terms and conditions apply.`,
+    return res.json({to:row.recipient_email,subject:'Your NELBD S$'+(units*5)+' Grab vouchers',
+      body:'Congratulations on winning S$'+(units*5)+' in Grab vouchers at NELBD Trail Lucky Dip!\n\n'+
+        'Your prize contains '+units+' separate S$5 voucher'+(units===1?'':'s')+'.\n\n'+
+        lines.join('\n\n')+'\n\nOpen each link or redeem each code using the Grab app.\n'+
+        'Please keep this email private. Terms and conditions apply.',
       status:row.status,ticketNumber:row.ticket_number});
   }catch {res.status(503).json({error:'Unable to prepare draft'});}
 });
