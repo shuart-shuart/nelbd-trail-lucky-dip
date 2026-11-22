@@ -76,8 +76,7 @@ export async function dispatchNextGrabVoucher(): Promise<void> {
          FROM grab_voucher_claim_sessions c
          JOIN draws d ON d.id=c.draw_id
          WHERE c.status='queued' AND c.recipient_email IS NOT NULL
-         ORDER BY c.created_at LIMIT 1 FOR UPDATE OF c SKIP LOCKED`,
-        [process.env.NELBD_GRAB_EARLY_TEST_20 === 'YES']
+         ORDER BY c.created_at LIMIT 1 FOR UPDATE OF c SKIP LOCKED`
       );
       if (!r.rows.length) return null;
       const item = r.rows[0];
