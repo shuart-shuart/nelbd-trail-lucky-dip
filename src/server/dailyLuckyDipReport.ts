@@ -55,7 +55,7 @@ export async function buildDailyReport(date:string):Promise<DailyReport>{
   drawTotals[site]+=n;drawTotals.total+=n;
  }
  const bag={PDD:0,PS:0,total:0};
- for(const row of goods.rows){if(row.site==='PDD'||row.site==='PS'){const n=count(row.n);bag[row.site]+=n;bag.total+=n;}}
+ for(const row of goods.rows){if(row.site==='PDD'||row.site==='PS'){const n=count(row.n);bag[row.site as Hub]+=n;bag.total+=n;}}
  const stockMap=new Map<string,{name:string;PDD:number;PS:number;total:number}>();
  const lowStock:{name:string;site:Hub;remaining:number}[]=[];
  for(const row of inventory.rows){
@@ -66,9 +66,9 @@ export async function buildDailyReport(date:string):Promise<DailyReport>{
   if(n<=10)lowStock.push({name,site,remaining:n});
  }
  const bagStock={PDD:0,PS:0,total:0};
- for(const row of goodieInventory.rows){if(row.site==='PDD'||row.site==='PS'){const n=count(row.remaining);bagStock[row.site]=n;bagStock.total+=n;if(n<=10)lowStock.push({name:'NELBD Goodie Bag',site:row.site,remaining:n});}}
+ for(const row of goodieInventory.rows){if(row.site==='PDD'||row.site==='PS'){const n=count(row.remaining);bagStock[row.site as Hub]=n;bagStock.total+=n;if(n<=10)lowStock.push({name:'NELBD Goodie Bag',site:row.site as Hub,remaining:n});}}
  const labels={test:0,error:0};
- for(const row of excluded.rows){if(row.classification==='test'||row.classification==='error')labels[row.classification]=count(row.n);}
+ for(const row of excluded.rows){if(row.classification==='test'||row.classification==='error')labels[row.classification as 'test'|'error']=count(row.n);}
  return {date,cutoff:'22:30',timezone:SGT,draws:drawTotals,goodieBags:bag,prizeBreakdown:[...prizeMap.values()].sort((a,b)=>a.name.localeCompare(b.name)),
   stock:[...stockMap.values()].sort((a,b)=>a.name.localeCompare(b.name)),goodieStock:bagStock,lowStock,excluded:labels};
 }
