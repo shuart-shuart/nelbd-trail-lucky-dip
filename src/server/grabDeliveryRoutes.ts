@@ -102,7 +102,7 @@ export async function dispatchNextGrabVoucher(): Promise<void> {
         [item.draw_id,deliveryId]
       );
       return {deliveryId,ticketNumber:item.ticket_number,to:item.recipient_email,
-        subject:expected===1?GRAB_EMAIL_SUBJECT:'Congratulations! Your NELBD S};
+        subject:expected===1?GRAB_EMAIL_SUBJECT:('Congratulations! Your NELBD S};
     });
     if (!delivery) return;
     // Dispatch deliberately at most once. A timeout or uncertain response remains
@@ -139,7 +139,7 @@ export function startGrabDeliveryWorker(): void {
   const interval = setInterval(() => {void dispatchNextGrabVoucher();},10000);
   interval.unref();
 }
-+(expected*5)+' Grab Vouchers',html};
++(expected*5)+' Grab Vouchers'),html};
     });
     if (!delivery) return;
     // Dispatch deliberately at most once. A timeout or uncertain response remains
