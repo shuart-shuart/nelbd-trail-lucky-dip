@@ -153,6 +153,22 @@ export function savePrizeSiteLimit(prizeId:string,site:string,dailyCap:number|nu
   });
 }
 
+export interface DrawProbabilitySnapshot {
+  available:boolean;
+  reason?:string;
+  calculatedAt?:string;
+  eligibleGrabCodes?:number;
+  topPrizeAvailable?:boolean;
+  sites:Array<{
+    site:'PDD'|'PS';
+    totalWeight:number;
+    prizes:Array<{prizeId:string;name:string;probability:number}>;
+  }>;
+}
+export function getCurrentDrawProbabilities():Promise<DrawProbabilitySnapshot> {
+  return json<DrawProbabilitySnapshot>('/draw-probabilities');
+}
+
 export interface GrabVoucherSummary {
   total:number;
   unassigned:number;
