@@ -81,6 +81,84 @@ postgresAdminRouter.get('/daily-report/preview',async(_req,res)=>{
 });
 
 
+/** Read-only effective odds for the next eligible draw at each hub.
+ * Mirrors postgresDrawEngine's eligibility filters and its stock-weighted
+ * low=1 / normal=2 / high=4 selection factors. No codes or PII returned.
+ */
+postgresAdminRouter.get('/draw-probabilities',async(_req,res)=>{
+  res.setHeader('Cache-Control','no-store');
+  if(process.env.DRAW_BACKEND!=='postgres')
+    return res.json({available:false,reason:'PostgreSQL is not the active draw backend',sites:[]});
+  try{
+    const throttlingEnabled=process.env.NELBD_PRIZE_THROTTLING_ENABLED==='YES';
+    const fulfilmentEnabled=process.env.NELBD_GRAB_FULFILMENT_ENABLED==='YES';
+    const earlyTestEnabled=process.env.NELBD_GRAB_EARLY_TEST_20==='YES';
+    const [top,eligible,codeCount]=await Promise.all([
+      getPool().query(`SELECT 1 FROM daily_top_awards
+        WHERE singapore_date=(now() AT TIME ZONE 'Asia/Singapore')::date LIMIT 1`),
+      getPool().query(`SELECT p.id AS "prizeId",p.name,p.tier,p.probability,
+        i.site,i.remaining_quantity AS "remainingQuantity"
+        FROM prizes p JOIN site_inventory i ON i.prize_id=p.id
+        WHERE p.is_active=true AND i.remaining_quantity>0
+          AND (p.tier<>'TOP' OR NOT EXISTS (
+             SELECT 1 FROM daily_top_awards
+             WHERE singapore_date=(now() AT TIME ZONE 'Asia/Singapore')::date))
+          AND (p.id NOT IN ('grab-voucher','grab-voucher-5','grab-voucher-10','grab-voucher-50')
+            OR ($1::boolean=true AND (
+              SELECT count(*) FROM grab_voucher_codes v
+              WHERE v.assigned_draw_id IS NULL AND v.denomination_cents=500
+                AND v.expires_at>now() AND (
+                  v.starts_at<=now() OR
+                  ($2::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
+                   AND v.starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
+                   AND (SELECT count(*) FROM grab_voucher_codes used
+                      WHERE used.assigned_at IS NOT NULL AND used.assigned_at<used.starts_at)<20)
+                )
+              ) >= CASE p.id WHEN 'grab-voucher-50' THEN 10
+                   WHEN 'grab-voucher-10' THEN 2 ELSE 1 END))
+          AND ($3::boolean=false OR NOT EXISTS (
+            SELECT 1 FROM prize_site_limits lim
+            WHERE lim.prize_id=p.id AND lim.site=i.site AND
+              (lim.paused OR (lim.daily_cap IS NOT NULL AND
+                (SELECT count(*) FROM draws d WHERE d.prize_id=p.id AND d.site=i.site
+                  AND (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date =
+                    (now() AT TIME ZONE 'Asia/Singapore')::date) >= lim.daily_cap))
+          ))
+        ORDER BY i.site,p.id`,[fulfilmentEnabled,earlyTestEnabled,throttlingEnabled]),
+      getPool().query(`SELECT count(*)::int AS count FROM grab_voucher_codes v
+        WHERE v.assigned_draw_id IS NULL AND v.denomination_cents=500
+          AND v.expires_at>now() AND (v.starts_at<=now() OR
+           ($1::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
+            AND v.starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
+            AND (SELECT count(*) FROM grab_voucher_codes used
+              WHERE used.assigned_at IS NOT NULL AND used.assigned_at<used.starts_at)<20))`,
+        [earlyTestEnabled])
+    ]);
+    const sites=(['PDD','PS'] as const).map(site=>{
+      const rows=eligible.rows.filter(row=>row.site===site);
+      const weights=rows.map(row=>({
+        prizeId:String(row.prizeId),name:String(row.name),
+        weight:Number(row.remainingQuantity)*(row.probability==='low'?1:row.probability==='high'?4:2)
+      }));
+      const totalWeight=weights.reduce((sum,row)=>sum+row.weight,0);
+      return {site,totalWeight,prizes:weights.map(row=>({
+        prizeId:row.prizeId,name:row.name,
+        probability:totalWeight>0?row.weight/totalWeight*100:0
+      }))};
+    });
+    return res.json({
+      available:true,sites,
+      eligibleGrabCodes:Number(codeCount.rows[0]?.count||0),
+      topPrizeAvailable:!top.rowCount,
+      calculatedAt:new Date().toISOString(),
+      note:'Next-draw probabilities from current saved inventory, availability, and active restrictions.'
+    });
+  }catch(e){
+    console.error('Draw probability preview unavailable',e);
+    return res.status(503).json({error:'Unable to calculate current draw probabilities'});
+  }
+});
+
 /** Prize-site throttles. NULL daily_cap means unlimited; zero means no awards. */
 postgresAdminRouter.get('/prize-limits',async (_req,res)=>{
   try {

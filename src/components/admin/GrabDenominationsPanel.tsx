@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import {getPostgresPrizesWithInventory,getGrabVoucherSummary} from '../../api/postgresAdminClient';
+import {getPostgresPrizesWithInventory,getGrabVoucherSummary,getCurrentDrawProbabilities,type DrawProbabilitySnapshot} from '../../api/postgresAdminClient';
 
 const denominations=[{id:'grab-voucher-5',amount:5,units:1},{id:'grab-voucher-10',amount:10,units:2},{id:'grab-voucher-50',amount:50,units:10}];
 type Cfg={enabled:boolean;probability:'low'|'normal'|'high';pddRemaining:number;psRemaining:number};
@@ -15,20 +15,30 @@ export function GrabDenominationsPanel(){
  const [settings,setSettings]=useState<State>({});
  const [configured,setConfigured]=useState(false);
  const [codes,setCodes]=useState<number|null>(null);
+ const [odds,setOdds]=useState<DrawProbabilitySnapshot|null>(null);
  const [busy,setBusy]=useState('');
  const [error,setError]=useState('');
  const [notice,setNotice]=useState('');
  const refresh=async()=>{
-   const [prizes,stock]=await Promise.all([getPostgresPrizesWithInventory(),getGrabVoucherSummary()]);
+   const [prizes,stock,probabilities]=await Promise.all([getPostgresPrizesWithInventory(),getGrabVoucherSummary(),getCurrentDrawProbabilities()]);
    const next:State={};
    for(const d of denominations){
      const prize=prizes.find(p=>p.id===d.id);
      if(prize)next[d.id]={enabled:prize.isActive,probability:prize.probability||'normal',
        pddRemaining:prize.pddInventory.remainingQuantity,psRemaining:prize.psInventory.remainingQuantity};
    }
-   setSettings(next);setConfigured(Object.keys(next).length===3);setCodes(stock.currently_eligible);
+   setSettings(next);setConfigured(Object.keys(next).length===3);setCodes(stock.currently_eligible);setOdds(probabilities);
  };
- useEffect(()=>{void refresh().catch(e=>setError(String(e)));},[]);
+ useEffect(()=>{
+  void refresh().catch(e=>setError(String(e)));
+  const timer=setInterval(()=>void getCurrentDrawProbabilities().then(setOdds).catch(()=>setOdds(null)),15000);
+  return ()=>clearInterval(timer);
+ },[]);
+ const percentage=(id:string,site:'PDD'|'PS')=>{
+   if(!odds?.available)return '—';
+   const value=odds.sites.find(row=>row.site===site)?.prizes.find(row=>row.prizeId===id)?.probability??0;
+   return Number.isFinite(value)?value.toPrecision(3)+'%':'—';
+ };
  const edit=(id:string,changes:Partial<Cfg>)=>setSettings(s=>({...s,[id]:{...s[id],...changes}}));
  const setup=async()=>{
   if(!window.confirm('Create $5, $10 and $50 Grab voucher prizes and retire the old single Grab Voucher from future draws? Existing claims remain valid.'))return;
@@ -48,6 +58,7 @@ export function GrabDenominationsPanel(){
   <p className="text-sm mt-1">Independently toggle $5 / $10 / $50 prizes, set PDD and PS award quantities and choose relative odds. Each winner receives 1, 2 or 10 separate $5 Grab codes.</p>
   <p className="text-sm font-semibold mt-2">Currently valid, unassigned $5 codes: {codes??'—'} (shared across all prizes).</p>
   <p className="text-xs mt-1">Low = half, normal = standard, high = twice the base draw weight. Actual chances also depend on the remaining stock of all other prizes.</p>
+  <p className="text-xs mt-1">Current win percentages are rounded to 3 significant figures and refresh every 15 seconds. These are next-draw odds using <strong>saved</strong> settings; edits take effect after Save. A dash means probability data is unavailable.</p>
   {error&&<p role="alert" className="text-red-700 font-bold text-sm mt-2">{error}</p>}
   {notice&&<p role="status" className="text-sm font-bold mt-2">{notice}</p>}
   {!configured?<button type="button" disabled={!!busy} onClick={()=>void setup()}
@@ -59,6 +70,11 @@ export function GrabDenominationsPanel(){
     return <div key={d.id} className="border rounded-xl border-[#CDBDD9] p-4 space-y-3">
      <h3 className="text-lg font-bold">{'$'}{d.amount} Grab Voucher</h3>
      <p className="text-xs">{d.units} × $5 codes per winner</p>
+     <div className="rounded-lg border border-[#CDBDD9] p-3" aria-label={"Current chance of winning $"+d.amount+" Grab Voucher"}>
+      <p className="text-xs font-semibold">Current chance of winning (3 s.f.)</p>
+      <div className="flex justify-between items-baseline gap-2 mt-2"><span className="text-sm">PDD</span><strong className="text-lg tabular-nums">{percentage(d.id,"PDD")}</strong></div>
+      <div className="flex justify-between items-baseline gap-2 mt-1"><span className="text-sm">PS</span><strong className="text-lg tabular-nums">{percentage(d.id,"PS")}</strong></div>
+     </div>
      <label className="flex items-center gap-2 text-sm font-semibold">
       <input type="checkbox" checked={s.enabled} onChange={e=>edit(d.id,{enabled:e.target.checked})}/> Enabled
      </label>
