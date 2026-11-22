@@ -28,6 +28,7 @@ import { processPngUpload } from '../../utils/imageUpload';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { InventoryPrizeLimits } from '../../components/admin/InventoryPrizeLimits';
 import { RewardInventoryPanel } from '../../components/admin/RewardInventoryPanel';
+import { GrabDenominationsPanel } from '../../components/admin/GrabDenominationsPanel';
 import {
   subscribeToPrizesWithInventory,
   subscribeToInventoryAdjustments,
@@ -917,6 +918,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           <span>{feedbackMessage.text}</span>
         </div>
       )}
+
+      {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <GrabDenominationsPanel />}
 
       {/* ------------------------------------------------------------- */}
       {/* INVENTORY SUMMARY CARDS ABOVE TABLE */}

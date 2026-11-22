@@ -2,7 +2,7 @@ import { randomUUID, createHash, timingSafeEqual } from 'node:crypto';
 import { Router } from 'express';
 import { withTransaction, getPool } from './postgres.ts';
 import { decryptGrabCredential } from './grabVoucherDecrypt.ts';
-import { GRAB_EMAIL_SUBJECT, renderGrabEmail } from './grabEmailTemplate.ts';
+import { GRAB_EMAIL_SUBJECT, renderGrabBundleEmail } from './grabEmailTemplate.ts';
 import {completeDailyReportDelivery} from './dailyLuckyDipEmail.ts';
 
 export const grabDeliveryRouter = Router();
@@ -72,23 +72,37 @@ export async function dispatchNextGrabVoucher(): Promise<void> {
     if (target.protocol !== 'https:') return;
     const delivery = await withTransaction(async client => {
       const r = await client.query(
-        `SELECT c.draw_id,c.recipient_email,v.code_ciphertext,v.url_ciphertext,d.ticket_number FROM grab_voucher_claim_sessions c JOIN grab_voucher_codes v ON v.id=c.voucher_id AND v.assigned_draw_id=c.draw_id JOIN draws d ON d.id=c.draw_id WHERE c.status='queued' AND c.recipient_email IS NOT NULL AND v.expires_at>now() AND (v.starts_at<=now() OR (
-          $1::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
-          AND v.starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
-          AND v.assigned_at IS NOT NULL AND v.assigned_at<v.starts_at))
-        ORDER BY c.created_at LIMIT 1 FOR UPDATE OF c SKIP LOCKED`,
+        `SELECT c.draw_id,c.recipient_email,d.ticket_number,d.prize_id
+         FROM grab_voucher_claim_sessions c
+         JOIN draws d ON d.id=c.draw_id
+         WHERE c.status='queued' AND c.recipient_email IS NOT NULL
+         ORDER BY c.created_at LIMIT 1 FOR UPDATE OF c SKIP LOCKED`,
         [process.env.NELBD_GRAB_EARLY_TEST_20 === 'YES']
       );
       if (!r.rows.length) return null;
       const item = r.rows[0];
-      const html = renderGrabEmail(decryptGrabCredential(item.code_ciphertext),decryptGrabCredential(item.url_ciphertext));
+      const expected=item.prize_id==='grab-voucher-50'?10:item.prize_id==='grab-voucher-10'?2:1;
+      const codes=await client.query(`SELECT code_ciphertext,url_ciphertext,starts_at,expires_at
+        FROM grab_voucher_codes WHERE assigned_draw_id=$1 AND denomination_cents=500
+        ORDER BY id`,[item.draw_id]);
+      if(codes.rows.length!==expected)throw Error('GRAB_BUNDLE_INCOMPLETE');
+      if(codes.rows.some(v=>new Date(v.expires_at).getTime()<=Date.now() ||
+        (new Date(v.starts_at).getTime()>Date.now() && !(
+          process.env.NELBD_GRAB_EARLY_TEST_20==='YES' &&
+          Date.now()<Date.parse('2026-11-13T16:00:00Z') &&
+          new Date(v.starts_at).getTime()===Date.parse('2026-11-13T16:00:00Z')))))
+        throw Error('GRAB_BUNDLE_NOT_ACTIVE');
+      const html=renderGrabBundleEmail(codes.rows.map(v=>({
+        code:decryptGrabCredential(v.code_ciphertext),
+        url:decryptGrabCredential(v.url_ciphertext)
+      })));
       const deliveryId = randomUUID();
       await client.query(
         "UPDATE grab_voucher_claim_sessions SET status='processing',delivery_attempt_id=$2,delivery_started_at=now(),updated_at=now() WHERE draw_id=$1 AND status='queued'",
         [item.draw_id,deliveryId]
       );
       return {deliveryId,ticketNumber:item.ticket_number,to:item.recipient_email,
-        subject:GRAB_EMAIL_SUBJECT,html};
+        subject:expected===1?GRAB_EMAIL_SUBJECT:('Congratulations! Your NELBD S$'+(expected*5)+' Grab Vouchers'),html};
     });
     if (!delivery) return;
     // Dispatch deliberately at most once. A timeout or uncertain response remains

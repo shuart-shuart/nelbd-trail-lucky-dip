@@ -113,6 +113,88 @@ postgresAdminRouter.put('/prize-limits/:prizeId/:site',async (req,res)=>{
 });
 
 
+/** Super-admin setup: creates denomination prize categories without issuing any codes.
+ * Existing draw history is preserved. Explicit setup retires the legacy
+ * single Grab prize from future draws; existing claim sessions remain valid.
+ */
+postgresAdminRouter.post('/grab-denominations/setup',async(req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  if(req.body?.confirmed!==true)return res.status(400).json({error:'Explicit setup confirmation required'});
+  try{
+    await withTransaction(async client=>{
+      await client.query('SELECT pg_advisory_xact_lock($1)',[7102026]);
+      // Original schema allowed only one voucher per draw. Explicit super-admin
+      // setup converts that link to one-to-many, preserving every existing code
+      // and historical assignment. Never change this constraint implicitly.
+      await client.query('ALTER TABLE grab_voucher_codes DROP CONSTRAINT IF EXISTS grab_voucher_codes_assigned_draw_id_key');
+      await client.query(`CREATE INDEX IF NOT EXISTS grab_voucher_codes_draw_idx
+        ON grab_voucher_codes(assigned_draw_id) WHERE assigned_draw_id IS NOT NULL`);
+      const original=await client.query("SELECT image_url FROM prizes WHERE id='grab-voucher'");
+      if(!original.rowCount)throw Error('LEGACY_GRAB_MISSING');
+      const variants=[
+        ['grab-voucher-5','$5 Grab Voucher','One S$5 Grab gift code'],
+        ['grab-voucher-10','$10 Grab Voucher Bundle','Two separate S$5 Grab gift codes'],
+        ['grab-voucher-50','$50 Grab Voucher Bundle','Ten separate S$5 Grab gift codes']
+      ];
+      for(const [id,name,description] of variants){
+        await client.query(`INSERT INTO prizes(id,name,description,tier,icon,image_url,is_active,probability)
+          VALUES($1,$2,$3,'STANDARD','gift',$4,false,'normal')
+          ON CONFLICT(id) DO NOTHING`,[id,name,description,original.rows[0].image_url||'']);
+        await client.query(`INSERT INTO site_inventory(prize_id,site)
+          SELECT $1,site FROM (VALUES('PDD'),('PS')) as hubs(site)
+          ON CONFLICT(prize_id,site) DO NOTHING`,[id]);
+        await client.query(`INSERT INTO prize_site_limits(prize_id,site)
+          SELECT $1,site FROM (VALUES('PDD'),('PS')) as hubs(site)
+          ON CONFLICT(prize_id,site) DO NOTHING`,[id]);
+      }
+      await client.query("UPDATE prizes SET is_active=false,updated_at=now() WHERE id='grab-voucher'");
+    });
+    return res.json({initialized:true});
+  }catch(e){
+    return res.status(e instanceof Error&&e.message==='LEGACY_GRAB_MISSING'?409:503)
+      .json({error:e instanceof Error&&e.message==='LEGACY_GRAB_MISSING'?'Existing Grab Voucher prize is missing':'Grab denominations setup failed'});
+  }
+});
+
+/** One atomic configuration save per prize: enable, relative odds, per-hub remaining award quantities.
+ * Counts are prize awards, not individual S$5 codes. Real code stock is checked at draw time.
+ */
+postgresAdminRouter.put('/grab-denominations/:id',async(req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  const {id}=req.params;
+  if(!['grab-voucher-5','grab-voucher-10','grab-voucher-50'].includes(id))
+    return res.status(404).json({error:'Unknown Grab voucher denomination'});
+  const {enabled,probability,pddRemaining,psRemaining}=req.body||{};
+  if(typeof enabled!=='boolean'||!['low','normal','high'].includes(probability)||
+    ![pddRemaining,psRemaining].every(n=>Number.isSafeInteger(n)&&n>=0&&n<=100000))
+    return res.status(400).json({error:'Invalid quantity, odds or enable setting'});
+  try{
+    await withTransaction(async client=>{
+      await client.query('SELECT pg_advisory_xact_lock($1)',[7102026]);
+      const prize=await client.query('SELECT id FROM prizes WHERE id=$1 FOR UPDATE',[id]);
+      if(!prize.rowCount)throw Error('DENOMINATION_NOT_INITIALIZED');
+      for(const [site,remaining] of [['PDD',pddRemaining],['PS',psRemaining]] as const){
+        const old=await client.query('SELECT remaining_quantity,claimed_quantity FROM site_inventory WHERE prize_id=$1 AND site=$2 FOR UPDATE',[id,site]);
+        if(!old.rowCount)throw Error('DENOMINATION_NOT_INITIALIZED');
+        const previous=Number(old.rows[0].remaining_quantity);
+        await client.query(`UPDATE site_inventory SET remaining_quantity=$3,
+          allocated_quantity=claimed_quantity+$3,updated_at=now()
+          WHERE prize_id=$1 AND site=$2`,[id,site,remaining]);
+        if(previous!==remaining){
+          await client.query(`INSERT INTO inventory_adjustments
+          (prize_id,site,previous_quantity,new_quantity,delta,reason,adjusted_by)
+          VALUES($1,$2,$3,$4,$5,'manual_adjustment',$6)`,
+          [id,site,previous,remaining,remaining-previous,res.locals.admin.email||'admin']);
+        }
+      }
+      await client.query('UPDATE prizes SET is_active=$2,probability=$3,updated_at=now() WHERE id=$1',
+        [id,enabled,probability]);
+    });
+    return res.json({saved:true});
+  }catch(e){return res.status(e instanceof Error&&e.message==='DENOMINATION_NOT_INITIALIZED'?409:503)
+    .json({error:e instanceof Error&&e.message==='DENOMINATION_NOT_INITIALIZED'?'Initialize Grab denominations first':'Unable to save Grab denomination'});}
+});
+
 /** Grab voucher credentials are never returned by inventory endpoints. */
 
 /** Outlook Email Centre: draft-only, manually sent by authorized staff. */
@@ -134,30 +216,31 @@ postgresAdminRouter.get('/outlook-centre/:drawId/draft',async (req,res)=>{
   if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
   if(!/^[0-9a-f-]{36}$/i.test(req.params.drawId))return res.status(400).json({error:'Invalid draw'});
   try {
-    const {rows}=await getPool().query(`SELECT c.recipient_email,c.status,d.ticket_number,
-      v.code_ciphertext,v.url_ciphertext,v.expires_at
+    const {rows}=await getPool().query(`SELECT c.recipient_email,c.status,d.ticket_number,d.prize_id
       FROM grab_voucher_claim_sessions c
-      JOIN draws d ON d.id=c.draw_id
-      JOIN grab_voucher_codes v ON v.id=c.voucher_id AND v.assigned_draw_id=c.draw_id
-      WHERE c.draw_id=$1`,[req.params.drawId]);
+      JOIN draws d ON d.id=c.draw_id WHERE c.draw_id=$1`,[req.params.drawId]);
     if(!rows.length)return res.status(404).json({error:'Draft not found'});
     const row=rows[0];
     if(!row.recipient_email)return res.status(409).json({error:'Winner has not submitted an email'});
     if(row.status==='processing'||row.status==='sent'||process.env.NELBD_POWER_AUTOMATE_ENABLED==='YES')
       return res.status(409).json({error:'This voucher is managed by automatic fulfilment or has already been sent'});
-    const code=decryptGrabCredential(row.code_ciphertext);
-    const link=decryptGrabCredential(row.url_ciphertext);
-    const expires=new Intl.DateTimeFormat('en-SG',{timeZone:'Asia/Singapore',dateStyle:'long'}).format(new Date(row.expires_at));
+    const vouchers=await getPool().query(`SELECT code_ciphertext,url_ciphertext,expires_at
+      FROM grab_voucher_codes WHERE assigned_draw_id=$1 AND denomination_cents=500 ORDER BY id`,[req.params.drawId]);
+    const units=row.prize_id==='grab-voucher-50'?10:row.prize_id==='grab-voucher-10'?2:1;
+    if(vouchers.rows.length!==units)return res.status(409).json({error:'Incomplete Grab voucher bundle; ask an administrator to reconcile the codes'});
+    const lines=vouchers.rows.map((v,index)=>{
+      const code=decryptGrabCredential(v.code_ciphertext);
+      const link=decryptGrabCredential(v.url_ciphertext);
+      const expires=new Intl.DateTimeFormat('en-SG',{timeZone:'Asia/Singapore',dateStyle:'long'}).format(new Date(v.expires_at));
+      return 'S$5 voucher '+(index+1)+' of '+units+'\nGift code: '+code+
+        '\nOfficial Grab gift link: '+link+'\nExpires: '+expires+' (Singapore time)';
+    });
     res.setHeader('Cache-Control','no-store, private');
-    return res.json({to:row.recipient_email,subject:'Your NELBD S$5 Grab voucher',
-      body:`Congratulations on winning a S$5 Grab voucher at NELBD Trail Lucky Dip!
-
-Your Grab gift code: ${code}
-Your official Grab gift link: ${link}
-
-Open the link or redeem the code using the Grab app.
-Voucher expires: ${expires} (Singapore time).
-Please keep this email private. Terms and conditions apply.`,
+    return res.json({to:row.recipient_email,subject:'Your NELBD S$'+(units*5)+' Grab vouchers',
+      body:'Congratulations on winning S$'+(units*5)+' in Grab vouchers at NELBD Trail Lucky Dip!\n\n'+
+        'Your prize contains '+units+' separate S$5 voucher'+(units===1?'':'s')+'.\n\n'+
+        lines.join('\n\n')+'\n\nOpen each link or redeem each code using the Grab app.\n'+
+        'Please keep this email private. Terms and conditions apply.',
       status:row.status,ticketNumber:row.ticket_number});
   }catch {res.status(503).json({error:'Unable to prepare draft'});}
 });

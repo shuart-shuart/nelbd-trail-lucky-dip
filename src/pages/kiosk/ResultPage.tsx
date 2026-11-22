@@ -25,6 +25,13 @@ export const ResultPage: React.FC = () => {
 
   const drawResult = session.drawResult;
   const prizeName = drawResult?.prize?.name || 'Exclusive Trail Reward';
+  const prizeLabel = prizeName.trim().replace(/[!?.]+$/, '');
+  const lowerPrizeLabel = prizeLabel.toLowerCase();
+  const prizeWinnerMessage = lowerPrizeLabel.startsWith('pick a merch')
+    ? "You've won your choice of merchandise!"
+    : lowerPrizeLabel === 'plaza singapura vouchers' || /\bvouchers$/.test(lowerPrizeLabel)
+      ? `You've won ${prizeLabel}!`
+      : `You've won ${/^(nelbd\b|ez[- ]?link\b|[aeiou])/i.test(prizeLabel) ? 'an' : 'a'} ${prizeLabel}!`;
   const ticketNumber = drawResult?.ticketNumber || session.ticketNumber;
 
   const [prizeImageUrl, setPrizeImageUrl] = useState<string | undefined>(
@@ -131,14 +138,9 @@ export const ResultPage: React.FC = () => {
               />
             </div>
           )}
-          <div className="w-full text-center">
-            <h1 className="kiosk-result-title font-nel font-semibold text-nel-violet tracking-tight leading-[1.08] text-balance">
-              You've won!
-            </h1>
-            <p className="font-dm font-bold text-nel-violet text-[clamp(1.05rem,4vw,1.75rem)] leading-tight mt-1 text-balance">
-              {prizeName}
-            </p>
-          </div>
+          <h1 className="kiosk-result-title font-nel font-semibold text-nel-violet tracking-tight leading-[1.08] text-center text-balance">
+            {prizeWinnerMessage}
+          </h1>
         </section>
 
         {drawResult?.voucherClaimToken && (
