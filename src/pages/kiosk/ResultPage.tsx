@@ -29,9 +29,9 @@ export const ResultPage: React.FC = () => {
   const lowerPrizeLabel = prizeLabel.toLowerCase();
   const prizeWinnerMessage = lowerPrizeLabel.startsWith('pick a merch')
     ? "You've won your choice of merchandise!"
-    : lowerPrizeLabel === 'plaza singapura vouchers' || /\\bvouchers$/.test(lowerPrizeLabel)
+    : lowerPrizeLabel === 'plaza singapura vouchers' || /\bvouchers$/.test(lowerPrizeLabel)
       ? `You've won ${prizeLabel}!`
-      : `You've won ${/^(nelbd\\b|ez[- ]?link\\b|[aeiou])/i.test(prizeLabel) ? 'an' : 'a'} ${prizeLabel}!`;
+      : `You've won ${/^(nelbd\b|ez[- ]?link\b|[aeiou])/i.test(prizeLabel) ? 'an' : 'a'} ${prizeLabel}!`;
   const ticketNumber = drawResult?.ticketNumber || session.ticketNumber;
 
   const [prizeImageUrl, setPrizeImageUrl] = useState<string | undefined>(
