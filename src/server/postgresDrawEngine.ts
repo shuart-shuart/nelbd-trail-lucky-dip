@@ -19,6 +19,12 @@ function getSingaporeCalendarDate(date = new Date()): string {
   return `${part('year')}-${part('month')}-${part('day')}`;
 }
 
+const GRAB_UNITS: Record<string, number> = {
+  'grab-voucher': 1,
+  'grab-voucher-5': 1,
+  'grab-voucher-10': 2,
+  'grab-voucher-50': 10,
+};
 const failure = (error: string): DrawResultScreenPayload => ({ success: false, error });
 
 /**
@@ -62,15 +68,18 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
        FROM prizes p JOIN site_inventory i ON i.prize_id=p.id
        WHERE p.is_active=true AND i.site=$1 AND i.remaining_quantity>0
          AND (p.tier<>'TOP' OR $2::boolean=false)
-         AND (p.id<>'grab-voucher' OR ($4::boolean=true AND EXISTS (
-           SELECT 1 FROM grab_voucher_codes v WHERE v.assigned_draw_id IS NULL
-             AND v.expires_at>now() AND (
-               v.starts_at<=now() OR
-               ($5::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
-                AND v.starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
-                AND (SELECT count(*) FROM grab_voucher_codes used
+         AND (p.id NOT IN ('grab-voucher','grab-voucher-5','grab-voucher-10','grab-voucher-50')
+           OR ($4::boolean=true AND (
+             SELECT count(*) FROM grab_voucher_codes v
+             WHERE v.assigned_draw_id IS NULL AND v.denomination_cents=500
+               AND v.expires_at>now() AND (
+                 v.starts_at<=now() OR
+                 ($5::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
+                   AND v.starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
+                   AND (SELECT count(*) FROM grab_voucher_codes used
                      WHERE used.assigned_at IS NOT NULL AND used.assigned_at < used.starts_at)<20)
-             ))))
+               )
+           ) >= CASE p.id WHEN 'grab-voucher-50' THEN 10 WHEN 'grab-voucher-10' THEN 2 ELSE 1 END))
          AND ($3::boolean=false OR NOT EXISTS (
            SELECT 1 FROM prize_site_limits lim WHERE lim.prize_id=p.id AND lim.site=i.site
            AND (lim.paused OR (lim.daily_cap IS NOT NULL AND
@@ -102,20 +111,23 @@ export async function executePostgresLuckyDipDraw(request: DrawExecutionRequest)
        VALUES($1,$2,$3,$4,$5,$6,'claimed',$7,now()) RETURNING id,drawn_at`,
       [ticket,participant.rows[0].id,chosen.id,chosen.name,chosen.tier,site,kioskId]);
     let voucherClaimToken: string | undefined;
-    if (chosen.id === 'grab-voucher' && process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES') {
+    if (GRAB_UNITS[chosen.id] && process.env.NELBD_GRAB_FULFILMENT_ENABLED === 'YES') {
+      // One draw = one claim/email, backed atomically by 1, 2 or 10 distinct S$5 codes.
+      const units=GRAB_UNITS[chosen.id];
       const available = await client.query(`SELECT id FROM grab_voucher_codes
-        WHERE assigned_draw_id IS NULL AND expires_at>now()
+        WHERE assigned_draw_id IS NULL AND denomination_cents=500 AND expires_at>now()
           AND (starts_at<=now() OR (
             $1::boolean=true AND now()<TIMESTAMPTZ '2026-11-14 00:00:00+08'
             AND starts_at=TIMESTAMPTZ '2026-11-14 00:00:00+08'
             AND (SELECT count(*) FROM grab_voucher_codes used
                  WHERE used.assigned_at IS NOT NULL AND used.assigned_at < used.starts_at)<20))
-        ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`,[process.env.NELBD_GRAB_EARLY_TEST_20 === 'YES']);
-      if (!available.rowCount) throw new Error('GRAB_STOCK_EXHAUSTED');
+        ORDER BY id LIMIT $2 FOR UPDATE SKIP LOCKED`,
+        [process.env.NELBD_GRAB_EARLY_TEST_20 === 'YES',units]);
+      if (available.rows.length !== units) throw new Error('GRAB_STOCK_EXHAUSTED');
       voucherClaimToken=crypto.randomBytes(32).toString('base64url');
       const tokenHash=crypto.createHash('sha256').update(voucherClaimToken).digest('hex');
-      await client.query('UPDATE grab_voucher_codes SET assigned_draw_id=$1,assigned_at=now() WHERE id=$2',
-        [draw.rows[0].id,available.rows[0].id]);
+      await client.query('UPDATE grab_voucher_codes SET assigned_draw_id=$1,assigned_at=now() WHERE id = ANY($2::uuid[])',
+        [draw.rows[0].id,available.rows.map(v=>v.id)]);
       await client.query(`INSERT INTO grab_voucher_claim_sessions(draw_id,voucher_id,token_hash)
         VALUES($1,$2,$3)`,[draw.rows[0].id,available.rows[0].id,tokenHash]);
     }
