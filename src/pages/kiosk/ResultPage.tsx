@@ -131,9 +131,14 @@ export const ResultPage: React.FC = () => {
               />
             </div>
           )}
-          <h1 className="kiosk-result-title font-nel font-semibold text-nel-violet tracking-tight leading-[1.08] text-center text-balance">
-            You've won {prizeName}!
-          </h1>
+          <div className="w-full text-center">
+            <h1 className="kiosk-result-title font-nel font-semibold text-nel-violet tracking-tight leading-[1.08] text-balance">
+              You've won!
+            </h1>
+            <p className="font-dm font-bold text-nel-violet text-[clamp(1.05rem,4vw,1.75rem)] leading-tight mt-1 text-balance">
+              {prizeName}
+            </p>
+          </div>
         </section>
 
         {drawResult?.voucherClaimToken && (
