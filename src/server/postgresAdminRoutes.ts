@@ -123,6 +123,12 @@ postgresAdminRouter.post('/grab-denominations/setup',async(req,res)=>{
   try{
     await withTransaction(async client=>{
       await client.query('SELECT pg_advisory_xact_lock($1)',[7102026]);
+      // Original schema allowed only one voucher per draw. Explicit super-admin
+      // setup converts that link to one-to-many, preserving every existing code
+      // and historical assignment. Never change this constraint implicitly.
+      await client.query('ALTER TABLE grab_voucher_codes DROP CONSTRAINT IF EXISTS grab_voucher_codes_assigned_draw_id_key');
+      await client.query(`CREATE INDEX IF NOT EXISTS grab_voucher_codes_draw_idx
+        ON grab_voucher_codes(assigned_draw_id) WHERE assigned_draw_id IS NOT NULL`);
       const original=await client.query("SELECT image_url FROM prizes WHERE id='grab-voucher'");
       if(!original.rowCount)throw Error('LEGACY_GRAB_MISSING');
       const variants=[
