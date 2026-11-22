@@ -102,44 +102,7 @@ export async function dispatchNextGrabVoucher(): Promise<void> {
         [item.draw_id,deliveryId]
       );
       return {deliveryId,ticketNumber:item.ticket_number,to:item.recipient_email,
-        subject:expected===1?GRAB_EMAIL_SUBJECT:('Congratulations! Your NELBD S};
-    });
-    if (!delivery) return;
-    // Dispatch deliberately at most once. A timeout or uncertain response remains
-    // processing for manual reconciliation, never an automatic repeat email.
-    let response: Response;
-    try {
-      response = await fetch(endpoint,{method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(delivery),signal:AbortSignal.timeout(20000)});
-    } catch {
-      await recordGrabHandoff(delivery.deliveryId,'TRANSPORT_ERROR');
-      console.error('Grab delivery handoff transport failure; manual reconciliation required');
-      return;
-    }
-    if (response.ok) {
-      // Power Automate 2xx only confirms the HTTP trigger accepted the handoff.
-      // Actual sending requires the separate /automation/complete callback.
-      await recordGrabHandoff(delivery.deliveryId,'TRIGGER_ACCEPTED_AWAITING_CALLBACK');
-      console.info('Grab delivery handoff accepted; awaiting Power Automate callback',response.status);
-    } else {
-      await recordGrabHandoff(delivery.deliveryId,'HTTP_'+response.status);
-      // Do not log the raw Microsoft response, trigger URL, voucher code or recipient.
-      console.error('Grab delivery handoff rejected by Power Automate HTTP',response.status);
-    }
-  } catch {
-    console.error('Grab delivery handoff needs staff reconciliation');
-  } finally {
-    polling = false;
-  }
-}
-
-export function startGrabDeliveryWorker(): void {
-  if (!enabled()) return;
-  const interval = setInterval(() => {void dispatchNextGrabVoucher();},10000);
-  interval.unref();
-}
-+(expected*5)+' Grab Vouchers'),html};
+        subject:expected===1?GRAB_EMAIL_SUBJECT:('Congratulations! Your NELBD S$'+(expected*5)+' Grab Vouchers'),html};
     });
     if (!delivery) return;
     // Dispatch deliberately at most once. A timeout or uncertain response remains
