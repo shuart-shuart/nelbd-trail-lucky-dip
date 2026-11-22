@@ -70,35 +70,10 @@ export function GrabDenominationsPanel(){
     return <div key={d.id} className="border rounded-xl border-[#CDBDD9] p-4 space-y-3">
      <h3 className="text-lg font-bold">{'$'}{d.amount} Grab Voucher</h3>
      <p className="text-xs">{d.units} × $5 codes per winner</p>
-     <div className="rounded-lg border border-[#CDBDD9] p-3" aria-label={'Current chance of winning 
-     <label className="flex items-center gap-2 text-sm font-semibold">
-      <input type="checkbox" checked={s.enabled} onChange={e=>edit(d.id,{enabled:e.target.checked})}/> Enabled
-     </label>
-     <label className="block text-sm font-semibold">Relative odds
-      <select className="block mt-1 w-full p-2 rounded-lg" value={s.probability}
-       onChange={e=>edit(d.id,{probability:e.target.value as Cfg['probability']})}>
-       <option value="low">Low (½×)</option><option value="normal">Normal (1×)</option><option value="high">High (2×)</option>
-      </select>
-     </label>
-     {(['PDD','PS'] as const).map(site=><label className="block text-sm font-semibold" key={site}>
-      {site} — awards remaining
-      <input type="number" min={0} max={100000} step={1} className="block mt-1 w-full p-2 rounded-lg"
-       value={site==='PDD'?s.pddRemaining:s.psRemaining}
-       onChange={e=>edit(d.id,site==='PDD'?{pddRemaining:Number(e.target.value)}:{psRemaining:Number(e.target.value)})}/>
-     </label>)}
-     <button type="button" disabled={!!busy} onClick={()=>void save(d.id)}
-      className="w-full bg-[#270342] text-white font-bold rounded-lg p-2 disabled:opacity-50">
-      {busy===d.id?'Saving…':'Save settings'}
-     </button>
-    </div>;
-   })}
-  </div>}
- </section>;
-}
-+d.amount+' Grab Voucher'}>
-       <p className="text-xs font-semibold">Current chance of winning (3 s.f.)</p>
-       <div className="flex justify-between items-baseline gap-2 mt-2"><span className="text-sm">PDD</span><strong className="text-lg tabular-nums">{percentage(d.id,'PDD')}</strong></div>
-       <div className="flex justify-between items-baseline gap-2 mt-1"><span className="text-sm">PS</span><strong className="text-lg tabular-nums">{percentage(d.id,'PS')}</strong></div>
+     <div className="rounded-lg border border-[#CDBDD9] p-3" aria-label={"Current chance of winning $"+d.amount+" Grab Voucher"}>
+      <p className="text-xs font-semibold">Current chance of winning (3 s.f.)</p>
+      <div className="flex justify-between items-baseline gap-2 mt-2"><span className="text-sm">PDD</span><strong className="text-lg tabular-nums">{percentage(d.id,"PDD")}</strong></div>
+      <div className="flex justify-between items-baseline gap-2 mt-1"><span className="text-sm">PS</span><strong className="text-lg tabular-nums">{percentage(d.id,"PS")}</strong></div>
      </div>
      <label className="flex items-center gap-2 text-sm font-semibold">
       <input type="checkbox" checked={s.enabled} onChange={e=>edit(d.id,{enabled:e.target.checked})}/> Enabled
