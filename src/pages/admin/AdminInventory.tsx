@@ -46,7 +46,7 @@ import {
   InventoryAdjustment,
 } from '../../firebase/types';
 import { useAuth } from '../../context/AuthContext';
-import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining, updatePostgresStarting, updatePostgresPrize, getPrizeSiteLimits, type PrizeSiteLimit } from '../../api/postgresAdminClient';
+import { getPostgresPrizesWithInventory, getPostgresInventoryAdjustments, updatePostgresRemaining, updatePostgresStarting, updatePostgresPrize, getPrizeSiteLimits, getCurrentDrawProbabilities, type PrizeSiteLimit, type DrawProbabilitySnapshot } from '../../api/postgresAdminClient';
 
 interface ParsedCsvItem {
   rowNumber: number;
@@ -69,6 +69,20 @@ export const AdminInventory: React.FC = () => {
   const [togglingPrizeId, setTogglingPrizeId] = useState<string | null>(null);
   const [adjustments, setAdjustments] = useState<InventoryAdjustment[]>([]);
   const [prizeLimits,setPrizeLimits]=useState<PrizeSiteLimit[]>([]);
+  const [drawOdds,setDrawOdds]=useState<DrawProbabilitySnapshot|null>(null);
+  useEffect(()=>{if(import.meta.env.VITE_DATA_BACKEND!=='postgres')return;
+    let mounted=true;
+    const refresh=()=>void getCurrentDrawProbabilities().then(value=>{if(mounted)setDrawOdds(value);}).catch(()=>{if(mounted)setDrawOdds(null);});
+    refresh();const timer=setInterval(refresh,15000);
+    return()=>{mounted=false;clearInterval(timer);};
+  },[]);
+  const winOdds=(id:string,site:'PDD'|'PS')=>{
+    if(!drawOdds?.available)return '—';
+    const source=drawOdds.sites.find(s=>s.site===site);
+    if(!source||source.totalWeight<=0)return '—';
+    const n=source.prizes.find(p=>p.prizeId===id)?.probability??0;
+    return n===0?'0.00%':n.toPrecision(3)+'%';
+  };
   useEffect(()=>{if(import.meta.env.VITE_DATA_BACKEND!=='postgres')return;
     const refresh=()=>void getPrizeSiteLimits().then(setPrizeLimits).catch(()=>{});
     refresh();const timer=setInterval(refresh,15000);return()=>clearInterval(timer);
@@ -1111,7 +1125,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 </span>
               </div>
               <span className="text-[11px] text-[#8A7C96]">
-                Double-click a remaining quantity to edit · Click a prize name for probability · PDD + PS totals
+                Double-click remaining stock to edit · Next-draw win probabilities (3 s.f.)
               </span>
             </div>
 
@@ -1237,6 +1251,11 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                           </div>
                         </div>
 
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 px-2.5 py-2 rounded-lg bg-[#F1EAF9] text-xs font-semibold text-[#33224B]" aria-label={'Current winning probabilities for '+prize.name}>
+                          <span>Win chance PDD: <strong className="tabular-nums">{winOdds(prize.id,'PDD')}</strong></span>
+                          <span>PS: <strong className="tabular-nums">{winOdds(prize.id,'PS')}</strong></span>
+                        </div>
+
                         {/* Site Breakdown micro-grid (PDD vs PS) */}
                         <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                           {/* PDD Station */}
@@ -1299,6 +1318,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         <th className="px-4 py-3.5 text-center">PS Daily Cap</th>
                         <th className="px-4 py-3.5 text-center">Total Starting</th>
                         <th className="px-4 py-3.5 text-center">Total Remaining</th>
+                        <th className="px-4 py-3.5 text-center min-w-32" title="Current next-draw odds, rounded to 3 significant figures">Win probability</th>
                         <th className="px-4 py-3.5 text-center">Active</th>
                       </tr>
                     </thead>
@@ -1409,6 +1429,14 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                             {/* Total Remaining Quantity */}
                             <td className="px-4 py-4 text-center font-black text-[#8649AC] bg-nel-input/30">
                               {totalRem}
+                            </td>
+
+                            {/* Current PDD / PS probability, same eligibility as the draw engine */}
+                            <td className="px-4 py-4 text-center font-sans text-xs whitespace-nowrap">
+                              <div className="flex flex-col gap-1 text-[#33224B] tabular-nums">
+                                <span><strong>PDD</strong> {winOdds(prize.id,'PDD')}</span>
+                                <span><strong>PS</strong> {winOdds(prize.id,'PS')}</span>
+                              </div>
                             </td>
 
                             {/* Active */}
