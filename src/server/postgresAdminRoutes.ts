@@ -113,6 +113,82 @@ postgresAdminRouter.put('/prize-limits/:prizeId/:site',async (req,res)=>{
 });
 
 
+/** Super-admin setup: creates denomination prize categories without issuing any codes.
+ * Existing draw history is preserved. Explicit setup retires the legacy
+ * single Grab prize from future draws; existing claim sessions remain valid.
+ */
+postgresAdminRouter.post('/grab-denominations/setup',async(req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  if(req.body?.confirmed!==true)return res.status(400).json({error:'Explicit setup confirmation required'});
+  try{
+    await withTransaction(async client=>{
+      await client.query('SELECT pg_advisory_xact_lock($1)',[7102026]);
+      const original=await client.query("SELECT image_url FROM prizes WHERE id='grab-voucher'");
+      if(!original.rowCount)throw Error('LEGACY_GRAB_MISSING');
+      const variants=[
+        ['grab-voucher-5','$5 Grab Voucher','One S$5 Grab gift code'],
+        ['grab-voucher-10','$10 Grab Voucher Bundle','Two separate S$5 Grab gift codes'],
+        ['grab-voucher-50','$50 Grab Voucher Bundle','Ten separate S$5 Grab gift codes']
+      ];
+      for(const [id,name,description] of variants){
+        await client.query(`INSERT INTO prizes(id,name,description,tier,icon,image_url,is_active,probability)
+          VALUES($1,$2,$3,'STANDARD','gift',$4,false,'normal')
+          ON CONFLICT(id) DO NOTHING`,[id,name,description,original.rows[0].image_url||'']);
+        await client.query(`INSERT INTO site_inventory(prize_id,site)
+          SELECT $1,site FROM (VALUES('PDD'),('PS')) as hubs(site)
+          ON CONFLICT(prize_id,site) DO NOTHING`,[id]);
+        await client.query(`INSERT INTO prize_site_limits(prize_id,site)
+          SELECT $1,site FROM (VALUES('PDD'),('PS')) as hubs(site)
+          ON CONFLICT(prize_id,site) DO NOTHING`,[id]);
+      }
+      await client.query("UPDATE prizes SET is_active=false,updated_at=now() WHERE id='grab-voucher'");
+    });
+    return res.json({initialized:true});
+  }catch(e){
+    return res.status(e instanceof Error&&e.message==='LEGACY_GRAB_MISSING'?409:503)
+      .json({error:e instanceof Error&&e.message==='LEGACY_GRAB_MISSING'?'Existing Grab Voucher prize is missing':'Grab denominations setup failed'});
+  }
+});
+
+/** One atomic configuration save per prize: enable, relative odds, per-hub remaining award quantities.
+ * Counts are prize awards, not individual S$5 codes. Real code stock is checked at draw time.
+ */
+postgresAdminRouter.put('/grab-denominations/:id',async(req,res)=>{
+  if(res.locals.admin.role!=='super_admin')return res.status(403).json({error:'Super admin required'});
+  const {id}=req.params;
+  if(!['grab-voucher-5','grab-voucher-10','grab-voucher-50'].includes(id))
+    return res.status(404).json({error:'Unknown Grab voucher denomination'});
+  const {enabled,probability,pddRemaining,psRemaining}=req.body||{};
+  if(typeof enabled!=='boolean'||!['low','normal','high'].includes(probability)||
+    ![pddRemaining,psRemaining].every(n=>Number.isSafeInteger(n)&&n>=0&&n<=100000))
+    return res.status(400).json({error:'Invalid quantity, odds or enable setting'});
+  try{
+    await withTransaction(async client=>{
+      await client.query('SELECT pg_advisory_xact_lock($1)',[7102026]);
+      const prize=await client.query('SELECT id FROM prizes WHERE id=$1 FOR UPDATE',[id]);
+      if(!prize.rowCount)throw Error('DENOMINATION_NOT_INITIALIZED');
+      for(const [site,remaining] of [['PDD',pddRemaining],['PS',psRemaining]] as const){
+        const old=await client.query('SELECT remaining_quantity,claimed_quantity FROM site_inventory WHERE prize_id=$1 AND site=$2 FOR UPDATE',[id,site]);
+        if(!old.rowCount)throw Error('DENOMINATION_NOT_INITIALIZED');
+        const previous=Number(old.rows[0].remaining_quantity);
+        await client.query(`UPDATE site_inventory SET remaining_quantity=$3,
+          allocated_quantity=claimed_quantity+$3,updated_at=now()
+          WHERE prize_id=$1 AND site=$2`,[id,site,remaining]);
+        if(previous!==remaining){
+          await client.query(`INSERT INTO inventory_adjustments
+          (prize_id,site,previous_quantity,new_quantity,delta,reason,adjusted_by)
+          VALUES($1,$2,$3,$4,$5,'manual_adjustment',$6)`,
+          [id,site,previous,remaining,remaining-previous,res.locals.admin.email||'admin']);
+        }
+      }
+      await client.query('UPDATE prizes SET is_active=$2,probability=$3,updated_at=now() WHERE id=$1',
+        [id,enabled,probability]);
+    });
+    return res.json({saved:true});
+  }catch(e){return res.status(e instanceof Error&&e.message==='DENOMINATION_NOT_INITIALIZED'?409:503)
+    .json({error:e instanceof Error&&e.message==='DENOMINATION_NOT_INITIALIZED'?'Initialize Grab denominations first':'Unable to save Grab denomination'});}
+});
+
 /** Grab voucher credentials are never returned by inventory endpoints. */
 
 /** Outlook Email Centre: draft-only, manually sent by authorized staff. */
