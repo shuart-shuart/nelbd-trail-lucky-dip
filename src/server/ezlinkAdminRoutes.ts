@@ -28,7 +28,7 @@ ezlinkAdminRouter.get('/inventory',async(_req,res)=>{
    PDD:{total:0,redeemed:0,remaining:0},PS:{total:0,redeemed:0,remaining:0}};
   for(const row of rows)if(row.site==='PDD'||row.site==='PS'){
    const total=Number(row.total),redeemed=Number(row.redeemed);
-   bySite[row.site]={total,redeemed,remaining:total-redeemed};
+   bySite[row.site as 'PDD'|'PS']={total,redeemed,remaining:total-redeemed};
   }
   return res.json({total:Number(global.total),redeemed:Number(global.redeemed),
    remaining:Number(global.total)-Number(global.redeemed),
