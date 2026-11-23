@@ -242,38 +242,39 @@ export const AdminInventory: React.FC = () => {
   // -------------------------------------------------------------
   // INVENTORY SUMMARY CALCULATIONS
   // -------------------------------------------------------------
+  const merchandisePrizes = prizes.filter(p=>!p.id.startsWith('grab-voucher'));
   // TOTAL INVENTORY
-  const totalStartingQuantity = prizes.reduce(
+  const totalStartingQuantity = merchandisePrizes.reduce(
     (sum, p) => sum + p.pddInventory.allocatedQuantity + p.psInventory.allocatedQuantity,
     0
   );
-  const totalRemainingQuantity = prizes.reduce(
+  const totalRemainingQuantity = merchandisePrizes.reduce(
     (sum, p) => sum + p.pddInventory.remainingQuantity + p.psInventory.remainingQuantity,
     0
   );
 
   // PDD
-  const pddStartingQuantity = prizes.reduce(
+  const pddStartingQuantity = merchandisePrizes.reduce(
     (sum, p) => sum + p.pddInventory.allocatedQuantity,
     0
   );
-  const pddRemainingQuantity = prizes.reduce(
+  const pddRemainingQuantity = merchandisePrizes.reduce(
     (sum, p) => sum + p.pddInventory.remainingQuantity,
     0
   );
 
   // PS
-  const psStartingQuantity = prizes.reduce(
+  const psStartingQuantity = merchandisePrizes.reduce(
     (sum, p) => sum + p.psInventory.allocatedQuantity,
     0
   );
-  const psRemainingQuantity = prizes.reduce(
+  const psRemainingQuantity = merchandisePrizes.reduce(
     (sum, p) => sum + p.psInventory.remainingQuantity,
     0
   );
 
   // TOP PRIZE (Calculated for TOP tier prizes)
-  const topPrizes = prizes.filter((p) => p.tier === 'TOP');
+  const topPrizes = merchandisePrizes.filter((p) => p.tier === 'TOP');
   const topStartingQuantity = topPrizes.reduce(
     (sum, p) => sum + p.pddInventory.allocatedQuantity + p.psInventory.allocatedQuantity,
     0
@@ -948,6 +949,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
       {/* ------------------------------------------------------------- */}
       {/* INVENTORY SUMMARY CARDS ABOVE TABLE */}
       {/* ------------------------------------------------------------- */}
+{activeTab === 'inventory' && (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {/* TOTAL INVENTORY */}
         <div className="bg-white border border-nel-purple/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
@@ -1048,6 +1050,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           </div>
         </div>
       </div>
+      )}
 
       {/* Lucky Dip, audit, and guaranteed reward tabs */}
       <div className="flex flex-wrap items-center gap-2 mb-4 border-b border-nel-purple/40 pb-2">
@@ -1274,6 +1277,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                         <div className="flex flex-wrap gap-x-4 gap-y-1 px-2.5 py-2 rounded-lg bg-[#F1EAF9] text-xs font-semibold text-[#33224B]" aria-label={'Current winning probabilities for '+prize.name}>
                           <span>Win chance PDD: <strong className="tabular-nums">{winOdds(prize.id,'PDD')}</strong></span>
                           <span>PS: <strong className="tabular-nums">{winOdds(prize.id,'PS')}</strong></span>
+                           <span>Total: <strong className="tabular-nums">{totalWinOdds(prize.id)}</strong></span>
                         </div>
 
                         {/* Site Breakdown micro-grid (PDD vs PS) */}
