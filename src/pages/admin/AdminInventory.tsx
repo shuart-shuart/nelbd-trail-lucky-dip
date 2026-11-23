@@ -83,6 +83,16 @@ export const AdminInventory: React.FC = () => {
     const n=source.prizes.find(p=>p.prizeId===id)?.probability??0;
     return n===0?'0.00%':n.toPrecision(3)+'%';
   };
+  // Pooled probability: combine the two hubs' saved next-draw weights,
+  // rather than adding two percentages together.
+  const totalWinOdds=(id:string)=>{
+    if(!drawOdds?.available)return '—';
+    const hubs=drawOdds.sites.filter(s=>s.totalWeight>0);
+    const totalWeight=hubs.reduce((sum,s)=>sum+s.totalWeight,0);
+    if(totalWeight<=0)return '—';
+    const weighted=hubs.reduce((sum,s)=>sum+(s.prizes.find(p=>p.prizeId===id)?.probability??0)*s.totalWeight,0)/totalWeight;
+    return weighted===0?'0.00%':weighted.toPrecision(3)+'%';
+  };
   useEffect(()=>{if(import.meta.env.VITE_DATA_BACKEND!=='postgres')return;
     const refresh=()=>void getPrizeSiteLimits().then(setPrizeLimits).catch(()=>{});
     refresh();const timer=setInterval(refresh,15000);return()=>clearInterval(timer);
@@ -90,7 +100,7 @@ export const AdminInventory: React.FC = () => {
   const capLabel=(id:string,site:'PDD'|'PS')=>{const row=prizeLimits.find(x=>x.prizeId===id&&x.site===site);
     return !row?'—':row.paused?'Paused':row.dailyCap===null?'Unlimited':row.awardedToday+' / '+row.dailyCap;
   };
-  const [activeTab, setActiveTab] = useState<'inventory' | 'adjustments' | 'goodie-bags'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'grab-vouchers' | 'adjustments' | 'goodie-bags'>('inventory');
 
   // Search and Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -284,7 +294,7 @@ export const AdminInventory: React.FC = () => {
       statusFilter === 'ALL' ||
       (statusFilter === 'ACTIVE' && prize.isActive) ||
       (statusFilter === 'INACTIVE' && !prize.isActive);
-    return matchQuery && matchTier && matchStatus;
+    return !prize.id.startsWith('grab-voucher') && matchQuery && matchTier && matchStatus;
   });
 
   // Filtered Audit Adjustments Table
@@ -933,7 +943,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
         </div>
       )}
 
-      {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <GrabDenominationsPanel />}
+
 
       {/* ------------------------------------------------------------- */}
       {/* INVENTORY SUMMARY CARDS ABOVE TABLE */}
@@ -1050,8 +1060,16 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           }`}
         >
           <Gift className="w-4 h-4 shrink-0" />
-          <span>Inventory ({prizes.length})</span>
+          <span>Merchandise</span>
         </button>
+        {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <button
+          onClick={() => setActiveTab('grab-vouchers')}
+          className={`px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold transition cursor-pointer ${
+            activeTab === 'grab-vouchers'
+              ? 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/40 shadow'
+              : 'text-[#8A7C96] hover:text-[#33224B]'
+          }`}
+        ><span>Grab Vouchers</span></button>}
         <button
           onClick={() => setActiveTab('adjustments')}
           className={`px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
@@ -1078,6 +1096,8 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
       {activeTab === 'goodie-bags' ? (
         <RewardInventoryPanel />
+      ) : activeTab === 'grab-vouchers' ? (
+        <GrabDenominationsPanel />
       ) : activeTab === 'inventory' ? (
         <>
           {/* Search & Filter Toolbar */}
@@ -1125,7 +1145,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                 </span>
               </div>
               <span className="text-[11px] text-[#8A7C96]">
-                Double-click remaining stock to edit · Next-draw win probabilities (3 s.f.)
+                Remaining / Starting · Edit either number below · Next-draw odds (3 s.f.)
               </span>
             </div>
 
@@ -1304,72 +1324,69 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                   })}
                 </div>
 
-                {/* 2. DESKTOP FULL TABLE VIEW (Visible on lg screens and up) */}
+                {/* 2. Compact desktop inventory: Remaining / Starting, with both editable. */}
                 <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full text-left text-sm text-[#645574]">
                     <thead className="bg-nel-input/80 text-[11px] uppercase font-bold text-[#8A7C96] border-b border-nel-purple/40">
                       <tr>
-                        <th className="px-5 py-3.5">Prize Name</th>
-                        <th className="px-4 py-3.5 text-center">PDD Starting</th>
-                        <th className="px-4 py-3.5 text-center">PDD Remaining</th>
-                        <th className="px-4 py-3.5 text-center">PDD Daily Cap</th>
-                        <th className="px-4 py-3.5 text-center">PS Starting</th>
-                        <th className="px-4 py-3.5 text-center">PS Remaining</th>
-                        <th className="px-4 py-3.5 text-center">PS Daily Cap</th>
-                        <th className="px-4 py-3.5 text-center">Total Starting</th>
-                        <th className="px-4 py-3.5 text-center">Total Remaining</th>
-                        <th className="px-4 py-3.5 text-center min-w-32" title="Current next-draw odds, rounded to 3 significant figures">Win probability</th>
-                        <th className="px-4 py-3.5 text-center">Active</th>
+                        <th className="px-5 py-3">Prize</th>
+                        <th className="px-3 py-3 text-center" title="Remaining / Starting">PDD</th>
+                        <th className="px-3 py-3 text-center" title="Remaining / Starting">PS</th>
+                        <th className="px-3 py-3 text-center" title="Combined Remaining / Starting">Total</th>
+                        <th className="px-3 py-3 text-center">Win probability</th>
+                        <th className="px-3 py-3 text-center">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-nel-purple/20/80 font-mono">
-                      {filteredPrizes.map((prize) => {
-                        const pddStart = prize.pddInventory.allocatedQuantity;
-                        const pddRem = prize.pddInventory.remainingQuantity;
-                        const psStart = prize.psInventory.allocatedQuantity;
-                        const psRem = prize.psInventory.remainingQuantity;
-                        const totalStart = pddStart + psStart;
-                        const totalRem = pddRem + psRem;
-
-                        const drawCount = drawCountsByPrize[prize.id] || 0;
-                        const adjCount = adjustmentCountsByPrize[prize.id] || 0;
-                        const hasHistory = drawCount > 0 || adjCount > 0;
-
-                        return (
-                          <tr key={prize.id} className="hover:bg-[#F1EAF9]/40 transition">
-                            {/* Prize Image & Name */}
-                            <td className="px-5 py-4 font-sans">
-                              <div className="flex items-center gap-3">
-                                {/* Direct PNG Upload Thumbnail */}
-                                <div className="relative shrink-0">
-                                  <input
-                                    type="file"
-                                    id={`desktop-prize-img-${prize.id}`}
-                                    accept=".png,image/png"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const f = e.target.files?.[0];
-                                      if (f) handleDirectImageUpload(prize, f);
-                                    }}
-                                  />
-                                  <label
-                                    htmlFor={`desktop-prize-img-${prize.id}`}
-                                    className="w-12 h-12 rounded-xl bg-nel-input border border-[#E8DEF1] hover:border-nel-pink/60 flex flex-col items-center justify-center cursor-pointer overflow-hidden p-1 shadow-inner transition group"
-                                    title="Click to upload or replace PNG image"
-                                  >
-                                    {prize.imageUrl ? (
-                                      <img
-                                        src={prize.imageUrl}
-                                        alt={prize.name}
-                                        className="w-full h-full object-contain group-hover:scale-105 transition"
-                                      />
-                                    ) : isUploadingImageFor === prize.id ? (
-                                      <span className="text-[9px] text-[#8649AC] animate-pulse">Saving...</span>
-                                    ) : (
-                                      <>
-                                        <ImageIcon className="w-4 h-4 text-[#33224B]/30 group-hover:text-[#8649AC] transition" />
-                                        <span className="text-[8px] text-[#8649AC] font-bold mt-0.5">+ PNG</span>
-                                      </>
+                    <tbody className="divide-y divide-[#E8DEF1]">
+                      {filteredPrizes.map(prize=>{
+                        const pdd=prize.pddInventory;
+                        const ps=prize.psInventory;
+                        return <tr key={prize.id} className="hover:bg-[#F1EAF9]/40">
+                          <td className="px-5 py-3">
+                            <div className="flex items-center gap-3">
+                              <label className="w-11 h-11 shrink-0 rounded-lg border border-[#E8DEF1] bg-[#F6F0FB] flex items-center justify-center cursor-pointer overflow-hidden" title="Upload prize PNG">
+                                <input type="file" accept=".png,image/png" className="sr-only" onChange={e=>{const file=e.target.files?.[0];if(file)void handleDirectImageUpload(prize,file);}}/>
+                                {prize.imageUrl?<img src={prize.imageUrl} alt="" className="w-full h-full object-contain"/>:<ImageIcon className="w-5 h-5"/>}
+                              </label>
+                              <div className="min-w-0">
+                                <button type="button" onClick={()=>handleOpenEdit(prize)} className="font-bold text-[#33224B] text-left hover:underline">{prize.name}</button>
+                                {prize.description&&<p className="text-xs text-[#8A7C96] line-clamp-1 max-w-xs">{prize.description}</p>}
+                                <span className="text-[10px] text-[#645574]">Daily caps: PDD {capLabel(prize.id,'PDD')} · PS {capLabel(prize.id,'PS')}</span>
+                              </div>
+                            </div>
+                          </td>
+                          {(['PDD','PS'] as const).map(site=>{
+                            const stock=site==='PDD'?pdd:ps;
+                            return <td key={site} className="px-3 py-3 text-center whitespace-nowrap tabular-nums">
+                              <button type="button" onClick={()=>handleOpenAdjust(prize,site,'remaining')} title={site+' remaining — edit'}
+                                className="font-bold text-[#8649AC] underline decoration-dotted underline-offset-4">{stock.remainingQuantity.toLocaleString()}</button>
+                              <span className="text-[#8A7C96]"> / </span>
+                              <button type="button" onClick={()=>handleOpenAdjust(prize,site,'starting')} title={site+' starting — edit'}
+                                className="text-[#645574] underline decoration-dotted underline-offset-4">{stock.allocatedQuantity.toLocaleString()}</button>
+                            </td>;
+                          })}
+                          <td className="px-3 py-3 text-center tabular-nums bg-[#F6F0FB]/60 font-bold text-[#33224B] whitespace-nowrap">
+                            {(pdd.remainingQuantity+ps.remainingQuantity).toLocaleString()} <span className="text-[#8A7C96]">/</span> {(pdd.allocatedQuantity+ps.allocatedQuantity).toLocaleString()}
+                          </td>
+                          <td className="px-3 py-3 text-xs text-[#33224B] tabular-nums whitespace-nowrap">
+                            <div>PDD <strong>{winOdds(prize.id,'PDD')}</strong></div>
+                            <div>PS <strong>{winOdds(prize.id,'PS')}</strong></div>
+                            <div>Total <strong>{totalWinOdds(prize.id)}</strong></div>
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            <button type="button" onClick={()=>void handleToggleActive(prize)} disabled={togglingPrizeId!==null}
+                              aria-pressed={prize.isActive} aria-label={(prize.isActive?'Deactivate ':'Activate ')+prize.name}
+                              className="rounded-full border border-[#DDD2E8] px-3 py-1 text-xs text-[#33224B] disabled:opacity-50">
+                              {prize.isActive?'Active':'Inactive'}
+                            </button>
+                          </td>
+                        </tr>;
+                      })}
+                    </tbody>
+                  </table>
+                  <p className="px-5 py-2 text-xs text-[#645574]">Stock: Remaining / Starting. Click either number to edit. Total win probability is the pooled-weight probability across both hubs (not the sum of hub percentages).</p>
+                </div>
+              </>
                                     )}
                                   </label>
                                 </div>
