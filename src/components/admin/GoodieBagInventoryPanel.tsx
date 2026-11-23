@@ -3,6 +3,7 @@ type Site='PDD'|'PS';
 type Balance={total:number;redeemed:number;remaining:number};
 type Inventory=Record<Site,Balance>;
 type Audit={id:number;site:Site;previousTotal:number;newTotal:number;actor:string;note:string;happenedAt:string};
+type Handover={id:string;site:Site;scenario:'17_fresh'|'17_returning';redeemedAt:string};
 async function call<T>(path:string,init?:RequestInit):Promise<T>{
  const response=await fetch('/api/admin/goodie-bag'+path,{...init,credentials:'same-origin',cache:'no-store',
   headers:{'Content-Type':'application/json',...init?.headers}});
@@ -12,14 +13,30 @@ async function call<T>(path:string,init?:RequestInit):Promise<T>{
 }
 export function GoodieBagInventoryPanel(){
  const [stock,setStock]=useState<Inventory|null>(null),[history,setHistory]=useState<Audit[]>([]);
+ const [handovers,setHandovers]=useState<Handover[]>([]),[lastUpdated,setLastUpdated]=useState<Date|null>(null);
  const [site,setSite]=useState<Site>('PDD'),[total,setTotal]=useState(''),[note,setNote]=useState('');
  const [from,setFrom]=useState<Site>('PDD'),[to,setTo]=useState<Site>('PS'),[quantity,setQuantity]=useState(''),[transferNote,setTransferNote]=useState('');
  const [superAdmin,setSuperAdmin]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const refresh=async()=>{
-  const [balances,audit]=await Promise.all([call<Inventory>('/inventory'),call<Audit[]>('/adjustments').catch(()=>[])]);
-  setStock(balances);setHistory(audit);setTotal(String(balances[site].total));
+  const [balances,audit,recent]=await Promise.all([
+    call<Inventory>('/inventory'),
+    call<Audit[]>('/adjustments').catch(()=>[]),
+    call<Handover[]>('/history').catch(()=>[])
+  ]);
+  setStock(balances);setHistory(audit);setHandovers(recent);setLastUpdated(new Date());
+  // Do not overwrite a stock adjustment the admin is typing during polling.
+  setTotal(previous=>previous===''?String(balances[site].total):previous);
  };
- useEffect(()=>{void refresh().catch(e=>setError(String(e)));fetch('/api/admin/me',{credentials:'same-origin'}).then(r=>r.json()).then(d=>setSuperAdmin(d.role==='super_admin')).catch(()=>{});},[]);
+ useEffect(()=>{
+  let mounted=true;
+  const poll=()=>void refresh().catch(e=>{if(mounted)setError(e instanceof Error?e.message:'Unable to refresh stock');});
+  poll();
+  const timer=window.setInterval(poll,15000);
+  const onFocus=()=>poll();
+  window.addEventListener('focus',onFocus);
+  void fetch('/api/admin/me',{credentials:'same-origin'}).then(r=>r.json()).then(d=>{if(mounted)setSuperAdmin(d.role==='super_admin');}).catch(()=>{});
+  return()=>{mounted=false;window.clearInterval(timer);window.removeEventListener('focus',onFocus);};
+ },[]);
  const save=async()=>{
   if(!stock||!note.trim()||!/^\d+$/.test(total)||Number(total)===stock[site].total||busy)return;
   if(!window.confirm('Set '+site+' Goodie Bag physical stock to '+total+'? Note: '+note))return;
@@ -38,7 +55,8 @@ export function GoodieBagInventoryPanel(){
  };
  return <section className="rounded-2xl bg-white border border-[#DDD2E8] p-4 sm:p-6 text-[#270342] space-y-4 mb-5">
   <h2 className="text-xl font-bold">NELBD Goodie Bag · Guaranteed 17-Stamp Reward</h2>
-  <p className="text-sm">Manage the guaranteed 17-stamp Goodie Bag stock at each hub. Handover requires an onsite booklet check and confirmation, without a PIN. Previous reward records are preserved separately.</p>
+  <p className="text-sm">Each confirmed 17-stamp Goodie Bag handover deducts one from the selected hub, for both first-time and returning participants. Selecting a redemption path alone does not deduct stock.</p>
+  <p className="text-xs text-[#756782]" role="status">Balances refresh every 15 seconds and when this page regains focus{lastUpdated?' · Last refreshed '+lastUpdated.toLocaleTimeString('en-SG',{timeZone:'Asia/Singapore'}):''}.</p>
   <div className="grid gap-3 sm:grid-cols-2">
    {(['PDD','PS'] as const).map(h=><div key={h} className="rounded-xl border border-[#DDD2E8] bg-[#F6F0FB] p-3">
     <h3 className="font-bold">{h==='PDD'?'Innovation Hub (PDD)':'Impact Hub (PS)'}</h3>
@@ -46,6 +64,13 @@ export function GoodieBagInventoryPanel(){
     <p className="text-sm">Redeemed: <strong>{stock?.[h].redeemed??'—'}</strong> · Total: <strong>{stock?.[h].total??'—'}</strong></p>
    </div>)}
   </div>
+  <details className="border-t pt-3">
+    <summary className="cursor-pointer font-bold py-2">Recent confirmed Goodie Bag handovers ({handovers.length} shown)</summary>
+    <p className="text-xs text-[#756782] mb-2">These are recorded handovers, not merely selections on the kiosk. Most recent 100 are shown.</p>
+    <div className="max-h-60 overflow-auto"><table className="w-full text-sm text-left"><thead><tr><th className="p-2">Date &amp; time</th><th className="p-2">Hub</th><th className="p-2">Redemption path</th></tr></thead>
+      <tbody>{handovers.map(h=><tr key={h.id} className="border-t"><td className="p-2">{new Date(h.redeemedAt).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</td><td className="p-2">{h.site}</td><td className="p-2">{h.scenario==='17_fresh'?'First redemption':'Returning participant'}</td></tr>)}</tbody>
+    </table>{!handovers.length&&<p className="text-sm text-[#756782] p-2">No confirmed handovers are recorded yet.</p>}</div>
+  </details>
   {superAdmin&&<>
    <details className="border-t pt-3 space-y-2">
     <summary className="cursor-pointer font-bold py-2">Adjust Goodie Bag stock</summary>
