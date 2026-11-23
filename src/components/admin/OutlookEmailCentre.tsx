@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import {GrabCsvImporter} from './GrabCsvImporter';
 import {getGrabVoucherSummary,getGrabDeliveryDiagnostics,type GrabVoucherSummary,type GrabDeliveryDiagnostics} from '../../api/postgresAdminClient';
-type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string;deliveryStartedAt:string|null;handoffState:string|null};
+type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;prizeId:string;awardCents:number|null;codeCount:number|null;status:string;createdAt:string;deliveryStartedAt:string|null;handoffState:string|null};
 type Draft={to:string;subject:string;body:string;status:string;ticketNumber:string};
 type OfflineRetryCandidate={drawId:string;ticketNumber:string;attemptedAt:string;canRetry:boolean;alreadyRetried:boolean};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
@@ -157,9 +157,59 @@ export function OutlookEmailCentre(){
   {retryNotice&&<p role="status" className="mb-3 text-sm rounded-lg bg-[#F6F0FB] p-3">{retryNotice}</p>}
   <GrabCsvImporter onImported={()=>void refresh()}/>
   <div className="overflow-x-auto">
-   <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
+   <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Awarded</th><th className="p-2">Codes</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
    <tbody>{rows.map(row=><tr key={row.drawId} className="border-t">
     <td className="p-2">{row.ticketNumber}</td><td className="p-2">{row.site}</td>
+    <td className="p-2 font-semibold tabular-nums">{row.awardCents == null ? '—' : 'S<td className="p-2">
+      <span className="font-semibold">{row.status}</span>
+      {row.status==='processing'&&<span className="block text-xs text-[#645574]">
+        {row.handoffState?.includes('TRIGGER_ACCEPTED_AWAITING_CALLBACK')
+          ? 'Microsoft accepted HTTP trigger; awaiting Step 3 callback'
+          : row.handoffState?.includes('HTTP_')
+          ? 'Power Automate trigger rejected request ('+row.handoffState.split('HTTP_').pop()+')'
+          : row.handoffState?.includes('TRANSPORT_ERROR')
+          ? 'Network handoff failed; reconcile before retry'
+          : row.handoffState?.startsWith('OFFLINE_FLOW_RETRY_ONCE')
+          ? 'One-time retry requested; result unconfirmed'
+          : 'Handoff outcome not recorded — check Power Automate'}
+      </span>}
+      {row.deliveryStartedAt&&row.status==='processing'&&<span className="block text-xs text-[#645574]">
+        Attempted: {new Date(row.deliveryStartedAt).toLocaleString()}
+      </span>}
+    </td>
+    <td className="p-2"><div className="flex flex-wrap items-center gap-2">
+      <button disabled={!row.recipientEmail||busy||row.status==='processing'||row.status==='sent'} onClick={()=>void openDraft(row.drawId)}
+        className="rounded-lg border px-3 py-1 disabled:opacity-40">Review draft</button>
+      {retryCandidates.find(candidate=>candidate.drawId===row.drawId) && (() => {
+        const candidate=retryCandidates.find(item=>item.drawId===row.drawId)!;
+        return <button type="button" disabled={!candidate.canRetry||retryBusy}
+          onClick={()=>void requestOfflineRetry(candidate)}
+          className="rounded-lg bg-[#270342] text-white px-3 py-1 disabled:opacity-40">
+          {candidate.canRetry?'Retry email once':'Already retried'}
+        </button>;
+      })()}
+    </div></td>
+   </tr>)}</tbody></table>
+   {!rows.length&&<p className="text-sm py-3">No Grab voucher email drafts yet.</p>}
+  </div>
+  {draft&&<div className="mt-4 rounded-xl border border-[#DDD2E8] p-4">
+   <h3 className="font-bold mb-2">Draft · {draft.ticketNumber}</h3>
+   <p className="text-sm"><strong>To:</strong> {draft.to}</p>
+   <p className="text-sm mb-3"><strong>Subject:</strong> {draft.subject}</p>
+   <pre className="whitespace-pre-wrap break-words rounded-lg bg-[#F6F0FB] p-3 text-sm font-sans">{draft.body}</pre>
+   <div className="mt-3 flex flex-wrap gap-2">
+    <button onClick={()=>void copy()} className="rounded-lg bg-[#270342] text-white px-4 py-2 text-sm">Copy email for Outlook</button>
+    <a href="https://outlook.office.com/mail/" target="_blank" rel="noopener noreferrer"
+       className="rounded-lg border px-4 py-2 text-sm">Open Outlook</a>
+    <button disabled={busy||draft.status==='sent'||draft.status==='processing'} onClick={()=>void markSent()}
+       className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40">Mark manually sent</button>
+   </div>
+   <p className="text-xs mt-2">Voucher details are sensitive. Do not share drafts or paste them into public systems. Sent status is a staff declaration, not a delivery receipt.</p>
+  </div>}
+ </section>;
+}
++(row.awardCents/100).toFixed(2)}</td>
+    <td className="p-2 tabular-nums">{row.codeCount == null ? '—' : row.codeCount+' × S$5'}</td>
     <td className="p-2">{row.recipientEmail||'Awaiting winner'}</td><td className="p-2">
       <span className="font-semibold">{row.status}</span>
       {row.status==='processing'&&<span className="block text-xs text-[#645574]">
