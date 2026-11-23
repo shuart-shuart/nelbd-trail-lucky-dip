@@ -242,39 +242,38 @@ export const AdminInventory: React.FC = () => {
   // -------------------------------------------------------------
   // INVENTORY SUMMARY CALCULATIONS
   // -------------------------------------------------------------
-  const merchandisePrizes = prizes.filter(p=>!p.id.startsWith('grab-voucher'));
   // TOTAL INVENTORY
-  const totalStartingQuantity = merchandisePrizes.reduce(
+  const totalStartingQuantity = prizes.reduce(
     (sum, p) => sum + p.pddInventory.allocatedQuantity + p.psInventory.allocatedQuantity,
     0
   );
-  const totalRemainingQuantity = merchandisePrizes.reduce(
+  const totalRemainingQuantity = prizes.reduce(
     (sum, p) => sum + p.pddInventory.remainingQuantity + p.psInventory.remainingQuantity,
     0
   );
 
   // PDD
-  const pddStartingQuantity = merchandisePrizes.reduce(
+  const pddStartingQuantity = prizes.reduce(
     (sum, p) => sum + p.pddInventory.allocatedQuantity,
     0
   );
-  const pddRemainingQuantity = merchandisePrizes.reduce(
+  const pddRemainingQuantity = prizes.reduce(
     (sum, p) => sum + p.pddInventory.remainingQuantity,
     0
   );
 
   // PS
-  const psStartingQuantity = merchandisePrizes.reduce(
+  const psStartingQuantity = prizes.reduce(
     (sum, p) => sum + p.psInventory.allocatedQuantity,
     0
   );
-  const psRemainingQuantity = merchandisePrizes.reduce(
+  const psRemainingQuantity = prizes.reduce(
     (sum, p) => sum + p.psInventory.remainingQuantity,
     0
   );
 
   // TOP PRIZE (Calculated for TOP tier prizes)
-  const topPrizes = merchandisePrizes.filter((p) => p.tier === 'TOP');
+  const topPrizes = prizes.filter((p) => p.tier === 'TOP');
   const topStartingQuantity = topPrizes.reduce(
     (sum, p) => sum + p.pddInventory.allocatedQuantity + p.psInventory.allocatedQuantity,
     0
@@ -295,7 +294,7 @@ export const AdminInventory: React.FC = () => {
       statusFilter === 'ALL' ||
       (statusFilter === 'ACTIVE' && prize.isActive) ||
       (statusFilter === 'INACTIVE' && !prize.isActive);
-    return !prize.id.startsWith('grab-voucher') && matchQuery && matchTier && matchStatus;
+    return matchQuery && matchTier && matchStatus;
   });
 
   // Filtered Audit Adjustments Table
@@ -1063,7 +1062,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
           }`}
         >
           <Gift className="w-4 h-4 shrink-0" />
-          <span>Merchandise</span>
+          <span>Lucky Dip / Merchandise</span>
         </button>
         {import.meta.env.VITE_DATA_BACKEND === 'postgres' && <button
           onClick={() => setActiveTab('grab-vouchers')}
@@ -1072,7 +1071,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
               ? 'bg-emerald-500/20 text-[#8649AC] border border-nel-pink/40 shadow'
               : 'text-[#8A7C96] hover:text-[#33224B]'
           }`}
-        ><span>Grab Vouchers</span></button>}
+        ><span>Grab Voucher Settings</span></button>}
         <button
           onClick={() => setActiveTab('adjustments')}
           className={`px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
