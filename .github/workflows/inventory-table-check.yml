@@ -1,0 +1,22 @@
+name: Inventory table layout check
+on:
+  pull_request:
+    paths:
+      - 'src/pages/admin/AdminInventory.tsx'
+      - '.github/workflows/inventory-table-check.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Production build
+        run: npm run build
+      - name: TypeScript check
+        run: npm run lint

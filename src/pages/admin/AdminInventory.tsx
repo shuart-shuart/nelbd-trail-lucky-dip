@@ -1330,14 +1330,16 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
 
                 {/* 2. Compact desktop inventory: Remaining / Starting, with both editable. */}
                 <div className="hidden lg:block overflow-x-auto">
-                  <table className="w-full text-left text-sm text-[#645574]">
+                  <table className="w-full min-w-[1120px] text-left text-sm text-[#645574]">
                     <thead className="bg-nel-input/80 text-[11px] uppercase font-bold text-[#8A7C96] border-b border-nel-purple/40">
                       <tr>
-                        <th className="px-5 py-3">Prize</th>
+                        <th className="px-5 py-3 min-w-[260px]">Prize</th>
                         <th className="px-3 py-3 text-center" title="Remaining / Starting">PDD</th>
+                        <th className="px-3 py-3 text-center whitespace-nowrap">PDD Probability</th>
                         <th className="px-3 py-3 text-center" title="Remaining / Starting">PS</th>
+                        <th className="px-3 py-3 text-center whitespace-nowrap">PS Probability</th>
                         <th className="px-3 py-3 text-center" title="Combined Remaining / Starting">Total</th>
-                        <th className="px-3 py-3 text-center">Win probability</th>
+                        <th className="px-3 py-3 text-center whitespace-nowrap">Total Probability</th>
                         <th className="px-3 py-3 text-center">Status</th>
                       </tr>
                     </thead>
@@ -1355,27 +1357,34 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                               <div className="min-w-0">
                                 <button type="button" onClick={()=>handleOpenEdit(prize)} className="font-bold text-[#33224B] text-left hover:underline">{prize.name}</button>
                                 {prize.description&&<p className="text-xs text-[#8A7C96] line-clamp-1 max-w-xs">{prize.description}</p>}
-                                <span className="text-[10px] text-[#645574]">Daily caps: PDD {capLabel(prize.id,'PDD')} · PS {capLabel(prize.id,'PS')}</span>
+                                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-[#645574]" aria-label={`Daily limits for ${prize.name}`}>
+                                  <span className="font-semibold uppercase tracking-wide">Daily limits</span>
+                                  <span>PDD: {capLabel(prize.id,'PDD')}</span>
+                                  <span>PS: {capLabel(prize.id,'PS')}</span>
+                                </div>
                               </div>
                             </div>
                           </td>
                           {(['PDD','PS'] as const).map(site=>{
                             const stock=site==='PDD'?pdd:ps;
-                            return <td key={site} className="px-3 py-3 text-center whitespace-nowrap tabular-nums">
-                              <button type="button" onClick={()=>handleOpenAdjust(prize,site,'remaining')} title={site+' remaining — edit'}
-                                className="font-bold text-[#8649AC] underline decoration-dotted underline-offset-4">{stock.remainingQuantity.toLocaleString()}</button>
-                              <span className="text-[#8A7C96]"> / </span>
-                              <button type="button" onClick={()=>handleOpenAdjust(prize,site,'starting')} title={site+' starting — edit'}
-                                className="text-[#645574] underline decoration-dotted underline-offset-4">{stock.allocatedQuantity.toLocaleString()}</button>
-                            </td>;
+                            return <React.Fragment key={site}>
+                              <td className="px-3 py-3 text-center whitespace-nowrap tabular-nums">
+                                <button type="button" onClick={()=>handleOpenAdjust(prize,site,'remaining')} title={site+' remaining — edit'}
+                                  className="font-bold text-[#8649AC] underline decoration-dotted underline-offset-4">{stock.remainingQuantity.toLocaleString()}</button>
+                                <span className="text-[#8A7C96]"> / </span>
+                                <button type="button" onClick={()=>handleOpenAdjust(prize,site,'starting')} title={site+' starting — edit'}
+                                  className="text-[#645574] underline decoration-dotted underline-offset-4">{stock.allocatedQuantity.toLocaleString()}</button>
+                              </td>
+                              <td className="px-3 py-3 text-center tabular-nums font-semibold text-[#33224B] whitespace-nowrap">
+                                {winOdds(prize.id,site)}
+                              </td>
+                            </React.Fragment>;
                           })}
                           <td className="px-3 py-3 text-center tabular-nums bg-[#F6F0FB]/60 font-bold text-[#33224B] whitespace-nowrap">
                             {(pdd.remainingQuantity+ps.remainingQuantity).toLocaleString()} <span className="text-[#8A7C96]">/</span> {(pdd.allocatedQuantity+ps.allocatedQuantity).toLocaleString()}
                           </td>
-                          <td className="px-3 py-3 text-xs text-[#33224B] tabular-nums whitespace-nowrap">
-                            <div>PDD <strong>{winOdds(prize.id,'PDD')}</strong></div>
-                            <div>PS <strong>{winOdds(prize.id,'PS')}</strong></div>
-                            <div>Total <strong>{totalWinOdds(prize.id)}</strong></div>
+                          <td className="px-3 py-3 text-center tabular-nums font-bold text-[#33224B] whitespace-nowrap bg-[#F6F0FB]/60">
+                            {totalWinOdds(prize.id)}
                           </td>
                           <td className="px-3 py-3 text-center">
                             <button type="button" onClick={()=>void handleToggleActive(prize)} disabled={togglingPrizeId!==null}
@@ -1388,7 +1397,7 @@ Trail Explorer Carabiner Compass & Safety Whistle,STANDARD,38,39,true`;
                       })}
                     </tbody>
                   </table>
-                  <p className="px-5 py-2 text-xs text-[#645574]">Stock: Remaining / Starting. Click either number to edit. Total win probability is the pooled-weight probability across both hubs (not the sum of hub percentages).</p>
+                  <p className="px-5 py-2 text-xs text-[#645574]">Stock: Remaining / Starting (click either number to edit). Daily limits appear beneath each prize. Probabilities are per next draw; Total Probability is pooled and weighted across both hubs, not PDD + PS.</p>
                 </div>
               </>
             )}
