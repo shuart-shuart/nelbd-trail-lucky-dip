@@ -101,6 +101,7 @@ export async function dispatchNextGrabVoucher(): Promise<void> {
         [item.draw_id,deliveryId]
       );
       return {deliveryId,ticketNumber:item.ticket_number,to:item.recipient_email,
+        currency:'SGD',awardCents:expected*500,codeCount:expected,
         subject:expected===1?GRAB_EMAIL_SUBJECT:('Congratulations! Your NELBD S$'+(expected*5)+' Grab Vouchers'),html};
     });
     if (!delivery) return;

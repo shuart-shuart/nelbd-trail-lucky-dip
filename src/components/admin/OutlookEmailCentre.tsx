@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import {GrabCsvImporter} from './GrabCsvImporter';
 import {getGrabVoucherSummary,getGrabDeliveryDiagnostics,type GrabVoucherSummary,type GrabDeliveryDiagnostics} from '../../api/postgresAdminClient';
-type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;status:string;createdAt:string;deliveryStartedAt:string|null;handoffState:string|null};
+type QueueRow={drawId:string;ticketNumber:string;site:string;recipientEmail:string|null;prizeId:string;awardCents:number|null;codeCount:number|null;status:string;createdAt:string;deliveryStartedAt:string|null;handoffState:string|null};
 type Draft={to:string;subject:string;body:string;status:string;ticketNumber:string};
 type OfflineRetryCandidate={drawId:string;ticketNumber:string;attemptedAt:string;canRetry:boolean;alreadyRetried:boolean};
 async function api<T>(path:string,init?:RequestInit):Promise<T>{
@@ -157,9 +157,11 @@ export function OutlookEmailCentre(){
   {retryNotice&&<p role="status" className="mb-3 text-sm rounded-lg bg-[#F6F0FB] p-3">{retryNotice}</p>}
   <GrabCsvImporter onImported={()=>void refresh()}/>
   <div className="overflow-x-auto">
-   <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
+   <table className="w-full text-sm text-left"><thead><tr><th className="p-2">Ticket</th><th className="p-2">Hub</th><th className="p-2">Awarded</th><th className="p-2">Codes</th><th className="p-2">Recipient</th><th className="p-2">Status</th><th className="p-2">Action</th></tr></thead>
    <tbody>{rows.map(row=><tr key={row.drawId} className="border-t">
     <td className="p-2">{row.ticketNumber}</td><td className="p-2">{row.site}</td>
+    <td className="p-2 font-semibold tabular-nums">{row.awardCents == null ? '—' : 'S$'+(row.awardCents/100).toFixed(2)}</td>
+    <td className="p-2 tabular-nums">{row.codeCount == null ? '—' : row.codeCount+' × S$5'}</td>
     <td className="p-2">{row.recipientEmail||'Awaiting winner'}</td><td className="p-2">
       <span className="font-semibold">{row.status}</span>
       {row.status==='processing'&&<span className="block text-xs text-[#645574]">
