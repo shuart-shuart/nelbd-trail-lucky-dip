@@ -24,12 +24,12 @@ Use the **When an HTTP request is received** trigger, POST. The updated request-
     "awardCents": {"type": "integer", "enum": [500, 1000, 5000]},
     "codeCount": {"type": "integer", "enum": [1, 2, 10]}
   },
-  "required": ["deliveryId","ticketNumber","to","subject","html","currency","awardCents","codeCount"],
+  "required": ["deliveryId","ticketNumber","to","subject","html"],
   "additionalProperties": false
 }
 ```
 
-A $5 prize sends `awardCents:500,codeCount:1`; $10 sends `1000,2`; $50 sends `5000,10`. All voucher codes are distinct $5 units. Amounts are in cents, not dollars.
+The new quantum fields are **optional in the trigger schema during rollout** so that the currently deployed backend can continue submitting the original five fields until the new app is deployed. After deployment, the new backend always supplies them. A $5 prize sends `awardCents:500,codeCount:1`; $10 sends `1000,2`; $50 sends `5000,10`. All voucher codes are distinct $5 units. Amounts are in cents, not dollars.
 
 ## Send the email
 
