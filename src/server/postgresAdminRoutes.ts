@@ -281,6 +281,15 @@ postgresAdminRouter.get('/outlook-centre',async (_req,res)=>{
   try {
     const {rows}=await getPool().query(`SELECT c.draw_id AS "drawId",
       d.ticket_number AS "ticketNumber",d.site,c.recipient_email AS "recipientEmail",
+      d.prize_id AS "prizeId",
+      CASE d.prize_id WHEN 'grab-voucher-50' THEN 5000
+        WHEN 'grab-voucher-10' THEN 1000
+        WHEN 'grab-voucher-5' THEN 500
+        WHEN 'grab-voucher' THEN 500 ELSE NULL END AS "awardCents",
+      CASE d.prize_id WHEN 'grab-voucher-50' THEN 10
+        WHEN 'grab-voucher-10' THEN 2
+        WHEN 'grab-voucher-5' THEN 1
+        WHEN 'grab-voucher' THEN 1 ELSE NULL END AS "codeCount",
       c.status,c.created_at AS "createdAt",c.updated_at AS "updatedAt",
       c.delivery_started_at AS "deliveryStartedAt",
       c.delivery_error_code AS "handoffState"
