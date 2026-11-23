@@ -64,7 +64,7 @@ export function GoodieBagInventoryPanel(){
     <p className="text-sm">Redeemed: <strong>{stock?.[h].redeemed??'—'}</strong> · Total: <strong>{stock?.[h].total??'—'}</strong></p>
    </div>)}
   </div>
-  <details className="border-t pt-3" open={false}>
+  <details className="border-t pt-3">
     <summary className="cursor-pointer font-bold py-2">Recent confirmed Goodie Bag handovers ({handovers.length} shown)</summary>
     <p className="text-xs text-[#756782] mb-2">These are recorded handovers, not merely selections on the kiosk. Most recent 100 are shown.</p>
     <div className="max-h-60 overflow-auto"><table className="w-full text-sm text-left"><thead><tr><th className="p-2">Date &amp; time</th><th className="p-2">Hub</th><th className="p-2">Redemption path</th></tr></thead>
