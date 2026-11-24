@@ -9,7 +9,9 @@ export function EzlinkCompletion({scenario,mobile,site,onDone}:{scenario:Scenari
  const [pin,setPin]=useState(''),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[error,setError]=useState('');
  const complete=async()=>{
   if(busy||done||(pinRequired&&!/^\d{6,12}$/.test(pin)))return;
-  if(!window.confirm('Staff: Confirm the '+rewardName+' was handed over and the second hole punch was applied?'))return;
+  // The Goodie Bag button is the staff's final confirmation: do not ask twice.
+  // Legacy ez-link card handovers retain their existing PIN and confirmation dialog.
+  if(pinRequired&&!window.confirm('Staff: Confirm the '+rewardName+' was handed over and the second hole punch was applied?'))return;
   setBusy(true);setError('');
   try{
    const res=await fetch('/api/kiosk/quest-rewards/redeem',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -28,7 +30,7 @@ export function EzlinkCompletion({scenario,mobile,site,onDone}:{scenario:Scenari
  </section>;
  return <section className="rounded-2xl bg-nel-pink text-nel-violet p-4 sm:p-5 space-y-3">
   <h2 className="font-nel text-xl sm:text-2xl font-semibold">Staff: {rewardName} Handover</h2>
-  <p className="text-sm">Check the booklet for 17 stamps before handover.</p>
+  <p className="text-sm">Check the booklet for 17 stamps before handover. Pressing Confirm Handover records the collection and deducts one {rewardName} from this hub.</p>
   {pinRequired&&<>
   <label className="block text-sm font-bold">Staff-only PIN
    <input type="password" autoComplete="off" inputMode="numeric" maxLength={12} value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,'').slice(0,12))}
