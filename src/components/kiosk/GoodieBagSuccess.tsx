@@ -4,7 +4,7 @@ import {CheckCircle2} from 'lucide-react';
 import {useKiosk} from '../../context/KioskContext';
 import nelbdLogo from '../../assets/img/nelbd-logo.png';
 
-const RETURN_SECONDS=45;
+const RETURN_SECONDS=3;
 
 /** Shown only after the server confirms the physical Goodie Bag handover. */
 export function GoodieBagSuccess(){
@@ -32,11 +32,7 @@ export function GoodieBagSuccess(){
    <div className="space-y-2">
     <h1 className="font-nel text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">Goodie Bag collected!</h1>
    </div>
-   <button type="button" onClick={finish}
-    className="w-full min-h-[60px] rounded-xl bg-nel-violet text-nel-pink px-5 py-4 text-lg font-bold focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-nel-violet">
-    FINISH
-   </button>
-   <p className="font-dm text-xs text-nel-violet/70" aria-live="off">Returning to the start screen in {remaining}s</p>
+   <p className="font-dm text-base font-semibold text-nel-violet">Handover recorded. Returning to the start screen automatically.</p>
   </section>
  </div>;
 }
