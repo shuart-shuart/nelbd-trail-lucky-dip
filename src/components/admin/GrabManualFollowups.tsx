@@ -31,7 +31,7 @@ export function GrabManualFollowups(){
   <div className="overflow-x-auto mt-3"><table className="w-full text-sm text-left">
    <thead><tr><th className="p-2">Ticket</th><th className="p-2">Award</th><th className="p-2">Draw / Collection</th><th className="p-2">Handphone</th><th className="p-2">Notification</th><th className="p-2">Action</th></tr></thead>
    <tbody>{rows.map(row=><tr key={row.drawId} className="border-t">
-    <td className="p-2">{row.ticketNumber}</td><td className="p-2">S${row.award}</td>
+    <td className="p-2">{row.ticketNumber}<span className="block text-xs font-semibold">staff-input</span></td><td className="p-2">S${row.award}</td>
     <td className="p-2">{row.drawHub} / {row.collectionLocation}</td>
     <td className="p-2 whitespace-nowrap">{row.phone}</td>
     <td className="p-2">{row.notificationState.replaceAll('_',' ')}</td>
