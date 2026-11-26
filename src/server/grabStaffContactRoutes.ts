@@ -69,7 +69,20 @@ grabStaffRouter.post('/logout',async(req,res)=>{
 });
 const ticketValid=(value:unknown):value is string=>
  typeof value==='string'&&/^NELBD-(PDD|PS)-[0-9]{6}$/.test(value);
+// Bound authenticated ticket enumeration and contact collection separately from login.
+const staffRequests=new Map<string,{count:number;until:number}>();
+function staffLimited(req:any,operation:string,limit:number){
+ const cookie=(req.headers.cookie||'').split(';').map((part:string)=>part.trim())
+   .find((part:string)=>part.startsWith(COOKIE+'='))?.slice(COOKIE.length+1)||'anonymous';
+ const key=operation+':'+hash(cookie);
+ const now=Date.now(),existing=staffRequests.get(key);
+ const next=existing&&existing.until>now?existing:{count:0,until:now+60_000};
+ next.count++;staffRequests.set(key,next);
+ if(staffRequests.size>5000)for(const [k,v] of staffRequests)if(v.until<=now)staffRequests.delete(k);
+ return next.count>limit;
+}
 grabStaffRouter.post('/lookup',async(req,res)=>{
+ if(staffLimited(req,'lookup',30))return res.status(429).json({error:'Too many ticket lookups. Ask a supervisor'});
  if(!ticketValid(req.body?.ticketNumber))return res.status(400).json({error:'Enter a valid winning ticket'});
  try{
   const result=await getPool().query(`SELECT d.prize_id,c.status
@@ -111,6 +124,7 @@ async function notifyManual(info:{ticket:string;amount:number;collection:string;
  return state;
 }
 grabStaffRouter.post('/submit',async(req,res)=>{
+ if(staffLimited(req,'submit',15))return res.status(429).json({error:'Too many submissions. Ask a supervisor'});
  const {ticketNumber,collectionSite,method}=req.body||{};
  if(!ticketValid(ticketNumber)||!['PDD','PS','FARM'].includes(collectionSite)||!['email','phone'].includes(method))
   return res.status(400).json({error:'Invalid ticket, location or contact method'});
@@ -140,7 +154,11 @@ grabStaffRouter.post('/submit',async(req,res)=>{
    return {drawId:row.id,amount:VALID_PRIZES[row.prize_id]};
   });
   if(method==='email')return res.json({recorded:true,delivery:'email_queued'});
-  const notification=await notifyManual({ticket:ticketNumber,amount:recorded.amount,collection:collectionSite,phone:phone!,drawId:recorded.drawId});
+  // A notification failure cannot roll back an already committed contact record.
+  // Always report the saved manual follow-up truthfully; the admin queue is the fallback.
+  let notification='uncertain';
+  try{notification=await notifyManual({ticket:ticketNumber,amount:recorded.amount,collection:collectionSite,phone:phone!,drawId:recorded.drawId});}
+  catch{console.error('Staff manual follow-up notification could not be confirmed');}
   return res.json({recorded:true,delivery:'manual_followup',notification});
  }catch(e){
   const code=e instanceof Error?e.message:'';
