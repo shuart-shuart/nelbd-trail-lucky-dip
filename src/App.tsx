@@ -23,6 +23,7 @@ import { AdminQuestPage } from './pages/admin/AdminQuestPage';
 import { AdminEzlinkPage } from './pages/admin/AdminEzlinkPage';
 import { QuestClaimPage } from './pages/QuestClaimPage';
 import { QuestVouchersPage } from './pages/QuestVouchersPage';
+import {GrabStaffContactPage} from './pages/GrabStaffContactPage';
 
 export default function App() {
   return (
@@ -69,6 +70,8 @@ export default function App() {
 
             <Route path="/quest/claim/:token" element={<QuestClaimPage />} />
             <Route path="/quest/vouchers/:token" element={<QuestVouchersPage />} />
+
+            <Route path="/staff/grab-redemption" element={<GrabStaffContactPage/>}/>
 
             {/* Protected Admin Routes */}
             <Route
