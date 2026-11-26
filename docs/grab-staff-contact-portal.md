@@ -40,3 +40,11 @@ PR #74 previously required a ticket number, intended as a redemption/contact col
 ## Stock pool clarification (26 November 2026)
 
 Staff-input S$5 and S$10 both deduct **one** from the general `grab-voucher` award count in the chosen PDD/PS inventory (or whichever of those is selected for FARM). They do **not** reduce the dormant denomination-specific award counts. Independently, S$5 reserves **one** real S$5 Grab code; S$10 reserves **two**. When the general Grab Voucher remaining quantity is zero, the staff-input form rejects issuance rather than pulling from S$5/S$10 award inventory.
+
+## FARM-only second verification (26 November 2026)
+
+The main staff portal password continues to cover PDD and PS. FARM requires an **additional, distinct** password before its S$5 / S$10 email-only redemption fields appear. The backend independently rejects FARM award submissions until the same staff session has verified the FARM password. Authorization expires after 15 minutes, on logout, or after a server restart. A password guess throttle is applied per client and globally.
+
+To enable FARM, set a separate secret `NELBD_GRAB_FARM_VERIFICATION_PASSWORD` on the **Render web service → Environment**. Use a unique, randomly generated password of **at least 12 characters**, different from `NELBD_GRAB_STAFF_PASSWORD`. The secret is read server-side only. Never put it in GitHub, the page code, screenshots, or this chat. If the setting is absent/too short/the same as the main password, **FARM access fails closed**; PDD/PS are unaffected. Saving an environment variable in Render triggers a deploy; wait for Live before testing.
+
+Verification authorizes access only. It does not reserve codes or change inventory. Only the final explicitly confirmed staff-input submission allocates a voucher, from the general `grab-voucher` stock as before.
