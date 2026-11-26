@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {randomBytes,createHash,scryptSync,timingSafeEqual} from 'node:crypto';
+import {randomBytes,randomInt,createHash,createHmac,scryptSync,timingSafeEqual} from 'node:crypto';
 import {getPool,withTransaction} from './postgres.ts';
 
 export const grabStaffRouter=Router();
@@ -67,8 +67,6 @@ grabStaffRouter.post('/logout',async(req,res)=>{
  if(cookie)await getPool().query('DELETE FROM grab_staff_sessions WHERE token_hash=$1',[hash(cookie)]).catch(()=>{});
  res.clearCookie(COOKIE,{path:'/api/staff/grab'});return res.json({ok:true});
 });
-const ticketValid=(value:unknown):value is string=>
- typeof value==='string'&&/^NELBD-(PDD|PS)-[0-9]{6}$/.test(value);
 // Bound authenticated ticket enumeration and contact collection separately from login.
 const staffRequests=new Map<string,{count:number;until:number}>();
 function staffLimited(req:any,operation:string,limit:number){
@@ -81,19 +79,6 @@ function staffLimited(req:any,operation:string,limit:number){
  if(staffRequests.size>5000)for(const [k,v] of staffRequests)if(v.until<=now)staffRequests.delete(k);
  return next.count>limit;
 }
-grabStaffRouter.post('/lookup',async(req,res)=>{
- if(staffLimited(req,'lookup',30))return res.status(429).json({error:'Too many ticket lookups. Ask a supervisor'});
- if(!ticketValid(req.body?.ticketNumber))return res.status(400).json({error:'Enter a valid winning ticket'});
- try{
-  const result=await getPool().query(`SELECT d.prize_id,c.status
-    FROM draws d JOIN grab_voucher_claim_sessions c ON c.draw_id=d.id
-    WHERE d.ticket_number=$1`,[req.body.ticketNumber]);
-  const row=result.rows[0];
-  if(!row||!VALID_PRIZES[row.prize_id])return res.status(404).json({error:'No eligible S$5 or S$10 Grab prize found'});
-  return res.json({amount:VALID_PRIZES[row.prize_id],available:row.status==='awaiting_email',
-    status:row.status==='awaiting_email'?'Awaiting contact':'Already submitted or requires supervisor review'});
- }catch{return res.status(503).json({error:'Unable to verify winning ticket'});}
-});
 function normalizedPhone(value:unknown){
  if(typeof value!=='string'||value.length>32)return null;
  const digits=value.replace(/[\s()-]/g,'');
@@ -123,11 +108,18 @@ async function notifyManual(info:{ticket:string;amount:number;collection:string;
  await getPool().query('UPDATE grab_staff_contact_submissions SET notification_state=$2 WHERE draw_id=$1 AND notification_state=\'sending\'',[info.drawId,state]).catch(()=>{});
  return state;
 }
+/** Staff fallback: create a new award, reserve 1/2 S$5 codes, and log stock atomically.
+ * No existing ticket or manual voucher codes are accepted from the browser.
+ * FARM is a collection location; its backing stock is allocated from PDD/PS.
+ */
 grabStaffRouter.post('/submit',async(req,res)=>{
- if(staffLimited(req,'submit',15))return res.status(429).json({error:'Too many submissions. Ask a supervisor'});
- const {ticketNumber,collectionSite,method}=req.body||{};
- if(!ticketValid(ticketNumber)||!['PDD','PS','FARM'].includes(collectionSite)||!['email','phone'].includes(method))
-  return res.status(400).json({error:'Invalid ticket, location or contact method'});
+ if(staffLimited(req,'submit',8))return res.status(429).json({error:'Too many submissions. Ask a supervisor'});
+ if(process.env.NELBD_GRAB_FULFILMENT_ENABLED!=='YES')
+  return res.status(423).json({error:'Grab voucher fulfilment is not enabled'});
+ const {collectionSite,method,amount,confirmed}=req.body||{};
+ if(!['PDD','PS','FARM'].includes(collectionSite)||!['email','phone'].includes(method)||
+    (amount!==5&&amount!==10)||confirmed!==true)
+  return res.status(400).json({error:'Choose a valid location, amount, contact method and confirm handover'});
  if(collectionSite==='FARM'&&method!=='email')
   return res.status(400).json({error:'FARM accepts email submissions only'});
  const email=typeof req.body?.email==='string'?req.body.email.trim().toLowerCase():null;
@@ -135,37 +127,97 @@ grabStaffRouter.post('/submit',async(req,res)=>{
  if(method==='email'&&(!email||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))
   return res.status(400).json({error:'Enter a valid email address'});
  if(method==='phone'&&!phone)return res.status(400).json({error:'Enter a valid Singapore handphone number'});
+ // Keyed fingerprint prevents plaintext contact lookup from the database alone.
+ const key=process.env.NELBD_VOUCHER_ENCRYPTION_KEY||'';
+ if(key.length<32)return res.status(503).json({error:'Voucher security is not configured'});
+ const contact=method==='email'?email!:phone!;
+ const fingerprint=createHmac('sha256',key).update(method+':'+contact).digest('hex');
  try{
   const recorded=await withTransaction(async client=>{
-   const result=await client.query(`SELECT d.id,d.prize_id,c.status
-     FROM draws d JOIN grab_voucher_claim_sessions c ON c.draw_id=d.id
-     WHERE d.ticket_number=$1 FOR UPDATE OF c`,[ticketNumber]);
-   const row=result.rows[0];
-   if(!row||!VALID_PRIZES[row.prize_id])throw Error('INVALID_PRIZE');
-   if(row.status!=='awaiting_email')throw Error('ALREADY_SUBMITTED');
-   const updated=await client.query(`UPDATE grab_voucher_claim_sessions SET
-     status=$2,recipient_email=$3,updated_at=now()
-     WHERE draw_id=$1 AND status='awaiting_email' RETURNING draw_id`,
-     [row.id,method==='email'?'queued':'manual_followup',method==='email'?email:null]);
-   if(!updated.rowCount)throw Error('ALREADY_SUBMITTED');
+   // The same advisory lock as the ordinary kiosk draw prevents simultaneous
+   // stock/cap changes from racing this manual fallback.
+   await client.query('SELECT pg_advisory_xact_lock($1)',[7102026]);
+   const old=await client.query('SELECT draw_id FROM grab_staff_contact_submissions WHERE contact_fingerprint=$1 LIMIT 1',[fingerprint]);
+   if(old.rowCount)throw Error('DUPLICATE_CONTACT');
+   if(method==='email'){
+    const used=await client.query('SELECT 1 FROM grab_voucher_claim_sessions WHERE lower(recipient_email)=$1 LIMIT 1',[email]);
+    if(used.rowCount)throw Error('DUPLICATE_CONTACT');
+   }else{
+    const existing=await client.query('SELECT 1 FROM participants WHERE mobile_number=$1 LIMIT 1',[phone]);
+    if(existing.rowCount)throw Error('DUPLICATE_CONTACT');
+   }
+   const prizeId=amount===10?'grab-voucher-10':'grab-voucher-5';
+   const eligible=await client.query(`SELECT p.id,p.name,p.tier,i.site,i.remaining_quantity
+     FROM prizes p JOIN site_inventory i ON i.prize_id=p.id
+     LEFT JOIN prize_site_limits lim ON lim.prize_id=i.prize_id AND lim.site=i.site
+     WHERE p.id=$1 AND p.is_active=true AND i.remaining_quantity>0
+       AND ($2::text='FARM' OR i.site=$2)
+       AND NOT COALESCE(lim.paused,false)
+       AND (lim.daily_cap IS NULL OR
+          (SELECT count(*) FROM draws d WHERE d.prize_id=p.id AND d.site=i.site
+            AND (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date=
+                (now() AT TIME ZONE 'Asia/Singapore')::date) < lim.daily_cap)
+     ORDER BY i.remaining_quantity DESC,i.site
+     LIMIT 1 FOR UPDATE OF i`,[prizeId,collectionSite]);
+   if(!eligible.rowCount)throw Error('OUT_OF_STOCK');
+   const item=eligible.rows[0];
+   const codes=await client.query(`SELECT id FROM grab_voucher_codes
+     WHERE assigned_draw_id IS NULL AND denomination_cents=500
+       AND starts_at<=now() AND expires_at>now()
+     ORDER BY id LIMIT $1 FOR UPDATE SKIP LOCKED`,[amount/5]);
+   if(codes.rows.length!==amount/5)throw Error('OUT_OF_CODES');
+   let ticket='';
+   for(let i=0;i<20;i++){
+    const candidate='NELBD-'+item.site+'-'+randomInt(100000,1000000);
+    const check=await client.query('SELECT 1 FROM draws WHERE ticket_number=$1',[candidate]);
+    if(!check.rowCount){ticket=candidate;break;}
+   }
+   if(!ticket)throw Error('TICKET_EXHAUSTED');
+   const draw=await client.query(`INSERT INTO draws
+      (ticket_number,participant_id,prize_id,prize_name,prize_tier,site,status,kiosk_id,claimed_at)
+      VALUES($1,NULL,$2,$3,$4,$5,'claimed','STAFF_INPUT',now())
+      RETURNING id`,[ticket,item.id,item.name,item.tier,item.site]);
+   const drawId=draw.rows[0].id;
+   const inv=await client.query(`UPDATE site_inventory SET remaining_quantity=remaining_quantity-1,
+     claimed_quantity=claimed_quantity+1,updated_at=now()
+     WHERE prize_id=$1 AND site=$2 AND remaining_quantity>0
+     RETURNING remaining_quantity`,[item.id,item.site]);
+   if(!inv.rowCount)throw Error('OUT_OF_STOCK');
+   await client.query('UPDATE grab_voucher_codes SET assigned_draw_id=$1,assigned_at=now() WHERE id=ANY($2::uuid[])',
+     [drawId,codes.rows.map(v=>v.id)]);
+   const tokenHash=createHash('sha256').update(randomBytes(32)).digest('hex');
+   await client.query(`INSERT INTO grab_voucher_claim_sessions
+     (draw_id,voucher_id,token_hash,recipient_email,status)
+     VALUES($1,$2,$3,$4,$5)`,[drawId,codes.rows[0].id,tokenHash,
+      method==='email'?email:null,method==='email'?'queued':'manual_followup']);
    await client.query(`INSERT INTO grab_staff_contact_submissions
-     (draw_id,collection_site,contact_kind,contact_email,contact_phone,notification_state)
-     VALUES($1,$2,$3,$4,$5,$6)`,
-     [row.id,collectionSite,method,method==='email'?email:null,method==='phone'?phone:null,
-      method==='phone'?'pending':'not_applicable']);
-   return {drawId:row.id,amount:VALID_PRIZES[row.prize_id]};
+     (draw_id,collection_site,contact_kind,contact_email,contact_phone,notification_state,
+      staff_input,contact_fingerprint)
+     VALUES($1,$2,$3,$4,$5,$6,true,$7)`,
+     [drawId,collectionSite,method,method==='email'?email:null,method==='phone'?phone:null,
+      method==='phone'?'pending':'not_applicable',fingerprint]);
+   await client.query(`INSERT INTO inventory_adjustments
+     (prize_id,site,previous_quantity,new_quantity,delta,reason,adjusted_by)
+     VALUES($1,$2,$3,$4,-1,'draw','staff-input')`,
+     [item.id,item.site,item.remaining_quantity,inv.rows[0].remaining_quantity]);
+   return {drawId,amount,ticket,stockSite:item.site};
   });
-  if(method==='email')return res.json({recorded:true,delivery:'email_queued'});
-  // A notification failure cannot roll back an already committed contact record.
-  // Always report the saved manual follow-up truthfully; the admin queue is the fallback.
+  if(method==='email')return res.json({recorded:true,ticketNumber:recorded.ticket,
+   stockSite:recorded.stockSite,delivery:'email_queued'});
+  // Notification failure cannot undo stock or the recorded contact.
   let notification='uncertain';
-  try{notification=await notifyManual({ticket:ticketNumber,amount:recorded.amount,collection:collectionSite,phone:phone!,drawId:recorded.drawId});}
+  try{notification=await notifyManual({ticket:recorded.ticket,amount,
+    collection:collectionSite,phone:phone!,drawId:recorded.drawId});}
   catch{console.error('Staff manual follow-up notification could not be confirmed');}
-  return res.json({recorded:true,delivery:'manual_followup',notification});
+  return res.json({recorded:true,ticketNumber:recorded.ticket,stockSite:recorded.stockSite,
+   delivery:'manual_followup',notification});
  }catch(e){
   const code=e instanceof Error?e.message:'';
-  if(code==='ALREADY_SUBMITTED')return res.status(409).json({error:'Contact was already submitted for this ticket. Ask a supervisor'});
-  if(code==='INVALID_PRIZE')return res.status(404).json({error:'This ticket does not have an eligible S$5/S$10 Grab prize'});
-  return res.status(503).json({error:'Unable to record this contact. Ask a supervisor to check before retrying'});
+  if(code==='DUPLICATE_CONTACT'||code==='23505')
+   return res.status(409).json({error:'This contact may already have a Lucky Dip or staff voucher. Ask an administrator before issuing another'});
+  if(code==='OUT_OF_STOCK'||code==='OUT_OF_CODES')
+   return res.status(409).json({error:'Not enough eligible Grab voucher inventory remains at this location'});
+  console.error('Staff input Grab voucher allocation failed',code==='TICKET_EXHAUSTED'?'TICKET_EXHAUSTED':'UNKNOWN');
+  return res.status(503).json({error:'Unable to record voucher. Ask a supervisor to check the redemption list before retrying'});
  }
 });
