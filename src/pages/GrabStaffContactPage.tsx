@@ -73,8 +73,8 @@ export const GrabStaffContactPage:React.FC=()=>{
       </label>
       <fieldset className="space-y-2"><legend className="font-semibold">Grab voucher amount</legend>
        <div className="grid grid-cols-2 gap-2">
-        <label className="rounded-lg border bg-white p-3"><input type="radio" checked={amount===5} onChange={()=>setAmount(5)}/> <strong>S$5</strong></label>
-        <label className="rounded-lg border bg-white p-3"><input type="radio" checked={amount===10} onChange={()=>setAmount(10)}/> <strong>S$10</strong></label>
+        <label className="rounded-lg border border-[#270342] bg-[#EEE0F7] p-3"><input type="radio" checked={amount===5} onChange={()=>setAmount(5)}/> <strong>S$5</strong></label>
+        <label className="rounded-lg border border-[#270342] bg-[#EEE0F7] p-3"><input type="radio" checked={amount===10} onChange={()=>setAmount(10)}/> <strong>S$10</strong></label>
        </div>
       </fieldset>
       {collectionSite==='FARM'?<p className="rounded-lg bg-white p-3 text-sm font-semibold">FARM: email only. Voucher stock will be taken from an eligible PDD or PS pool and logged as FARM staff-input.</p>:
