@@ -46,6 +46,10 @@ async function main() {
     console.log('Explicit Grab staff contact migration requested.');
     await run(['scripts/apply-grab-staff-migration.ts']);
   }
+  if (process.env.APPLY_NELBD_GRAB_FALLBACK_MIGRATION === 'YES') {
+    console.log('Explicit Grab emergency backup contact migration requested.');
+    await run(['scripts/apply-grab-fallback-migration.ts']);
+  }
   if (process.env.CONFIRM_NELBD_ADMIN_BOOTSTRAP === 'YES') {
     console.log('One-time PostgreSQL administrator bootstrap requested.');
     await run(['scripts/bootstrap-postgres-admin.ts']);
