@@ -1,13 +1,13 @@
 # Ground-staff Grab voucher contact page (NOT enabled by this PR)
 
-Purpose: collect a winning S$5 or S$10 Grab voucher ticket's **email OR SG handphone**, without exposing voucher codes or allowing staff access to inventory. Staff may record collection at PDD, PS, or FARM. FARM is a **collection location only**, not a draw hub.
+Purpose: collect a winning S$5 or S$10 Grab voucher ticket's **email OR SG handphone**, without exposing voucher codes or allowing staff access to inventory. Staff may record collection at PDD, PS, or FARM. **FARM permits email submissions only**; PDD and PS permit either email or handphone. FARM is a **collection location only**, not a draw hub.
 
 ## Staff experience
 
 Proposed URL: `/staff/grab-redemption`. The app checks a **separate server-side password** (not super-admin credentials) before ticket lookup or submission. Ticket must be a previously drawn `NELBD-PDD-XXXXXX` or `NELBD-PS-XXXXXX` Grab S$5/S$10 prize. S$50 and arbitrary/manual code assignment are intentionally excluded. Each claim accepts one submission:
 
 - Email: sets existing claim from `awaiting_email` to `queued`. The existing Grab Power Automate email worker sends the same already assigned codes.
-- Phone: sets claim to `manual_followup`, preserving the reserved vouchers without an email send; stores location and normalized SG number in private database; attempts a **separate** Power Automate alert to `nelbd2026@gmail.com`. Admin can review pending phone submissions at `/admin/grab-vouchers` and mark contacted after manual outreach.
+- Phone (**PDD and PS only**): sets claim to `manual_followup`, preserving the reserved vouchers without an email send; stores location and normalized SG number in private database; attempts a **separate** Power Automate alert to `nelbd2026@gmail.com`. Admin can review pending phone submissions at `/admin/grab-vouchers` and mark contacted after manual outreach.
 
 Concurrent contact submissions are serialized with a row lock and a single-state transition. Claims already queued, processing, sent, failed, or manually followed up cannot be overwritten through the staff page.
 
