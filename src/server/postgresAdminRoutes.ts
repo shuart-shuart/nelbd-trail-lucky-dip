@@ -283,7 +283,8 @@ postgresAdminRouter.get('/outlook-centre',async (_req,res)=>{
   try {
     const {rows}=await getPool().query(`SELECT c.draw_id AS "drawId",
       d.ticket_number AS "ticketNumber",d.site,c.recipient_email AS "recipientEmail",
-      d.prize_id AS "prizeId",
+      d.prize_id AS "prizeId",d.kiosk_id='STAFF_INPUT' AS "staffInput",
+      staff.collection_site AS "staffCollectionSite",
       CASE d.prize_id WHEN 'grab-voucher-50' THEN 5000
         WHEN 'grab-voucher-10' THEN 1000
         WHEN 'grab-voucher-5' THEN 500
@@ -296,6 +297,7 @@ postgresAdminRouter.get('/outlook-centre',async (_req,res)=>{
       c.delivery_started_at AS "deliveryStartedAt",
       c.delivery_error_code AS "handoffState"
       FROM grab_voucher_claim_sessions c JOIN draws d ON d.id=c.draw_id
+      LEFT JOIN grab_staff_contact_submissions staff ON staff.draw_id=d.id
       ORDER BY c.created_at DESC LIMIT 200`);
     res.setHeader('Cache-Control','no-store');
     res.json(rows);
@@ -598,11 +600,11 @@ postgresAdminRouter.get('/draws',async (req,res)=>{
     const limit=Math.min(500,Math.max(1,Number(req.query.limit)||50));
     const offset=Math.max(0,Math.min(1000000,Number(req.query.offset)||0));
     const {rows}=await getPool().query(`SELECT d.id,d.ticket_number AS "ticketNumber",
-      p.nickname AS "participantNickname",d.prize_id AS "prizeId",d.prize_name AS "prizeName",
+      COALESCE(p.nickname,CASE WHEN d.kiosk_id='STAFF_INPUT' THEN 'staff-input' END) AS "participantNickname",d.prize_id AS "prizeId",d.prize_name AS "prizeName",
       d.prize_tier AS "prizeTier",d.site,d.status,d.kiosk_id AS "kioskId",
       d.drawn_at AS "drawnAt",d.claimed_at AS "claimedAt",
       rev.classification AS "reviewLabel",rev.note AS "reviewNote"
-      FROM draws d JOIN participants p ON p.id=d.participant_id
+      FROM draws d LEFT JOIN participants p ON p.id=d.participant_id
       LEFT JOIN draw_review_labels rev ON rev.draw_id=d.id
       ORDER BY d.drawn_at DESC,d.id DESC LIMIT $1 OFFSET $2`,[limit,offset]);
     res.json(rows);

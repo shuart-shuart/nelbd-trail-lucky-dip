@@ -1,29 +1,38 @@
-# Ground-staff Grab voucher contact page (NOT enabled by this PR)
+# Grab voucher staff-input fallback (no winning ticket required)
 
-Purpose: collect a winning S$5 or S$10 Grab voucher ticket's **email OR SG handphone**, without exposing voucher codes or allowing staff access to inventory. Staff may record collection at PDD, PS, or FARM. **FARM permits email submissions only**; PDD and PS permit either email or handphone. FARM is a **collection location only**, not a draw hub.
+Staff page: `/staff/grab-redemption`, behind the **separate staff password**.
 
-## Staff experience
+Use only if the normal Lucky Dip app fails **before a winner receives a prize**. The staff member must first check the participant has not already drawn/received an award; the fallback does not identify participants by their kiosk mobile number.
 
-Proposed URL: `/staff/grab-redemption`. The app checks a **separate server-side password** (not super-admin credentials) before ticket lookup or submission. Ticket must be a previously drawn `NELBD-PDD-XXXXXX` or `NELBD-PS-XXXXXX` Grab S$5/S$10 prize. S$50 and arbitrary/manual code assignment are intentionally excluded. Each claim accepts one submission:
+## Workflow
 
-- Email: sets existing claim from `awaiting_email` to `queued`. The existing Grab Power Automate email worker sends the same already assigned codes.
-- Phone (**PDD and PS only**): sets claim to `manual_followup`, preserving the reserved vouchers without an email send; stores location and normalized SG number in private database; attempts a **separate** Power Automate alert to `nelbd2026@gmail.com`. Admin can review pending phone submissions at `/admin/grab-vouchers` and mark contacted after manual outreach.
+- Staff choose collection location **PDD**, **PS**, or **FARM**.
+- Staff choose **S$5** (one S$5 Grab code) or **S$10** (two separate S$5 Grab codes).
+- **PDD/PS:** email or Singapore handphone. **FARM:** email only, enforced in UI and backend.
+- Submit **only an email or phone**, with no pre-existing winning ticket.
+- The server creates a new `STAFF_INPUT` draw reference, reserves the correct number of existing unassigned S$5 voucher codes, and deducts one award from the **same PDD/PS site_inventory** table used by ordinary Lucky Dip draws, all in one PostgreSQL transaction using the shared draw advisory lock. `inventory_adjustments.adjusted_by='staff-input'`.
+- For FARM, records the collection location as **FARM**, and uses an eligible PDD or PS existing stock row with the largest remaining quantity. There is no independent FARM inventory pool.
+- **Email:** creates a queued claim for the existing automatic Grab voucher worker and Power Automate email delivery (same codes/template/callback logic).
+- **Handphone:** creates a `manual_followup` claim, reserves the assigned codes without an email, and requests a **separate** Power Automate notification to `nelbd2026@gmail.com`. No voucher codes are sent in the notification. Super-admin can review/mark contacted in the Grab Email Centre.
+- Grab Voucher Email Centre labels synthetic rows **staff-input** and displays collection location; draw history also shows `staff-input`. The ticket is an audit reference generated automatically, *not* something staff enter.
 
-Concurrent contact submissions are serialized with a row lock and a single-state transition. Claims already queued, processing, sent, failed, or manually followed up cannot be overwritten through the staff page.
+## Safety checks
 
-## Activation requirements (deliberately not fulfilled automatically)
+- Staff password must be ≥12 chars in the Render `NELBD_GRAB_STAFF_PASSWORD` secret; public 3-digit PINs not permitted.
+- Server-side authenticated sessions, same-origin write checks and per-session request throttling remain in place.
+- The selected prize must be active; sufficient site inventory and available, in-date Grab S$5 codes must exist; hub pause and daily caps remain enforced.
+- Contact fingerprint is keyed using existing voucher encryption secret and has a unique index for staff submissions. Email is also checked against existing queued/sent claims; handphone against existing Lucky Dip participants. Existing real winner records are never edited by the fallback.
+- All stock, draw, code assignment, claim and staff-input audit writes are in one transaction. A failure rolls back everything.
+- The staff page cannot reveal voucher codes, arbitrarily change inventory, use a S$50 prize, or submit more than one claim with the same contact.
+- **Limitation:** Without a kiosk identity or prior winning ticket, this cannot prove two different email addresses belong to the same participant, and using a shared family email can legitimately trigger the duplicate check. Staff verification remains essential.
 
-1. Apply `migrations/021_grab_staff_contact_portal.sql` through the existing opt-in migration runner (`APPLY_NELBD_GRAB_STAFF_MIGRATION=YES` for **one** authorized deploy, then remove flag). Validate schema before enabling the page.
-2. Configure `NELBD_GRAB_STAFF_PASSWORD` **only in Render secrets**, using a unique random password **at least 12 characters**. The short example PIN proposed in chat is intentionally rejected. Never commit or share the password in Git or support messages. The login uses an HttpOnly, SameSite=Strict, four-hour cookie and limits login attempts; it is distinct from admin.
-3. Create a **separate** Power Automate flow with HTTP trigger schema: `ticketNumber`, `to`, `subject`, `html` (all strings), with `additionalProperties:false`. Send an HTML email through the authorized shared mailbox. Optionally validate `to` is `nelbd2026@gmail.com` in the flow. **Do not reuse** the existing Grab voucher delivery flow; it posts Grab status callbacks and could incorrectly mark voucher emails. Store its signed HTTPS trigger as `NELBD_GRAB_STAFF_NOTIFY_TRIGGER_URL` **in Render**, never the repository. Verify the flow to the designated mailbox using a dummy payload **without real participant numbers** before enabling live staff submissions. A 2xx response means trigger acceptance, not inbox delivery.
-4. Set `NELBD_GRAB_STAFF_PORTAL_ENABLED=YES` in Render, then deploy, test an existing dedicated **test-only** S$5 / S$10 winning ticket with contact submission, review audit list, and confirm the Power Automate notification arrived. Do **not** use real winners for testing without a clear authorization; submissions cannot be undone by ground staff.
-5. Remove migration flag from Render afterward. Restrict visibility of the admin manual-followup table to super-admin staff and limit the data-retention period under your event's privacy policy.
+## Rollout
 
-When notification HTTP is unavailable, the phone claim stays saved as `manual_followup` with `notification_state=uncertain` or `not_configured`. This never silently marks the participant's voucher sent. Admin's table is the fallback; staff should alert a supervisor. There is no blind automatic retry of sensitive notifications.
+1. Merge approved PR and deploy with `APPLY_NELBD_GRAB_STAFF_MIGRATION=YES` **one time**; runner applies idempotent 021 followed by 022. Confirm `NELBD_GRAB_STAFF_CONTACT_SCHEMA_READY` and deployment Live. Do not submit real vouchers while the migration runs.
+2. Set migration flag to `NO` again (triggers another deployment).
+3. Confirm staff password and separate `NELBD_GRAB_STAFF_NOTIFY_TRIGGER_URL` are configured privately on Render.
+4. Use authenticated login to open the staff page. Verify form options and admin labels **without clicking Confirm staff-input voucher** on real data. Confirm stock and Power Automate only after a deliberately authorized non-production test.
 
-## Limitations
+## Existing portal
 
-- This does not provide a PIN-only deployment for a three-digit passcode. On a public site collecting minors' or guardians' contact data, short shared PINs can be guessed.
-- The staff password authenticates the team as a whole, not an individual employee. For per-staff audit attribution, provision individual accounts in a separate enhancement.
-- Marking **contacted** is an administrative attestation of follow-up, not proof of voucher redemption.
-- Existing Grab processing or sent records are not changed by this feature.
+PR #74 previously required a ticket number, intended as a redemption/contact collection helper. This change **replaces that workflow** with an emergency award/fulfilment fallback. It does not alter already recorded staff submissions or existing Grab email sends.
