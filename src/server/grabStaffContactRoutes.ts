@@ -128,6 +128,8 @@ grabStaffRouter.post('/submit',async(req,res)=>{
  const {ticketNumber,collectionSite,method}=req.body||{};
  if(!ticketValid(ticketNumber)||!['PDD','PS','FARM'].includes(collectionSite)||!['email','phone'].includes(method))
   return res.status(400).json({error:'Invalid ticket, location or contact method'});
+ if(collectionSite==='FARM'&&method!=='email')
+  return res.status(400).json({error:'FARM accepts email submissions only'});
  const email=typeof req.body?.email==='string'?req.body.email.trim().toLowerCase():null;
  const phone=normalizedPhone(req.body?.phone);
  if(method==='email'&&(!email||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))
