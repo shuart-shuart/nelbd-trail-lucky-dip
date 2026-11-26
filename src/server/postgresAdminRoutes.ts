@@ -5,6 +5,7 @@ import {sendDailyCsvBackupTest} from './dailyCsvBackupEmail.ts';
 import {questManualOutlookRouter} from './questManualOutlookRoutes.ts';
 import {ezlinkAdminRouter} from './ezlinkAdminRoutes.ts';
 import {goodieBagAdminRouter} from './goodieBagAdminRoutes.ts';
+import {grabStaffAdminRouter} from './grabStaffAdminRoutes.ts';
 import {questAdminRouter} from './questRoutes.ts';
 import {questFulfilmentAdminRouter} from './questFulfilmentRoutes.ts';
 import {encryptVoucher,fingerprint} from './grabVoucherCrypto.ts';
@@ -25,6 +26,7 @@ postgresAdminRouter.use('/quest',questFulfilmentAdminRouter);
 postgresAdminRouter.use('/quest',questManualOutlookRouter);
 postgresAdminRouter.use('/ezlink',ezlinkAdminRouter);
 postgresAdminRouter.use('/goodie-bag',goodieBagAdminRouter);
+postgresAdminRouter.use('/grab-vouchers/staff',grabStaffAdminRouter);
 postgresAdminRouter.post('/logout', async (req,res) => {
   try { await logoutAdmin(req,res); } catch { res.status(503).json({error:'Logout unavailable'}); }
 });

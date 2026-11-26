@@ -42,6 +42,10 @@ async function main() {
     console.log('Explicitly authorized daily report ledger migration starting.');
     await run(['scripts/apply-daily-report-migration.ts']);
   }
+  if (process.env.APPLY_NELBD_GRAB_STAFF_MIGRATION === 'YES') {
+    console.log('Explicit Grab staff contact migration requested.');
+    await run(['scripts/apply-grab-staff-migration.ts']);
+  }
   if (process.env.CONFIRM_NELBD_ADMIN_BOOTSTRAP === 'YES') {
     console.log('One-time PostgreSQL administrator bootstrap requested.');
     await run(['scripts/bootstrap-postgres-admin.ts']);

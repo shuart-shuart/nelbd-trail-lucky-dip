@@ -7,6 +7,7 @@ import {startDailyLuckyDipEmailScheduler} from './src/server/dailyLuckyDipEmail.
 import {startDailyCsvBackupScheduler} from './src/server/dailyCsvBackupEmail.ts';
 import { postgresAdminRouter } from './src/server/postgresAdminRoutes.ts';
 import { grabClaimRouter } from './src/server/grabClaimRoutes.ts';
+import {grabStaffRouter} from './src/server/grabStaffContactRoutes.ts';
 import { grabDeliveryRouter, startGrabDeliveryWorker } from './src/server/grabDeliveryRoutes.ts';
 import { executePostgresLuckyDipDraw, checkPostgresMobileHasDrawn } from './src/server/postgresDrawEngine.ts';
 import path from 'path';
@@ -38,6 +39,7 @@ app.use('/api/kiosk/quest-rewards',kioskQuestRewardsRouter);
 app.use('/api/quest',questViewRouter);
 app.use('/api/quest',questCallbackRouter);
 app.use('/api/grab',grabClaimRouter);
+app.use('/api/staff/grab',grabStaffRouter);
 app.use('/api/grab',grabDeliveryRouter);
 
 // ---------------------------------------------------------------------------
