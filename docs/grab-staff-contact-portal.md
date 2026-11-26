@@ -10,7 +10,7 @@ Use only if the normal Lucky Dip app fails **before a winner receives a prize**.
 - Staff choose **S$5** (one S$5 Grab code) or **S$10** (two separate S$5 Grab codes).
 - **PDD/PS:** email or Singapore handphone. **FARM:** email only, enforced in UI and backend.
 - Submit **only an email or phone**, with no pre-existing winning ticket.
-- The server creates a new `STAFF_INPUT` draw reference, reserves the correct number of existing unassigned S$5 voucher codes, and deducts one award from the **same PDD/PS site_inventory** table used by ordinary Lucky Dip draws, all in one PostgreSQL transaction using the shared draw advisory lock. `inventory_adjustments.adjusted_by='staff-input'`.
+- The server creates a new `STAFF_INPUT` draw reference, reserves the correct number of existing unassigned S$5 voucher codes, and deducts **one award from the general `grab-voucher` PDD/PS `site_inventory` row**, *not* the dormant S$5/S$10 inventory rows, all in one PostgreSQL transaction using the shared draw advisory lock. `inventory_adjustments.adjusted_by='staff-input'`.
 - For FARM, records the collection location as **FARM**, and uses an eligible PDD or PS existing stock row with the largest remaining quantity. There is no independent FARM inventory pool.
 - **Email:** creates a queued claim for the existing automatic Grab voucher worker and Power Automate email delivery (same codes/template/callback logic).
 - **Handphone:** creates a `manual_followup` claim, reserves the assigned codes without an email, and requests a **separate** Power Automate notification to `nelbd2026@gmail.com`. No voucher codes are sent in the notification. Super-admin can review/mark contacted in the Grab Email Centre.
@@ -20,7 +20,7 @@ Use only if the normal Lucky Dip app fails **before a winner receives a prize**.
 
 - Staff password must be ≥12 chars in the Render `NELBD_GRAB_STAFF_PASSWORD` secret; public 3-digit PINs not permitted.
 - Server-side authenticated sessions, same-origin write checks and per-session request throttling remain in place.
-- The selected prize must be active; sufficient site inventory and available, in-date Grab S$5 codes must exist; hub pause and daily caps remain enforced.
+- The general `grab-voucher` prize may be inactive for random Lucky Dip draws; staff-input explicitly uses its PDD/PS stock row regardless of that inactive flag. Sufficient remaining general stock and available, in-date Grab S$5 codes are required; general hub pause and daily caps remain enforced. The S$5/S$10 prize identifiers remain on draw records solely to preserve the correct one-code/two-code email bundle.
 - Contact fingerprint is keyed using existing voucher encryption secret and has a unique index for staff submissions. Email is also checked against existing queued/sent claims; handphone against existing Lucky Dip participants. Existing real winner records are never edited by the fallback.
 - All stock, draw, code assignment, claim and staff-input audit writes are in one transaction. A failure rolls back everything.
 - The staff page cannot reveal voucher codes, arbitrarily change inventory, use a S$50 prize, or submit more than one claim with the same contact.
@@ -36,3 +36,7 @@ Use only if the normal Lucky Dip app fails **before a winner receives a prize**.
 ## Existing portal
 
 PR #74 previously required a ticket number, intended as a redemption/contact collection helper. This change **replaces that workflow** with an emergency award/fulfilment fallback. It does not alter already recorded staff submissions or existing Grab email sends.
+
+## Stock pool clarification (26 November 2026)
+
+Staff-input S$5 and S$10 both deduct **one** from the general `grab-voucher` award count in the chosen PDD/PS inventory (or whichever of those is selected for FARM). They do **not** reduce the dormant denomination-specific award counts. Independently, S$5 reserves **one** real S$5 Grab code; S$10 reserves **two**. When the general Grab Voucher remaining quantity is zero, the staff-input form rejects issuance rather than pulling from S$5/S$10 award inventory.
