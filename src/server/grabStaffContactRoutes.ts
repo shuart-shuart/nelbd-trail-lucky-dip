@@ -146,19 +146,27 @@ grabStaffRouter.post('/submit',async(req,res)=>{
     const existing=await client.query('SELECT 1 FROM participants WHERE mobile_number=$1 LIMIT 1',[phone]);
     if(existing.rowCount)throw Error('DUPLICATE_CONTACT');
    }
-   const prizeId=amount===10?'grab-voucher-10':'grab-voucher-5';
-   const eligible=await client.query(`SELECT p.id,p.name,p.tier,i.site,i.remaining_quantity
+   // Staff fallback uses the existing general Grab Voucher stock bucket, not
+   // the dormant denomination prize inventory. Inactive here means unavailable
+   // to normal random draws, not unavailable for this explicit staff action.
+   // Keep the draw's denomination prize id so the existing email worker knows
+   // whether to send one or two distinct S$5 voucher codes.
+   const denominationPrizeId=amount===10?'grab-voucher-10':'grab-voucher-5';
+   const eligible=await client.query(`SELECT p.id AS stock_prize_id,i.site,i.remaining_quantity,
+       denom.id AS award_prize_id,denom.name AS award_name,denom.tier AS award_tier
      FROM prizes p JOIN site_inventory i ON i.prize_id=p.id
+     JOIN prizes denom ON denom.id=$1
      LEFT JOIN prize_site_limits lim ON lim.prize_id=i.prize_id AND lim.site=i.site
-     WHERE p.id=$1 AND p.is_active=true AND i.remaining_quantity>0
+     WHERE p.id='grab-voucher' AND i.remaining_quantity>0
        AND ($2::text='FARM' OR i.site=$2)
        AND NOT COALESCE(lim.paused,false)
        AND (lim.daily_cap IS NULL OR
-          (SELECT count(*) FROM draws d WHERE d.prize_id=p.id AND d.site=i.site
-            AND (d.drawn_at AT TIME ZONE 'Asia/Singapore')::date=
-                (now() AT TIME ZONE 'Asia/Singapore')::date) < lim.daily_cap)
+          (SELECT count(*) FROM inventory_adjustments adj
+            WHERE adj.prize_id=p.id AND adj.site=i.site AND adj.reason='draw'
+              AND (adj.created_at AT TIME ZONE 'Asia/Singapore')::date=
+                  (now() AT TIME ZONE 'Asia/Singapore')::date) < lim.daily_cap)
      ORDER BY i.remaining_quantity DESC,i.site
-     LIMIT 1 FOR UPDATE OF i`,[prizeId,collectionSite]);
+     LIMIT 1 FOR UPDATE OF i`,[denominationPrizeId,collectionSite]);
    if(!eligible.rowCount)throw Error('OUT_OF_STOCK');
    const item=eligible.rows[0];
    const codes=await client.query(`SELECT id FROM grab_voucher_codes
@@ -176,12 +184,12 @@ grabStaffRouter.post('/submit',async(req,res)=>{
    const draw=await client.query(`INSERT INTO draws
       (ticket_number,participant_id,prize_id,prize_name,prize_tier,site,status,kiosk_id,claimed_at)
       VALUES($1,NULL,$2,$3,$4,$5,'claimed','STAFF_INPUT',now())
-      RETURNING id`,[ticket,item.id,item.name,item.tier,item.site]);
+      RETURNING id`,[ticket,item.award_prize_id,item.award_name,item.award_tier,item.site]);
    const drawId=draw.rows[0].id;
    const inv=await client.query(`UPDATE site_inventory SET remaining_quantity=remaining_quantity-1,
      claimed_quantity=claimed_quantity+1,updated_at=now()
      WHERE prize_id=$1 AND site=$2 AND remaining_quantity>0
-     RETURNING remaining_quantity`,[item.id,item.site]);
+     RETURNING remaining_quantity`,[item.stock_prize_id,item.site]);
    if(!inv.rowCount)throw Error('OUT_OF_STOCK');
    await client.query('UPDATE grab_voucher_codes SET assigned_draw_id=$1,assigned_at=now() WHERE id=ANY($2::uuid[])',
      [drawId,codes.rows.map(v=>v.id)]);
@@ -199,7 +207,7 @@ grabStaffRouter.post('/submit',async(req,res)=>{
    await client.query(`INSERT INTO inventory_adjustments
      (prize_id,site,previous_quantity,new_quantity,delta,reason,adjusted_by)
      VALUES($1,$2,$3,$4,-1,'draw','staff-input')`,
-     [item.id,item.site,item.remaining_quantity,inv.rows[0].remaining_quantity]);
+     [item.stock_prize_id,item.site,item.remaining_quantity,inv.rows[0].remaining_quantity]);
    return {drawId,amount,ticket,stockSite:item.site};
   });
   if(method==='email')return res.json({recorded:true,ticketNumber:recorded.ticket,
