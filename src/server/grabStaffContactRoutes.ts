@@ -1,10 +1,9 @@
 import {Router} from 'express';
-import {randomBytes,createHash,scryptSync,timingSafeEqual} from 'node:crypto';
+import {randomBytes,randomUUID,createHash,scryptSync,timingSafeEqual} from 'node:crypto';
 import {getPool,withTransaction} from './postgres.ts';
 
 export const grabStaffRouter=Router();
 const COOKIE='nelbd_grab_staff';
-const VALID_PRIZES:Record<string,number>={'grab-voucher-5':5,'grab-voucher-10':10};
 const loginAttempts=new Map<string,{count:number,until:number}>();
 let overallAttempts:{count:number,until:number}={count:0,until:0};
 const esc=(s:string)=>s.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'} as Record<string,string>)[ch]);
@@ -67,105 +66,91 @@ grabStaffRouter.post('/logout',async(req,res)=>{
  if(cookie)await getPool().query('DELETE FROM grab_staff_sessions WHERE token_hash=$1',[hash(cookie)]).catch(()=>{});
  res.clearCookie(COOKIE,{path:'/api/staff/grab'});return res.json({ok:true});
 });
-const ticketValid=(value:unknown):value is string=>
- typeof value==='string'&&/^NELBD-(PDD|PS)-[0-9]{6}$/.test(value);
-// Bound authenticated ticket enumeration and contact collection separately from login.
+// Emergency backup form deliberately never reads or changes Lucky Dip tickets or voucher claims.
 const staffRequests=new Map<string,{count:number;until:number}>();
-function staffLimited(req:any,operation:string,limit:number){
+function staffLimited(req:any,limit:number){
  const cookie=(req.headers.cookie||'').split(';').map((part:string)=>part.trim())
-   .find((part:string)=>part.startsWith(COOKIE+'='))?.slice(COOKIE.length+1)||'anonymous';
- const key=operation+':'+hash(cookie);
- const now=Date.now(),existing=staffRequests.get(key);
- const next=existing&&existing.until>now?existing:{count:0,until:now+60_000};
+  .find((part:string)=>part.startsWith(COOKIE+'='))?.slice(COOKIE.length+1)||'anonymous';
+ const key=hash(cookie),now=Date.now(),old=staffRequests.get(key);
+ const next=old&&old.until>now?old:{count:0,until:now+60_000};
  next.count++;staffRequests.set(key,next);
  if(staffRequests.size>5000)for(const [k,v] of staffRequests)if(v.until<=now)staffRequests.delete(k);
- return next.count>limit;
+ return next.count>12;
 }
-grabStaffRouter.post('/lookup',async(req,res)=>{
- if(staffLimited(req,'lookup',30))return res.status(429).json({error:'Too many ticket lookups. Ask a supervisor'});
- if(!ticketValid(req.body?.ticketNumber))return res.status(400).json({error:'Enter a valid winning ticket'});
- try{
-  const result=await getPool().query(`SELECT d.prize_id,c.status
-    FROM draws d JOIN grab_voucher_claim_sessions c ON c.draw_id=d.id
-    WHERE d.ticket_number=$1`,[req.body.ticketNumber]);
-  const row=result.rows[0];
-  if(!row||!VALID_PRIZES[row.prize_id])return res.status(404).json({error:'No eligible S$5 or S$10 Grab prize found'});
-  return res.json({amount:VALID_PRIZES[row.prize_id],available:row.status==='awaiting_email',
-    status:row.status==='awaiting_email'?'Awaiting contact':'Already submitted or requires supervisor review'});
- }catch{return res.status(503).json({error:'Unable to verify winning ticket'});}
-});
 function normalizedPhone(value:unknown){
  if(typeof value!=='string'||value.length>32)return null;
- const digits=value.replace(/[\s()-]/g,'');
+ const digits=value.replace(/[\\s()-]/g,'');
  const phone=digits.startsWith('+65')?digits:digits.startsWith('65')&&digits.length===10?'+'+digits:'+65'+digits;
- return /^\+65[89][0-9]{7}$/.test(phone)?phone:null;
+ return /^\\+65[89][0-9]{7}$/.test(phone)?phone:null;
 }
-async function notifyManual(info:{ticket:string;amount:number;collection:string;phone:string;drawId:string}){
- const url=process.env.NELBD_GRAB_STAFF_NOTIFY_TRIGGER_URL||'';
- let target:URL;
- try{target=new URL(url);if(target.protocol!=='https:')throw Error('not https');}
+// Old endpoints are disabled to prevent stale clients claiming real codes through fallback.
+grabStaffRouter.post('/lookup',(_req,res)=>res.status(410).json({error:'Ticket verification is no longer part of the emergency contact form. Refresh this page.'}));
+grabStaffRouter.post('/submit',(_req,res)=>res.status(410).json({error:'Refresh this page to use the emergency contact form.'}));
+
+async function notify(info:{id:string;site:string;amount:number;kind:string;contact:string}){
+ const rawUrl=process.env.NELBD_GRAB_STAFF_NOTIFY_TRIGGER_URL||'';
+ let url:URL;
+ try{url=new URL(rawUrl);if(url.protocol!=='https:')throw Error('HTTPS required');}
  catch{
-  await getPool().query("UPDATE grab_staff_contact_submissions SET notification_state='not_configured' WHERE draw_id=$1 AND notification_state='pending'",[info.drawId]);
+  await getPool().query("UPDATE grab_staff_fallback_submissions SET notification_state='not_configured' WHERE id=$1 AND notification_state='pending'",[info.id]);
   return 'not_configured';
  }
- await getPool().query("UPDATE grab_staff_contact_submissions SET notification_state='sending' WHERE draw_id=$1 AND notification_state='pending'",[info.drawId]);
- const html='<div style="font-family:Arial,sans-serif"><h2>NELBD Grab Voucher — manual contact requested</h2>'+
-  '<p><strong>Ticket:</strong> '+esc(info.ticket)+'</p><p><strong>Award:</strong> S$'+info.amount+'</p>'+
-  '<p><strong>Collected at:</strong> '+esc(info.collection)+'</p><p><strong>Handphone:</strong> '+esc(info.phone)+'</p>'+
-  '<p>No voucher codes are included. Please verify the winning ticket and arrange follow-up.</p></div>';
- let state='uncertain';
+ await getPool().query("UPDATE grab_staff_fallback_submissions SET notification_state='sending' WHERE id=$1 AND notification_state='pending'",[info.id]);
+ // Keep the existing tested flow's schema: ticketNumber, to, subject, html.
+ // Here ticketNumber is a BACKUP reference, not an actual winning ticket.
+ const ref='BACKUP-'+info.id;
+ const html='<div style="font-family:Arial,sans-serif"><h2>NELBD Grab — APP OFFLINE BACKUP</h2>'+
+  '<p><strong>Reference:</strong> '+esc(ref)+'</p>'+
+  '<p><strong>Location:</strong> '+esc(info.site)+'</p>'+
+  '<p><strong>Amount recorded by staff:</strong> S$'+info.amount+'</p>'+
+  '<p><strong>Contact type:</strong> '+esc(info.kind)+'</p>'+
+  '<p><strong>Contact:</strong> '+esc(info.contact)+'</p>'+
+  '<p>This was manually recorded while the Lucky Dip app was unavailable. No ticket, voucher allocation or email fulfilment was verified. Review before sending vouchers.</p></div>';
+ let result='uncertain';
  try{
-  const response=await fetch(target,{method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({ticketNumber:info.ticket,to:'nelbd2026@gmail.com',
-    subject:'NELBD Grab manual follow-up — '+info.ticket,html}),signal:AbortSignal.timeout(15_000)});
-  state=response.ok?'accepted':'uncertain';
- }catch{state='uncertain';}
- await getPool().query('UPDATE grab_staff_contact_submissions SET notification_state=$2 WHERE draw_id=$1 AND notification_state=\'sending\'',[info.drawId,state]).catch(()=>{});
- return state;
+  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({ticketNumber:ref,to:'nelbd2026@gmail.com',
+    subject:'[APP OFFLINE] NELBD Grab backup — '+info.site+' — S$'+info.amount,html}),
+   signal:AbortSignal.timeout(15000)});
+  result=response.ok?'accepted':'uncertain';
+ }catch{result='uncertain';}
+ await getPool().query("UPDATE grab_staff_fallback_submissions SET notification_state=$2 WHERE id=$1 AND notification_state='sending'",[info.id,result]).catch(()=>{});
+ return result;
 }
-grabStaffRouter.post('/submit',async(req,res)=>{
- if(staffLimited(req,'submit',15))return res.status(429).json({error:'Too many submissions. Ask a supervisor'});
- const {ticketNumber,collectionSite,method}=req.body||{};
- if(!ticketValid(ticketNumber)||!['PDD','PS','FARM'].includes(collectionSite)||!['email','phone'].includes(method))
-  return res.status(400).json({error:'Invalid ticket, location or contact method'});
+grabStaffRouter.post('/fallback/submit',async(req,res)=>{
+ if(staffLimited(req,12))return res.status(429).json({error:'Too many submissions. Ask a supervisor'});
+ const {collectionSite,method,amount}=req.body||{};
+ if(!['PDD','PS','FARM'].includes(collectionSite)||!['email','phone'].includes(method)||![5,10].includes(amount))
+  return res.status(400).json({error:'Select a valid location, voucher amount and contact method'});
  if(collectionSite==='FARM'&&method!=='email')
-  return res.status(400).json({error:'FARM accepts email submissions only'});
- const email=typeof req.body?.email==='string'?req.body.email.trim().toLowerCase():null;
- const phone=normalizedPhone(req.body?.phone);
- if(method==='email'&&(!email||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))
+  return res.status(400).json({error:'FARM is email-only'});
+ const email=typeof req.body.email==='string'?req.body.email.trim().toLowerCase():'';
+ const phone=normalizedPhone(req.body.phone);
+ if(method==='email'&&(!email||email.length>254||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)))
   return res.status(400).json({error:'Enter a valid email address'});
  if(method==='phone'&&!phone)return res.status(400).json({error:'Enter a valid Singapore handphone number'});
+ const contact=method==='email'?email:phone!;
  try{
-  const recorded=await withTransaction(async client=>{
-   const result=await client.query(`SELECT d.id,d.prize_id,c.status
-     FROM draws d JOIN grab_voucher_claim_sessions c ON c.draw_id=d.id
-     WHERE d.ticket_number=$1 FOR UPDATE OF c`,[ticketNumber]);
-   const row=result.rows[0];
-   if(!row||!VALID_PRIZES[row.prize_id])throw Error('INVALID_PRIZE');
-   if(row.status!=='awaiting_email')throw Error('ALREADY_SUBMITTED');
-   const updated=await client.query(`UPDATE grab_voucher_claim_sessions SET
-     status=$2,recipient_email=$3,updated_at=now()
-     WHERE draw_id=$1 AND status='awaiting_email' RETURNING draw_id`,
-     [row.id,method==='email'?'queued':'manual_followup',method==='email'?email:null]);
-   if(!updated.rowCount)throw Error('ALREADY_SUBMITTED');
-   await client.query(`INSERT INTO grab_staff_contact_submissions
-     (draw_id,collection_site,contact_kind,contact_email,contact_phone,notification_state)
-     VALUES($1,$2,$3,$4,$5,$6)`,
-     [row.id,collectionSite,method,method==='email'?email:null,method==='phone'?phone:null,
-      method==='phone'?'pending':'not_applicable']);
-   return {drawId:row.id,amount:VALID_PRIZES[row.prize_id]};
+  const saved=await withTransaction(async client=>{
+   // Prevent double taps creating repeated messages for the same recorded contact.
+   await client.query('SELECT pg_advisory_xact_lock($1)',[7102031]);
+   const old=await client.query(`SELECT id,notification_state FROM grab_staff_fallback_submissions
+     WHERE collection_site=$1 AND award_cents=$2 AND contact_kind=$3 AND contact_value=$4
+       AND created_at>now()-interval '10 minutes'
+     ORDER BY created_at DESC LIMIT 1`,[collectionSite,amount*100,method,contact]);
+   if(old.rowCount)return {id:old.rows[0].id,existing:true,notification:old.rows[0].notification_state};
+   const id=randomUUID();
+   await client.query(`INSERT INTO grab_staff_fallback_submissions
+     (id,collection_site,award_cents,contact_kind,contact_value)
+     VALUES($1,$2,$3,$4,$5)`,[id,collectionSite,amount*100,method,contact]);
+   return {id,existing:false,notification:'pending'};
   });
-  if(method==='email')return res.json({recorded:true,delivery:'email_queued'});
-  // A notification failure cannot roll back an already committed contact record.
-  // Always report the saved manual follow-up truthfully; the admin queue is the fallback.
+  if(saved.existing)return res.json({recorded:true,alreadyRecorded:true,notification:saved.notification});
   let notification='uncertain';
-  try{notification=await notifyManual({ticket:ticketNumber,amount:recorded.amount,collection:collectionSite,phone:phone!,drawId:recorded.drawId});}
-  catch{console.error('Staff manual follow-up notification could not be confirmed');}
-  return res.json({recorded:true,delivery:'manual_followup',notification});
- }catch(e){
-  const code=e instanceof Error?e.message:'';
-  if(code==='ALREADY_SUBMITTED')return res.status(409).json({error:'Contact was already submitted for this ticket. Ask a supervisor'});
-  if(code==='INVALID_PRIZE')return res.status(404).json({error:'This ticket does not have an eligible S$5/S$10 Grab prize'});
-  return res.status(503).json({error:'Unable to record this contact. Ask a supervisor to check before retrying'});
+  try{notification=await notify({id:saved.id,site:collectionSite,amount,kind:method,contact});}
+  catch{console.error('Grab offline contact notification uncertain');}
+  return res.json({recorded:true,notification});
+ }catch{
+  return res.status(503).json({error:'Contact could not be confirmed. Ask an administrator to check the backup list before repeating'});
  }
 });
