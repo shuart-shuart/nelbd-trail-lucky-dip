@@ -25,8 +25,8 @@ export const GrabStaffContactPage:React.FC=()=>{
  useEffect(()=>{if(authenticated&&collectionSite==='FARM'){
   void request<{verified:boolean}>('/farm/status').then(r=>setFarmVerified(r.verified)).catch(()=>setFarmVerified(false));
  }},[authenticated,collectionSite]);
- const verifyFarm=async(e:React.FormEvent)=>{
-  e.preventDefault();if(busy)return;setBusy(true);setError('');
+ const verifyFarm=async()=>{
+  if(busy)return;setBusy(true);setError('');
   try{await request('/farm/verify',{password:farmPassword});setFarmPassword('');setFarmVerified(true);}
   catch(e){setFarmVerified(false);setError(e instanceof Error?e.message:'Unable to verify FARM password');}
   finally{setBusy(false);}
@@ -89,7 +89,7 @@ export const GrabStaffContactPage:React.FC=()=>{
         <input type="password" required autoComplete="off" value={farmPassword} onChange={e=>setFarmPassword(e.target.value)}
          className="mt-1 block w-full rounded-lg border border-[#270342] bg-white p-3"/>
        </label>
-       <button type="button" onClick={()=>void verifyFarm({preventDefault:()=>{}} as React.FormEvent)} disabled={busy} className="w-full rounded-xl bg-[#270342] p-3 font-bold text-white disabled:opacity-50">Verify FARM access</button>
+       <button type="button" onClick={()=>void verifyFarm()} disabled={busy} className="w-full rounded-xl bg-[#270342] p-3 font-bold text-white disabled:opacity-50">Verify FARM access</button>
       </div>}
       {collectionSite==='FARM'&&farmVerified&&<p role="status" className="rounded-lg bg-[#EEE0F7] p-3 text-sm font-semibold">FARM access verified for this staff session (15 minutes).</p>}
       {(collectionSite!=='FARM'||farmVerified)&&<>
