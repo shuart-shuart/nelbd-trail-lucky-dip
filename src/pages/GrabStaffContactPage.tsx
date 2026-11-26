@@ -77,14 +77,15 @@ export const GrabStaffContactPage:React.FC=()=>{
      {lookup?.available&&<form onSubmit={submit} className="space-y-4 border-t pt-4 border-[#CDBDD9]">
       <label className="block font-semibold">Staff collection location
        <select className="mt-1 block w-full rounded-lg border p-3" value={collectionSite}
-        onChange={e=>setCollectionSite(e.target.value as 'PDD'|'PS'|'FARM')}>
+        onChange={e=>{const site=e.target.value as 'PDD'|'PS'|'FARM';setCollectionSite(site);if(site==='FARM')setMethod('email');}}>
         <option value="PDD">PDD</option><option value="PS">PS</option><option value="FARM">FARM</option>
        </select>
       </label>
-      <fieldset className="space-y-2"><legend className="font-semibold">Contact method — choose one</legend>
+      {collectionSite==='FARM'&&<p className="rounded-lg bg-white p-3 text-sm font-semibold">FARM submissions require an email address. Handphone follow-up is available at PDD and PS only.</p>}
+      {collectionSite!=='FARM'&&<fieldset className="space-y-2"><legend className="font-semibold">Contact method — choose one</legend>
        <label className="flex items-center gap-2"><input type="radio" checked={method==='email'} onChange={()=>setMethod('email')}/> Email — automatic delivery</label>
        <label className="flex items-center gap-2"><input type="radio" checked={method==='phone'} onChange={()=>setMethod('phone')}/> Handphone — manual follow-up</label>
-      </fieldset>
+      </fieldset>}
       {method==='email'?<label className="block font-semibold">Email address
        <input type="email" required maxLength={254} autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}
         className="mt-1 block w-full rounded-lg border p-3" placeholder="parent@example.com"/></label>:
