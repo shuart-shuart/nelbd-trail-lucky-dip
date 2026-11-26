@@ -598,7 +598,7 @@ postgresAdminRouter.get('/draws',async (req,res)=>{
     const limit=Math.min(500,Math.max(1,Number(req.query.limit)||50));
     const offset=Math.max(0,Math.min(1000000,Number(req.query.offset)||0));
     const {rows}=await getPool().query(`SELECT d.id,d.ticket_number AS "ticketNumber",
-      p.nickname AS "participantNickname",d.prize_id AS "prizeId",d.prize_name AS "prizeName",
+      COALESCE(p.nickname,CASE WHEN d.kiosk_id='STAFF_INPUT' THEN 'staff-input' END) AS "participantNickname",d.prize_id AS "prizeId",d.prize_name AS "prizeName",
       d.prize_tier AS "prizeTier",d.site,d.status,d.kiosk_id AS "kioskId",
       d.drawn_at AS "drawnAt",d.claimed_at AS "claimedAt",
       rev.classification AS "reviewLabel",rev.note AS "reviewNote"
