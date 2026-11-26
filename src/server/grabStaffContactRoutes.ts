@@ -65,6 +65,7 @@ grabStaffRouter.get('/session',(_req,res)=>res.json({authenticated:true}));
 grabStaffRouter.post('/logout',async(req,res)=>{
  const cookie=(req.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith(COOKIE+'='))?.slice(COOKIE.length+1);
  if(cookie)await getPool().query('DELETE FROM grab_staff_sessions WHERE token_hash=$1',[hash(cookie)]).catch(()=>{});
+ if(cookie)farmGrants.delete(hash(cookie));
  res.clearCookie(COOKIE,{path:'/api/staff/grab'});return res.json({ok:true});
 });
 // Bound authenticated ticket enumeration and contact collection separately from login.
@@ -79,6 +80,51 @@ function staffLimited(req:any,operation:string,limit:number){
  if(staffRequests.size>5000)for(const [k,v] of staffRequests)if(v.until<=now)staffRequests.delete(k);
  return next.count>limit;
 }
+// Additional FARM authorization is scoped to the existing staff session.
+// An in-memory grant expires after 15 minutes; server restart revokes it.
+const farmGrants=new Map<string,number>();
+const farmAttempts=new Map<string,{count:number,until:number}>();
+let farmGlobalAttempts:{count:number,until:number}={count:0,until:0};
+function staffSessionHash(req:any){
+ const token=(req.headers.cookie||'').split(';').map((part:string)=>part.trim())
+  .find((part:string)=>part.startsWith(COOKIE+'='))?.slice(COOKIE.length+1);
+ return token&&/^[a-f0-9]{64}$/.test(token)?hash(token):null;
+}
+function farmConfigured(){
+ const value=process.env.NELBD_GRAB_FARM_VERIFICATION_PASSWORD||'';
+ const staff=process.env.NELBD_GRAB_STAFF_PASSWORD||'';
+ return value.length>=12 && value!==staff;
+}
+function farmAttemptLimited(req:any){
+ const now=Date.now();
+ const key=String(req.ip||req.socket.remoteAddress||'unknown');
+ const previous=farmAttempts.get(key);
+ const next=previous&&previous.until>now?previous:{count:0,until:now+15*60_000};
+ next.count++;farmAttempts.set(key,next);
+ if(farmAttempts.size>5000)for(const [ip,row] of farmAttempts)if(row.until<=now)farmAttempts.delete(ip);
+ if(farmGlobalAttempts.until<=now)farmGlobalAttempts={count:0,until:now+15*60_000};
+ farmGlobalAttempts.count++;
+ return next.count>5||farmGlobalAttempts.count>100;
+}
+grabStaffRouter.get('/farm/status',(req,res)=>{
+ const tokenHash=staffSessionHash(req);
+ res.json({verified:!!tokenHash&&(farmGrants.get(tokenHash)||0)>Date.now()});
+});
+grabStaffRouter.post('/farm/verify',async(req,res)=>{
+ if(!farmConfigured())return res.status(423).json({error:'FARM verification is not configured. Ask an administrator'});
+ if(farmAttemptLimited(req))return res.status(429).json({error:'Too many FARM password attempts. Ask an administrator'});
+ const supplied=typeof req.body?.password==='string'?req.body.password:'';
+ if(supplied.length<1||supplied.length>256)return res.status(401).json({error:'Invalid FARM verification password'});
+ const expected=process.env.NELBD_GRAB_FARM_VERIFICATION_PASSWORD!;
+ const salt='nelbd-grab-farm-authorization-v1';
+ const a=scryptSync(supplied,salt,32),b=scryptSync(expected,salt,32);
+ if(!timingSafeEqual(a,b))return res.status(401).json({error:'Invalid FARM verification password'});
+ const tokenHash=staffSessionHash(req);
+ if(!tokenHash)return res.status(401).json({error:'Staff login required'});
+ farmGrants.set(tokenHash,Date.now()+15*60_000);
+ if(farmGrants.size>5000)for(const [key,until] of farmGrants)if(until<Date.now())farmGrants.delete(key);
+ return res.json({verified:true,expiresInMinutes:15});
+});
 function normalizedPhone(value:unknown){
  if(typeof value!=='string'||value.length>32)return null;
  const digits=value.replace(/[\s()-]/g,'');
@@ -122,6 +168,12 @@ grabStaffRouter.post('/submit',async(req,res)=>{
   return res.status(400).json({error:'Choose a valid location, amount, contact method and confirm handover'});
  if(collectionSite==='FARM'&&method!=='email')
   return res.status(400).json({error:'FARM accepts email submissions only'});
+ if(collectionSite==='FARM'){
+  const sessionHash=staffSessionHash(req);
+  if(!farmConfigured())return res.status(423).json({error:'FARM verification is not configured. Ask an administrator'});
+  if(!sessionHash||(farmGrants.get(sessionHash)||0)<=Date.now())
+   return res.status(403).json({error:'Verify the separate FARM password before issuing a voucher'});
+ }
  const email=typeof req.body?.email==='string'?req.body.email.trim().toLowerCase():null;
  const phone=normalizedPhone(req.body?.phone);
  if(method==='email'&&(!email||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))
